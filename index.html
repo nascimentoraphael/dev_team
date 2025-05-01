@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipe de Desenvolvimento - Perfis Profissionais</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Adicionado Chart.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .skill-chip {
+      transition: all 0.3s ease;
+    }
+
+    .skill-chip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-card {
+      transition: all 0.3s ease;
+    }
+
+    .profile-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .category-tab {
+      transition: all 0.3s ease;
+    }
+
+    .category-tab.active {
+      border-bottom: 3px solid #3b82f6;
+      color: #3b82f6;
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 font-sans">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="mb-12 text-center">
+      <h1 class="text-4xl font-bold text-blue-800 mb-2">Equipe de Desenvolvimento</h1>
+      <p class="text-xl text-gray-600">Perfis profissionais e competências técnicas</p>
+      <div class="w-24 h-1 bg-blue-500 mx-auto mt-4 rounded-full"></div>
+    </header>
+
+    <!-- Filters -->
+    <div class="mb-8 bg-white rounded-xl shadow-md p-6">
+      <div class="flex flex-wrap justify-between items-center gap-4">
+        <div class="flex-1 min-w-[250px]">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por nome</label>
+          <div class="relative">
+            <input type="text" id="search-name" placeholder="Digite um nome..."
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-[250px]">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por área</label>
+          <select id="filter-area"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            <option value="all">Todas as áreas</option>
+            <option value="backend">Backend</option>
+            <option value="frontend">Frontend</option>
+            <option value="mobile">Mobile</option>
+            <option value="arquitetura">Arquitetura</option>
+            <option value="gestao">Gestão</option>
+            <option value="seguranca">Segurança</option>
+            <option value="infra">Infraestrutura</option>
+            <option value="dados">Dados/IA</option>
+            <option value="imersivas">Tecnologias Imersivas</option>
+            <option value="marketing">Marketing Digital</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button id="reset-filters"
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+            <i class="fas fa-redo mr-2"></i>Limpar filtros
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories Navigation -->
+    <div class="mb-8 overflow-x-auto">
+      <div class="flex space-x-1 pb-2">
+        <button data-category="all" class="category-tab active px-6 py-2 font-medium rounded-t-lg">Todos</button>
+        <button data-category="backend" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-server mr-2"></i>Backend
+        </button>
+        <button data-category="frontend" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-laptop-code mr-2"></i>Frontend
+        </button>
+        <button data-category="mobile" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-mobile-alt mr-2"></i>Mobile
+        </button>
+        <button data-category="arquitetura" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-project-diagram mr-2"></i>Arquitetura
+        </button>
+        <button data-category="gestao" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-tasks mr-2"></i>Gestão
+        </button>
+        <button data-category="seguranca" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-shield-alt mr-2"></i>Segurança
+        </button>
+        <button data-category="infra" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-network-wired mr-2"></i>Infra
+        </button>
+        <button data-category="dados" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-database mr-2"></i>Dados/IA
+        </button>
+        <button data-category="imersivas" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-vr-cardboard mr-2"></i>Imersivas
+        </button>
+        <button data-category="marketing" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-hashtag mr-2"></i>Marketing
+        </button>
+      </div>
+      <div class="h-1 bg-gray-200 rounded-full"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
+        <h3 class="text-gray-500 text-sm font-medium">Total de Membros</h3>
+        <p class="text-2xl font-bold">16</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+        <h3 class="text-gray-500 text-sm font-medium">Backend Experts</h3>
+        <p class="text-2xl font-bold">12</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+        <h3 class="text-gray-500 text-sm font-medium">Full Stack</h3>
+        <p class="text-2xl font-bold">10</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-yellow-500">
+        <h3 class="text-gray-500 text-sm font-medium">Mobile Devs</h3>
+        <p class="text-2xl font-bold">8</p>
+      </div>
+    </div>
+
+    <!-- Team Grid -->
+    <div id="team-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Profiles will be inserted here by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b p-4 sticky top-0 bg-white z-10">
+        <h3 id="modal-name" class="text-xl font-bold"></h3>
+        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-1">
+            <div class="bg-gray-100 rounded-lg p-4 mb-4">
+              <div class="flex items-center mb-3">
+                <div
+                  class="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl font-bold mr-3">
+                  <span id="modal-initials"></span>
+                </div>
+                <div>
+                  <h4 id="modal-fullname" class="font-bold"></h4>
+                  <p class="text-sm text-gray-600">Última atualização: <span id="modal-update"
+                      class="font-medium">1.27</span></p>
+                </div>
+              </div>
+            </div>
+            <div class="mb-4">
+              <h4 class="font-bold text-lg mb-2 flex items-center">
+                <i class="fas fa-star text-yellow-500 mr-2"></i>Principais Habilidades
+              </h4>
+              <div id="modal-top-skills" class="flex flex-wrap gap-2"></div>
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <div class="mb-6">
+              <h4 class="font-bold text-lg mb-3 flex items-center">
+                <i class="fas fa-code text-blue-500 mr-2"></i>Competências Técnicas
+              </h4>
+              <div class="space-y-4">
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Desenvolvimento Backend</h5>
+                  <div id="modal-backend" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Desenvolvimento Frontend</h5>
+                  <div id="modal-frontend" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Desenvolvimento Mobile</h5>
+                  <div id="modal-mobile" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Arquitetura de Software</h5>
+                  <div id="modal-architecture" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Gestão e Operação</h5>
+                  <div id="modal-management" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Segurança</h5>
+                  <div id="modal-security" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Infraestrutura</h5>
+                  <div id="modal-infra" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Dados e IA</h5>
+                  <div id="modal-data" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Tecnologias Imersivas</h5>
+                  <div id="modal-immersive" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Marketing Digital</h5>
+                  <div id="modal-marketing" class="flex flex-wrap gap-2"></div>
+                </div>
+              </div>
+              <!-- Adicionado Canvas para o Gráfico -->
+              <div class="mt-8">
+                <h4 class="font-bold text-lg mb-3 flex items-center"><i
+                    class="fas fa-chart-pie text-purple-500 mr-2"></i>Distribuição de Competências</h4>
+                <canvas id="modal-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="border-t p-4 flex justify-end sticky bottom-0 bg-white">
+        <button id="close-modal-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Team Data
+    const teamData = [
+      {
+        name: "Janaina Falco",
+        fullName: "Janaina Ferreira Falco",
+        lastUpdate: "1.27",
+        backend: ["PHP", "Spring Boot"],
+        frontend: ["Bootstrap", "CSS", "Design Responsivo", "HTML", "JavaScript", "React", "Wordpress", "TypeScript"],
+        mobile: ["Flutter", "React Native", "Swift", "Publicação em Play Store", "Publicação em Apple Store"],
+        architecture: ["Figma", "Firebase", "GitHub", "Git", "Prototipagem", "Design Thinking"],
+        management: ["Escrita de Projetos", "Kanban", "Levantamento de Requisitos", "Scrum"],
+        security: ["Adequação LGPD"],
+        infra: ["Amazon Web Services", "Azure DevOps"],
+        data: ["Power Automate"],
+        immersive: ["Blender", "VA", "VR"],
+        marketing: ["E-mail Marketing", "Google Analytics", "Mídias Digitais", "Omnichannel", "Redes Sociais", "SEO"]
+      },
+      {
+        name: "Flavio Dias",
+        fullName: "Flávio Camilo Dias",
+        lastUpdate: "1.27",
+        backend: [],
+        frontend: [],
+        mobile: [],
+        architecture: ["Design Thinking"],
+        management: ["Escrita de Projetos", "Kanban", "Levantamento de Requisitos", "Metodologia OKR"],
+        security: ["Análise de Risco", "Compliance Geral", "Segurança em Redes", "Segurança da Informação em Automação industrial"],
+        infra: ["IoT"],
+        data: ["Automação de Coleta de Dados", "Power BI", "Probabilidade e estatística"],
+        immersive: [],
+        marketing: ["Mídias Digitais", "Redes Sociais"]
+      },
+      {
+        name: "Italo Ignacio",
+        fullName: "Italo Felipe Ignacio",
+        lastUpdate: "1.27",
+        backend: ["API REST", "Express", "DBeaver", "Gerenciamento de Banco de Dados", "Java", "MySQL", "Node.js", "PostgreSQL", "Python", "SQLite", "Swagger", "Spring Boot", "Spring Data", "Spring JPA"],
+        frontend: ["Axios", "Bootstrap", "CSS", "Context API", "Design Responsivo", "HTML", "Insomnia", "JavaScript", "Next.js", "React Hook Form", "React Query", "React", "Redux", "Styled-components", "Tailwind CSS", "TypeScript", "Wordpress"],
+        mobile: ["React Native"],
+        architecture: ["Clean Code", "Documentação de Software", "Firebase", "Git", "GitHub", "Aplicações Monolíticas", "Design System"],
+        management: ["Scrum"],
+        security: ["Criptografia", "Segurança em código"],
+        infra: ["Amazon Web Services", "Azure", "Azure DevOps", "Arduino", "DevOps", "Docker", "NGinx", "Servidores Linux", "Servidores Windows"],
+        data: ["Algoritmos Genéticos", "Análise de Dados", "Automação de Coleta de Dados", "Opencv", "Pandas", "Selenium"],
+        immersive: [],
+        marketing: []
+      },
+      {
+        name: "Bruno Silva",
+        fullName: "Bruno Henrique Fernandes da Silva",
+        lastUpdate: "1.27",
+        backend: ["API REST", "DBeaver", "Entity Framework", "Gerenciamento de Banco de Dados", "Java", "MongoDB", "PostgreSQL", "Python", "Spring Boot", "Spring Data", "Spring JPA", "Swagger", "MySQL", "AssertJ"],
+        frontend: ["Angular", "Bootstrap", "CSS", "HTML", "Design Responsivo", "JavaScript", "Next.js", "Insomnia", "React", "Styled-components", "TypeScript", "Jest"],
+        mobile: ["Kotlin"],
+        architecture: ["Aplicações Monolíticas", "Clean Code", "Codereview", "Figma", "Git", "GitHub", "POO", "Prototipagem", "Design Patterns", "Documentação de Software", "SOLID", "Design System", "Design Thinking"],
+        management: ["Kanban", "Levantamento de Requisitos", "Scrum", "Escrita de Projetos"],
+        security: ["Adequação LGPD", "Criptografia", "Segurança em código", "Análise de Risco"],
+        infra: ["Azure DevOps", "Deploy de aplicações", "DevOps", "Docker", "Github Actions", "Grafana", "Servidores Linux", "Zabbix", "Serviços de Mensageria - PUB/SUB", "NGinx", "RabbitMQ", "Websockets"],
+        data: ["Selenium", "Automação de Coleta de Dados", "Pandas", "RPA"],
+        immersive: [],
+        marketing: ["SEO"]
+      },
+      {
+        name: "Lucas Silva",
+        fullName: "Lucas Araujo Oliveira Silva",
+        lastUpdate: "1.27",
+        backend: ["DBeaver", "Express", "Gerenciamento de Banco de Dados", "Java", "MySQL", "Node.js", "PostgreSQL", "Spring Boot", "Spring Data", "Spring JPA", "Swagger", "API REST", "MongoDB"],
+        frontend: ["Axios", "Bootstrap", "Context API", "CSS", "Design Responsivo", "HTML", "Insomnia", "JavaScript", "Jest", "React Hook Form", "React Query", "React", "Redux", "Styled-components", "Tailwind CSS", "TypeScript", "Vitest", "Wordpress"],
+        mobile: ["React Native", "Publicação em Play Store", "Publicação em Apple Store"],
+        architecture: ["Aplicações Monolíticas", "Clean Code", "Codereview", "Design Patterns", "Design Thinking", "Documentação de Software", "Figma", "Git", "Firebase", "GitHub", "POO", "Prototipagem", "SOLID", "Microserviços"],
+        management: ["Kanban", "Levantamento de Requisitos", "Scrum"],
+        security: ["Criptografia", "Segurança em código"],
+        infra: ["Amazon Web Services", "Azure", "Azure DevOps", "Arduino", "Computação em Nuvem (cloud computing)", "Deploy de aplicações", "DevOps", "Docker", "Github Actions", "NGinx", "RabbitMQ", "Serviços de Mensageria - PUB/SUB", "Apache Kafka"],
+        data: ["Análise exploratória", "Google Colab", "Jupyter Notebooks", "Keras", "Modelos de Classificação", "Modelos de Regressão Linear", "Pandas", "Orange", "Scikit-learn", "Seaborn", "Tensorflow", "Visão Computacional - Classificação", "Visão Computacional - Detecção de Objetos", "Visão Computacional - Reconhecimento de Caracteres (OCR)", "Matplotlib", "Machine Learning"],
+        immersive: [],
+        marketing: []
+      },
+      {
+        name: "Lukas Venancio",
+        fullName: "Lukas Santos Venancio",
+        lastUpdate: "1.27",
+        backend: ["API REST", "DBeaver", "Entity Framework", "Express", "Fastify", "Gerenciamento de Banco de Dados", "Java", "MySQL", "Node.js", "NestJS", "PHP", "Oracle", "PostgreSQL", "Python", "Spring Boot", "Spring Data", "Spring JPA", "Swagger"],
+        frontend: ["Axios", "Bootstrap", "Context API", "CSS", "Design Responsivo", "HTML", "Insomnia", "JavaScript", "Jest", "React Hook Form", "React Query", "React", "Redux", "Styled-components", "Tailwind CSS", "TypeScript", "Vitest", "VueJS"],
+        mobile: ["Kotlin", "React Native"],
+        architecture: ["Aplicações Monolíticas", "Clean Code", "Codereview", "Design Patterns", "Design System", "Design Thinking", "Documentação de Software", "Figma", "Firebase", "Git", "GitHub", "Microserviços", "POO", "Prototipagem", "Servless", "SOLID", "StoryBook", "UI", "UX"],
+        management: ["Kanban", "Levantamento de Requisitos", "Scrum"],
+        security: ["Análise de Risco", "Criptografia"],
+        infra: ["Apache", "Apache Kafka", "Amazon Web Services", "Azure DevOps", "Azure", "Computação em Nuvem (cloud computing)", "Deploy de aplicações", "DevOps", "Docker", "Github Actions", "Kubernetes", "NGinx", "Prometheus", "RabbitMQ", "Servidores Linux"],
+        data: ["Algoritmos Genéticos", "Power BI"],
+        immersive: [],
+        marketing: []
+      },
+      {
+        name: "Rogger Silveira",
+        fullName: "Rogger da Silva Silver",
+        lastUpdate: "1.27",
+        backend: ["API REST", "Express", "MySQL", "Node.js", "Python", "SQLite"],
+        frontend: ["CSS", "HTML", "Design Responsivo", "JavaScript", "React Hook Form", "React Query", "React", "Redux", "Tailwind CSS", "TypeScript", "Styled-components"],
+        mobile: ["Desenvolvimento Smart TV", "Desenvolvimento Smart Watch", "Flutter", "Kotlin", "Publicação em Play Store", "Publicação em Apple Store", "React Native"],
+        architecture: ["Clean Code", "Codereview", "Design System", "Figma", "Documentação de Software", "Git", "GitHub", "POO", "Prototipagem", "StoryBook", "UI", "UX"],
+        management: ["Escrita de Projetos", "Kanban", "Scrum"],
+        security: [],
+        infra: ["DevOps"],
+        data: ["Jupyter Notebooks", "Pandas", "Seaborn"],
+        immersive: [],
+        marketing: []
+      },
+      {
+        name: "Joao Meyer",
+        fullName: "João Henrique Parizoti Meyer",
+        lastUpdate: "1.27",
+        backend: [".NET", "API REST", "C#", "DBeaver", "Express", "Gerenciamento de Banco de Dados", "Java", "MongoDB", "MySQL", "Node.js", "NestJS", "Oracle", "PHP", "PostgreSQL", "Python", "Spring Boot", "Spring JPA", "Spring Data", "SQL Server", "SQLite", "Swagger"],
+        frontend: ["Axios", "Bootstrap", "CSS", "Design Responsivo", "HTML", "Insomnia", "JavaScript", "Jest", "Next.js", "React Hook Form", "React", "React Query", "Redux", "Styled-components", "Tailwind CSS", "TypeScript", "Wordpress"],
+        mobile: ["Desenvolvimento Smart TV", "Desenvolvimento Smart Watch", "Electron", "Flutter", "Kotlin", "Publicação em Apple Store", "Publicação em Play Store", "React Native"],
+        architecture: ["Clean Code", "Codereview", "Aplicações Monolíticas", "Design Patterns", "Design System", "Design Thinking", "Documentação de Software", "Figma", "Firebase", "Git", "GitHub", "Microserviços", "POO", "Prototipagem", "SOLID", "UI", "UX"],
+        management: ["Escrita de Projetos", "Kanban", "Levantamento de Requisitos", "Metodologia OKR", "Scrum"],
+        security: ["Adequação LGPD", "Análise de Risco", "Compliance Geral", "Criptografia", "Governança", "Segurança em código", "Segurança em Redes"],
+        infra: ["Amazon Web Services", "Apache", "Apache Kafka", "Arduino", "Azure", "Azure DevOps", "Computação em Nuvem (cloud computing)", "Configurações de Rede", "Deploy de aplicações", "DevOps", "Docker", "Grafana", "IIS", "IoT", "Kubernetes", "NGinx", "RabbitMQ", "Serviços de Mensageria - PUB/SUB", "Servidores Linux", "Servidores Windows", "Terraform", "Zabbix", "Websockets"],
+        data: ["Análise de Dados", "Automação de Coleta de Dados", "Jupyter Notebooks", "Machine Learning", "Opencv", "Pandas", "Power Automate", "Power BI", "Probabilidade e estatística", "Selenium", "RPA", "Visão Computacional - Classificação", "Visão Computacional - Detecção de Objetos", "Visão Computacional - Reconhecimento de Caracteres (OCR)"],
+        immersive: ["Animação", "Blender", "Criação de Shadders", "Gamificação", "Maya", "Modelagem 3D", "Rigging", "VA", "VR", "Unity", "RM"],
+        marketing: []
+      },
+      {
+        name: "Daniel Santos",
+        fullName: "Daniel Wilson Alves dos Santos",
+        lastUpdate: "1.27",
+        backend: ["API REST", "Node.js", "Express", "DBeaver", "Fastify", "MySQL", "PostgreSQL", "PHP", "Swagger"],
+        frontend: ["Axios", "Bootstrap", "Context API", "CSS", "Design Responsivo", "HTML", "Insomnia", "JavaScript", "Next.js", "React Hook Form", "React Query", "React", "Redux", "Tailwind CSS", "Styled-components", "TypeScript", "Vitest", "Wordpress"],
+        mobile: ["React Native"],
+        architecture: ["Clean Code", "Design Patterns", "Documentação de Software", "Figma", "Firebase", "Git", "GitHub", "Prototipagem", "StoryBook"],
+        management: ["Levantamento de Requisitos", "Scrum", "Kanban"],
+        security: [],
+        infra: ["Azure DevOps"],
+        data: [],
+        immersive: [],
+        marketing: []
+      },
+      {
+        name: "Rodrigo Silva",
+        fullName: "Rodrigo Areias da Silva",
+        lastUpdate: "1.27",
+        backend: ["Gerenciamento de Banco de Dados", "C#", "PHP", "Oracle", "SQL Server", "SQLite", "MySQL", "Python"],
+        frontend: ["HTML", "CSS"],
+        mobile: [],
+        architecture: ["Firebase", "Documentação de Software"],
+        management: ["Escrita de Projetos", "Levantamento de Requisitos", "Scrum"],
+        security: ["Análise de Risco", "Compliance Geral", "Governança"],
+        infra: ["Configurações de Rede", "Servidores Windows", "Computação em Nuvem (cloud computing)"],
+        data: ["Análise de Dados"],
+        immersive: [],
+        marketing: ["E-mail Marketing"]
+      },
+      {
+        name: "Christian Alonso",
+        fullName: "Christian Albuquerque Alonso",
+        lastUpdate: "1.27",
+        backend: [],
+        frontend: ["Angular", "Bootstrap", "Context API", "CSS", "Cypress", "Design Responsivo", "HTML", "Insomnia", "JavaScript", "Jest", "Materialize", "Next.js", "Wordpress", "TypeScript", "Tailwind CSS", "Styled-components", "Redux", "React"],
+        mobile: ["Publicação em Apple Store", "Publicação em Play Store", "React Native", "Flutter"],
+        architecture: ["Clean Code", "Aplicações Monolíticas", "Codereview", "Documentação de Software", "Figma", "Firebase", "Git", "GitHub", "Microserviços", "POO", "Prototipagem", "Design System", "Design Thinking", "Design Patterns", "UI", "UX", "SOLID"],
+        management: ["Levantamento de Requisitos", "Scrum", "Kanban", "Escrita de Projetos"],
+        security: ["Adequação LGPD", "Segurança em código", "Compliance Geral", "Governança"],
+        infra: ["Apache", "Azure", "Deploy de aplicações", "Google Cloud Platform", "Docker"],
+        data: [],
+        immersive: [],
+        marketing: ["E-mail Marketing", "Google ADS", "Google Analytics", "Meta ADS", "Mídias Digitais", "Redes Sociais", "SEO"]
+      },
+      {
+        name: "Erick Barbosa",
+        fullName: "Erick Araujo Barbosa",
+        lastUpdate: "1.27",
+        backend: ["Swagger", "API REST", "DBeaver", "Express", "Fastify", "Gerenciamento de Banco de Dados", "Java", "MySQL", "Node.js", "NestJS", "Oracle", "PostgreSQL", "Python", "Spring Boot", "Spring Data", "Spring JPA", "SQL Server", "SQLite", "MongoDB", "Redis"],
+        frontend: ["Axios", "Bootstrap", "Context API", "CSS", "Design Responsivo", "HTML", "Insomnia", "JavaScript", "Jest", "Materialize", "Next.js", "React Hook Form", "React Query", "React", "Redux", "Styled-components", "Tailwind CSS", "TypeScript", "Wordpress"],
+        mobile: ["Electron", "Publicação em Play Store", "React Native"],
+        architecture: ["Clean Code", "Codereview", "Design Patterns", "Design System", "Documentação de Software", "Figma", "Design Thinking", "Firebase", "Git", "GitHub", "UX", "UI", "POO", "Prototipagem", "SOLID", "Aplicações Monolíticas"],
+        management: ["Kanban", "Levantamento de Requisitos", "Scrum", "Metodologia OKR", "Escrita de Projetos"],
+        security: ["Adequação LGPD", "Análise de Risco", "Criptografia", "Segurança em código"],
+        infra: ["Amazon Web Services", "Apache", "Apache Kafka", "Azure DevOps", "Azure", "Arduino", "Computação em Nuvem (cloud computing)", "DevOps", "Docker", "Terraform", "Websockets", "RabbitMQ", "Kubernetes", "Deploy de aplicações", "Google Cloud Platform", "NGinx"],
+        data: ["Pandas", "Power BI", "Selenium", "Análise de Dados", "Jupyter Notebooks", "Power Automate"],
+        immersive: [],
+        marketing: []
+      },
+      {
+        name: "Raphael Nascimento",
+        fullName: "Raphael Lima Marques do Nascimento",
+        lastUpdate: "1.27",
+        backend: ["DBeaver", "Express", "Fastify", "Gerenciamento de Banco de Dados", "MongoDB", "MySQL", "Node.js", "Oracle", "PostgreSQL", "Python", "Swagger"],
+        frontend: ["Axios", "Bootstrap", "Context API", "CSS", "Design Responsivo", "HTML", "Insomnia", "JavaScript", "React Hook Form", "React Query", "React", "Tailwind CSS", "Styled-components", "TypeScript", "Wordpress"],
+        mobile: ["React Native", "Publicação em Play Store", "Publicação em Apple Store"],
+        architecture: ["Aplicações Monolíticas", "Clean Code", "Codereview", "Design Patterns", "Design System", "Design Thinking", "Documentação de Software", "Figma", "Git", "GitHub", "Microserviços", "Servless", "SOLID", "UI", "UX", "Prototipagem"],
+        management: ["Escrita de Projetos", "Kanban", "Levantamento de Requisitos", "Metodologia OKR", "Scrum"],
+        security: ["Governança", "Kali Linux", "Pentest", "Segurança em Redes"],
+        infra: ["Amazon Web Services", "Arduino", "Azure", "Azure DevOps", "Computação em Nuvem (cloud computing)", "Configurações de Rede", "DevOps", "Docker", "Google Cloud Platform", "IoT", "NGinx", "Servidores Linux", "Servidores Windows"],
+        data: ["Análise de Dados", "Automação de Coleta de Dados", "Google Colab", "Hugging Face", "Jupyter Notebooks", "Keras", "Langchain", "Machine Learning", "MLOps", "Power BI", "Probabilidade e estatística", "RPA", "Seaborn", "Scikit-learn", "UiPath"],
+        immersive: ["Modelagem 3D", "RM", "VA", "VR"],
+        marketing: ["E-mail Marketing", "Google Analytics", "Mídias Digitais", "SEO"]
+      },
+      {
+        name: "Pedro Santos",
+        fullName: "Pedro Henrique Silva Santos",
+        lastUpdate: "1.27",
+        backend: ["SQLite", "Python", "Node.js", "MySQL", "Express", "DBeaver", "API REST"],
+        frontend: ["Axios", "Context API", "CSS", "Cypress", "Design Responsivo", "HTML", "Insomnia", "JavaScript", "Jest", "Next.js", "React Hook Form", "React Query", "React", "Redux", "Styled-components", "Tailwind CSS", "TypeScript", "Vitest"],
+        mobile: ["React Native", "Publicação em Play Store", "Publicação em Apple Store", "Kotlin"],
+        architecture: ["Clean Code", "Codereview", "Aplicações Monolíticas", "Design Patterns", "Design System", "Documentação de Software", "Figma", "Firebase", "Git", "GitHub", "POO", "Prototipagem", "SOLID", "StoryBook", "UI", "UX"],
+        management: ["Kanban", "Levantamento de Requisitos", "Scrum"],
+        security: [],
+        infra: [],
+        data: [],
+        immersive: [],
+        marketing: []
+      },
+      {
+        name: "Wesley Meneghini",
+        fullName: "Wesley Wellington Meneghini",
+        lastUpdate: "1.27",
+        backend: ["API REST", "C#", "DBeaver", "Express", "Gerenciamento de Banco de Dados", "Java", "MongoDB", "MySQL", "Node.js", "NestJS", "PHP", "PostgreSQL", "Python", "Spring Boot", "Spring Data", "Spring JPA", "SQL Server", "Swagger"],
+        frontend: ["Axios", "Bootstrap", "Context API", "CSS", "HTML", "Insomnia", "JavaScript", "Next.js", "React", "Tailwind CSS", "TypeScript"],
+        mobile: ["Kotlin", "React Native"],
+        architecture: ["Aplicações Monolíticas", "Clean Code", "Codereview", "Design Patterns", "Documentação de Software", "Firebase", "Git", "GitHub", "Microserviços", "POO", "SOLID"],
+        management: ["Escrita de Projetos", "Levantamento de Requisitos", "Scrum"],
+        security: ["Segurança em código", "Segurança em Redes"],
+        infra: ["Amazon Web Services", "Azure", "Azure DevOps", "Computação em Nuvem (cloud computing)", "Configurações de Rede", "Deploy de aplicações", "DevOps", "Docker", "Github Actions", "NGinx", "RabbitMQ", "Servidores Linux", "Terraform", "Websockets"],
+        data: ["Visão Computacional - Classificação", "Selenium", "Opencv"],
+        immersive: [],
+        marketing: []
+      },
+      {
+        name: "Wilson Carneiro",
+        fullName: "Wilson Rogério Carneiro",
+        lastUpdate: "1.27",
+        backend: [],
+        frontend: [],
+        mobile: [],
+        architecture: [],
+        management: ["Escrita de Projetos", "Kanban", "Levantamento de Requisitos", "Metodologia OKR", "Scrum"],
+        security: [],
+        infra: [],
+        data: [],
+        immersive: [],
+        marketing: []
+      }
+    ];
+
+    // Ordena teamData em ordem alfabética pelo nome curto
+    teamData.sort((a, b) => a.name.localeCompare(b.name));
+
+    // DOM Elements
+    const teamContainer = document.getElementById('team-container');
+    const searchInput = document.getElementById('search-name');
+    const filterArea = document.getElementById('filter-area');
+    const resetFilters = document.getElementById('reset-filters');
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    const profileModal = document.getElementById('profile-modal');
+    const closeModal = document.getElementById('close-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    let currentChartInstance = null; // Variável para guardar a instância do gráfico atual
+
+    // Display all team members
+    function displayTeamMembers(members = teamData) {
+      teamContainer.innerHTML = '';
+
+      members.forEach(member => {
+        // Get initials
+        const names = member.name.split(' ');
+        const initials = names.length > 1
+          ? `${names[0][0]}${names[names.length - 1][0]}`
+          : names[0][0];
+
+        // Count skills
+        const totalSkills = [
+          ...member.backend,
+          ...member.frontend,
+          ...member.mobile,
+          ...member.architecture,
+          ...member.management,
+          ...member.security,
+          ...member.infra,
+          ...member.data,
+          ...member.immersive,
+          ...member.marketing
+        ].length;
+
+        // Get top 3 skills (most relevant)
+        const allSkills = [
+          ...member.backend.map(skill => ({ skill, category: 'backend' })),
+          ...member.frontend.map(skill => ({ skill, category: 'frontend' })),
+          ...member.mobile.map(skill => ({ skill, category: 'mobile' })),
+          ...member.architecture.map(skill => ({ skill, category: 'architecture' })),
+          ...member.management.map(skill => ({ skill, category: 'management' })),
+          ...member.security.map(skill => ({ skill, category: 'security' })),
+          ...member.infra.map(skill => ({ skill, category: 'infra' })),
+          ...member.data.map(skill => ({ skill, category: 'data' })),
+          ...member.immersive.map(skill => ({ skill, category: 'immersive' })),
+          ...member.marketing.map(skill => ({ skill, category: 'marketing' }))
+        ];
+
+        // Create profile card
+        const card = document.createElement('div');
+        card.className = 'profile-card bg-white rounded-xl shadow-md overflow-hidden animate-fade-in';
+        card.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg font-bold mr-3">
+                                ${initials}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg">${member.name}</h3>
+                                <p class="text-sm text-gray-600">${member.fullName}</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-700">Habilidades</span>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${totalSkills} competências</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                ${allSkills.slice(0, 3).map(skill => `
+                                    <span class="skill-chip text-xs bg-gray-100 text-gray-800 px-3 py-1 rounded-full">
+                                        ${skill.skill}
+                                    </span>
+                                `).join('')}
+                                ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500">Atualizado: v${member.lastUpdate}</span>
+                            <button class="view-profile-btn px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
+                                Ver perfil
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+        // Add click event to view profile
+        const viewProfileBtn = card.querySelector('.view-profile-btn');
+        viewProfileBtn.addEventListener('click', () => openProfileModal(member));
+
+        teamContainer.appendChild(card);
+      });
+    }
+
+    // Open profile modal
+    function openProfileModal(member) {
+      // Get initials
+      const names = member.name.split(' ');
+      const initials = names.length > 1
+        ? `${names[0][0]}${names[names.length - 1][0]}`
+        : names[0][0];
+
+      // Set modal content
+      document.getElementById('modal-name').textContent = member.name;
+      document.getElementById('modal-fullname').textContent = member.fullName;
+      document.getElementById('modal-initials').textContent = initials;
+      document.getElementById('modal-update').textContent = member.lastUpdate;
+
+      // Set top skills
+      const topSkillsContainer = document.getElementById('modal-top-skills');
+      topSkillsContainer.innerHTML = '';
+
+      const allSkills = [
+        ...member.backend,
+        ...member.frontend,
+        ...member.mobile,
+        ...member.architecture,
+        ...member.management,
+        ...member.security,
+        ...member.infra,
+        ...member.data,
+        ...member.immersive,
+        ...member.marketing
+      ].slice(0, 5);
+
+      allSkills.forEach(skill => {
+        const chip = document.createElement('span');
+        chip.className = 'skill-chip text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full mb-1';
+        chip.textContent = skill;
+        topSkillsContainer.appendChild(chip);
+      });
+
+      // Set skills by category
+      function populateSkills(containerId, skills) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        skills.forEach(skill => {
+          const chip = document.createElement('span');
+          chip.className = 'skill-chip text-xs bg-gray-100 text-gray-800 px-3 py-1 rounded-full mb-1';
+          chip.textContent = skill;
+          container.appendChild(chip);
+        });
+
+        if (skills.length === 0) {
+          container.innerHTML = '<span class="text-xs text-gray-500 italic">Nenhuma habilidade registrada</span>';
+        }
+      }
+
+      // Preparar dados para o gráfico
+      const areaKeys = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
+      const areaLabels = ['Backend', 'Frontend', 'Mobile', 'Arquitetura', 'Gestão', 'Segurança', 'Infra', 'Dados/IA', 'Imersivas', 'Marketing'];
+      const skillCounts = areaKeys.map(key => member[key]?.length || 0); // Conta as skills em cada área
+
+      // Renderizar o gráfico de radar
+      const ctx = document.getElementById('modal-chart').getContext('2d');
+
+      // Destruir gráfico anterior se existir
+      if (currentChartInstance) {
+        currentChartInstance.destroy();
+      }
+
+      currentChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: areaLabels,
+          datasets: [{
+            label: 'Nº de Competências',
+            data: skillCounts,
+            fill: true,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)', // Azul claro semi-transparente
+            borderColor: 'rgb(59, 130, 246)', // Azul
+            pointBackgroundColor: 'rgb(59, 130, 246)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(59, 130, 246)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true, // Ajuste conforme necessário
+          scales: {
+            r: {
+              angleLines: { display: true },
+              suggestedMin: 0,
+              ticks: { stepSize: 1 } // Garante que a escala seja em números inteiros
+            }
+          },
+          plugins: {
+            legend: {
+              display: false // Oculta a legenda para um visual mais limpo no radar
+            }
+          }
+        }
+      });
+
+      populateSkills('modal-backend', member.backend);
+      populateSkills('modal-frontend', member.frontend);
+      populateSkills('modal-mobile', member.mobile);
+      populateSkills('modal-architecture', member.architecture);
+      populateSkills('modal-management', member.management);
+      populateSkills('modal-security', member.security);
+      populateSkills('modal-infra', member.infra);
+      populateSkills('modal-data', member.data);
+      populateSkills('modal-immersive', member.immersive);
+      populateSkills('modal-marketing', member.marketing);
+
+      // Show modal
+      profileModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close profile modal
+    function closeProfileModal() {
+      profileModal.classList.add('hidden');
+      // Destruir o gráfico ao fechar o modal
+      if (currentChartInstance) {
+        currentChartInstance.destroy();
+        currentChartInstance = null;
+      }
+      document.body.style.overflow = 'auto';
+    }
+
+    // Filter team members
+    function filterTeamMembers() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const areaFilter = filterArea.value;
+
+      const filteredMembers = teamData.filter(member => {
+        // Search by name
+        const nameMatch = member.name.toLowerCase().includes(searchTerm) ||
+          member.fullName.toLowerCase().includes(searchTerm);
+
+        // Filter by area
+        let areaMatch = true;
+        if (areaFilter !== 'all') {
+          areaMatch = false;
+
+          switch (areaFilter) {
+            case 'backend':
+              areaMatch = member.backend.length > 0;
+              break;
+            case 'frontend':
+              areaMatch = member.frontend.length > 0;
+              break;
+            case 'mobile':
+              areaMatch = member.mobile.length > 0;
+              break;
+            case 'arquitetura':
+              areaMatch = member.architecture.length > 0;
+              break;
+            case 'gestao':
+              areaMatch = member.management.length > 0;
+              break;
+            case 'seguranca':
+              areaMatch = member.security.length > 0;
+              break;
+            case 'infra':
+              areaMatch = member.infra.length > 0;
+              break;
+            case 'dados':
+              areaMatch = member.data.length > 0;
+              break;
+            case 'imersivas':
+              areaMatch = member.immersive.length > 0;
+              break;
+            case 'marketing':
+              areaMatch = member.marketing.length > 0;
+              break;
+          }
+        }
+
+        return nameMatch && areaMatch;
+      });
+
+      displayTeamMembers(filteredMembers);
+    }
+
+    // Filter by category tab
+    function filterByCategory(category) {
+      // Update active tab
+      categoryTabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.category === category) {
+          tab.classList.add('active');
+        }
+      });
+
+      // Reset other filters
+      searchInput.value = '';
+      filterArea.value = 'all';
+
+      // Filter members
+      if (category === 'all') {
+        displayTeamMembers();
+        return;
+      }
+
+      const filteredMembers = teamData.filter(member => {
+        switch (category) {
+          case 'backend':
+            return member.backend.length > 0;
+          case 'frontend':
+            return member.frontend.length > 0;
+          case 'mobile':
+            return member.mobile.length > 0;
+          case 'arquitetura':
+            return member.architecture.length > 0;
+          case 'gestao':
+            return member.management.length > 0;
+          case 'seguranca':
+            return member.security.length > 0;
+          case 'infra':
+            return member.infra.length > 0;
+          case 'dados':
+            return member.data.length > 0;
+          case 'imersivas':
+            return member.immersive.length > 0;
+          case 'marketing':
+            return member.marketing.length > 0;
+          default:
+            return true;
+        }
+      });
+
+      displayTeamMembers(filteredMembers);
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', filterTeamMembers);
+    filterArea.addEventListener('change', filterTeamMembers);
+    resetFilters.addEventListener('click', () => {
+      searchInput.value = '';
+      filterArea.value = 'all';
+      categoryTabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.category === 'all') {
+          tab.classList.add('active');
+        }
+      });
+      displayTeamMembers();
+    });
+
+    categoryTabs.forEach(tab => {
+      tab.addEventListener('click', () => filterByCategory(tab.dataset.category));
+    });
+
+    closeModal.addEventListener('click', closeProfileModal);
+    closeModalBtn.addEventListener('click', closeProfileModal);
+
+    // Initialize
+    displayTeamMembers();
+  </script>
+</body>
+
+</html>
