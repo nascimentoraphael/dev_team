@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipe de Desenvolvimento - Perfis Profissionais</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Adicionado Chart.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .skill-chip {
+      transition: all 0.3s ease;
+    }
+
+    .skill-chip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-card {
+      transition: all 0.3s ease;
+    }
+
+    .profile-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .category-tab {
+      transition: all 0.3s ease;
+    }
+
+    .category-tab.active {
+      border-bottom: 3px solid #3b82f6;
+      color: #3b82f6;
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 font-sans">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="mb-12 text-center">
+      <h1 class="text-4xl font-bold text-blue-800 mb-2">Equipe de Desenvolvimento</h1>
+      <p class="text-xl text-gray-600">Perfis profissionais e competências técnicas</p>
+      <div class="w-24 h-1 bg-blue-500 mx-auto mt-4 rounded-full"></div>
+    </header>
+
+    <!-- User Profile Section (Initially Hidden) -->
+    <div id="user-profile-section" class="mb-8 bg-white rounded-xl shadow-md p-6 hidden">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Meu Perfil</h2>
+      <p id="welcome-message" class="text-lg mb-4"></p>
+      <button id="logout-button"
+        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">Sair</button>
+    </div>
+
+    <!-- Filters -->
+    <div id="filters-section" class="mb-8 bg-white rounded-xl shadow-md p-6" style="display: none;">
+      <!-- Ocultado por padrão -->
+      <!-- <div class="flex flex-wrap justify-between items-center gap-4">
+        <div class="flex-1 min-w-[250px]">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por nome</label>
+          <div class="relative">
+            <input type="text" id="search-name" placeholder="Digite um nome..."
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-[250px]">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por área</label>
+          <select id="filter-area"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            <option value="all">Todas as áreas</option>
+            <option value="backend">Backend</option>
+            <option value="frontend">Frontend</option>
+            <option value="mobile">Mobile</option>
+            <option value="arquitetura">Arquitetura</option>
+            <option value="gestao">Gestão</option>
+            <option value="seguranca">Segurança</option>
+            <option value="infra">Infraestrutura</option>
+            <option value="dados">Dados/IA</option>
+            <option value="imersivas">Tecnologias Imersivas</option>
+            <option value="marketing">Marketing Digital</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button id="reset-filters"
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+            <i class="fas fa-redo mr-2"></i>Limpar filtros
+          </button>
+        </div>
+      </div> -->
+    </div>
+
+    <!-- Categories Navigation -->
+    <div id="categories-section" class="mb-8 overflow-x-auto" style="display: none;"> <!-- Ocultado por padrão -->
+      <div class="flex space-x-1 pb-2">
+        <button data-category="all" class="category-tab active px-6 py-2 font-medium rounded-t-lg">Todos</button>
+        <button data-category="backend" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-server mr-2"></i>Backend
+        </button>
+        <button data-category="frontend" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-laptop-code mr-2"></i>Frontend
+        </button>
+        <button data-category="mobile" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-mobile-alt mr-2"></i>Mobile
+        </button>
+        <button data-category="arquitetura" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-project-diagram mr-2"></i>Arquitetura
+        </button>
+        <button data-category="gestao" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-tasks mr-2"></i>Gestão
+        </button>
+        <button data-category="seguranca" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-shield-alt mr-2"></i>Segurança
+        </button>
+        <button data-category="infra" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-network-wired mr-2"></i>Infra
+        </button>
+        <button data-category="dados" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-database mr-2"></i>Dados/IA
+        </button>
+        <button data-category="imersivas" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-vr-cardboard mr-2"></i>Imersivas
+        </button>
+        <button data-category="marketing" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-hashtag mr-2"></i>Marketing
+        </button>
+      </div>
+      <div class="h-1 bg-gray-200 rounded-full"></div>
+    </div>
+
+    <!-- Stats -->
+    <div id="stats-section" class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4" style="display: none;">
+      <!-- Ocultado por padrão -->
+      <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
+        <h3 class="text-gray-500 text-sm font-medium">Total de Membros</h3>
+        <p id="stats-total-members" class="text-2xl font-bold">0</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+        <h3 class="text-gray-500 text-sm font-medium">Backend Experts</h3>
+        <p id="stats-backend-experts" class="text-2xl font-bold">0</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+        <h3 class="text-gray-500 text-sm font-medium">Full Stack</h3>
+        <p id="stats-full-stack" class="text-2xl font-bold">0</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-yellow-500">
+        <h3 class="text-gray-500 text-sm font-medium">Mobile Devs</h3>
+        <p id="stats-mobile-devs" class="text-2xl font-bold">0</p>
+      </div>
+    </div>
+
+    <!-- Team Grid -->
+    <div id="team-container" class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 gap-6">
+      <!-- Ajustado para 1 coluna -->
+      <!-- Profiles will be inserted here by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b p-4 sticky top-0 bg-white z-10">
+        <h3 id="modal-name" class="text-xl font-bold"></h3>
+        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-1">
+            <div class="bg-gray-100 rounded-lg p-4 mb-4">
+              <div class="flex items-center mb-3">
+                <div
+                  class="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl font-bold mr-3">
+                  <span id="modal-initials"></span>
+                </div>
+                <div>
+                  <h4 id="modal-fullname" class="font-bold"></h4>
+                  <p class="text-sm text-gray-600">Última atualização: <span id="modal-update"
+                      class="font-medium">1.27</span></p>
+                </div>
+              </div>
+            </div>
+            <div class="mb-4">
+              <h4 class="font-bold text-lg mb-2 flex items-center">
+                <i class="fas fa-star text-yellow-500 mr-2"></i>Principais Habilidades
+              </h4>
+              <div id="modal-top-skills" class="flex flex-wrap gap-2"></div>
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <div class="mb-6">
+              <h4 class="font-bold text-lg mb-3 flex items-center">
+                <i class="fas fa-code text-blue-500 mr-2"></i>Competências Técnicas
+              </h4>
+              <div class="space-y-4">
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Desenvolvimento Backend</h5>
+                  <div id="modal-backend" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Desenvolvimento Frontend</h5>
+                  <div id="modal-frontend" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Desenvolvimento Mobile</h5>
+                  <div id="modal-mobile" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Arquitetura de Software</h5>
+                  <div id="modal-architecture" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Gestão e Operação</h5>
+                  <div id="modal-management" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Segurança</h5>
+                  <div id="modal-security" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Infraestrutura</h5>
+                  <div id="modal-infra" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Dados e IA</h5>
+                  <div id="modal-data" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Tecnologias Imersivas</h5>
+                  <div id="modal-immersive" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                  <h5 class="font-medium text-blue-700 mb-1">Marketing Digital</h5>
+                  <div id="modal-marketing" class="flex flex-wrap gap-2"></div>
+                </div>
+              </div>
+              <!-- Adicionado Canvas para o Gráfico -->
+              <div class="mt-8">
+                <h4 class="font-bold text-lg mb-3 flex items-center"><i
+                    class="fas fa-chart-pie text-purple-500 mr-2"></i>Distribuição de Competências</h4>
+                <canvas id="modal-chart"></canvas>
+              </div>
+              <!-- Adicionado Canvas para o Segundo Gráfico (Habilidades Individuais) -->
+              <div class="mt-8">
+                <h4 class="font-bold text-lg mb-3 flex items-center"><i
+                    class="fas fa-tasks text-teal-500 mr-2"></i>Proficiência em Habilidades Específicas (Top 10)</h4>
+                <canvas id="modal-skills-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="border-t p-4 flex justify-end sticky bottom-0 bg-white">
+        <button id="close-modal-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Função para formatar data e hora
+    function formatDateTime(isoString) {
+      if (!isoString) return 'N/A';
+      try {
+        const date = new Date(isoString);
+        // Verifica se a data é válida
+        if (isNaN(date.getTime())) {
+          // Se não for uma string ISO válida, pode ser um valor antigo ou já formatado.
+          return isoString;
+        }
+        const options = {
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          // hour: '2-digit', minute: '2-digit' // Opções de hora e minuto removidas
+        };
+        return date.toLocaleString('pt-BR', options);
+      } catch (e) {
+        console.error("Erro ao formatar data:", isoString, e);
+        return isoString; // Fallback para a string original se a formatação falhar
+      }
+    }
+
+    const proficiencyLevels = [
+      {
+        level: 0,
+        label: "0 - Não Avaliado / Sem Experiência",
+        text: "Nenhuma avaliação ou experiência prática registrada para esta habilidade."
+      },
+      {
+        level: 1,
+        label: "1 - Familiar (Conceitos Básicos)",
+        text: "Familiarizado com os conceitos básicos, como algoritmos de aprendizado supervisionado e não supervisionado, mas ainda não aplicou esses conhecimentos em projetos reais."
+      },
+      {
+        level: 2,
+        label: "2 - Iniciante (Entende Terminologia)",
+        text: "Entende e consegue discutir a terminologia e os conceitos fundamentais, como modelos de regressão, classificação e clustering. Pode participar de discussões sobre projetos e contribuir com ideias básicas."
+      },
+      {
+        level: 3,
+        label: "3 - Intermediário (Aplica com Orientação)",
+        text: "Capaz de aplicar as habilidades de forma independente em situações familiares, como a criação de modelos preditivos simples. Pode preparar dados, treinar modelos e avaliar resultados, com orientação ocasional."
+      },
+      {
+        level: 4,
+        label: "4 - Avançado (Orienta Outros)",
+        text: "Pode orientar ou guiar outros na aplicação, incluindo a explicação de nuances complexas, como ajuste de hiperparâmetros, validação cruzada e interpretação de resultados. Tem experiência em liderar equipes de desenvolvimento e garantir que os objetivos sejam alcançados dentro do prazo e do orçamento."
+      },
+      {
+        level: 5,
+        label: "5 - Especialista (Gerencia Projetos Complexos)",
+        text: "Demonstrou resultados consistentes na aplicação em diversos contextos e desafios. Capaz de gerenciar projetos complexos e de grande escala, implementar metodologias avançadas e inovar na abordagem para resolver problemas. Seus resultados são mensuráveis e alinhados com as necessidades e objetivos departamentais."
+      }
+    ];
+
+    // Global variable to store fetched team members
+    let allTeamMembers = [];
+
+    // DOM Elements
+    const teamContainer = document.getElementById('team-container');
+    // const searchInput = document.getElementById('search-name'); // Removido/Ocultado
+    // const filterArea = document.getElementById('filter-area'); // Removido/Ocultado
+    // const resetFilters = document.getElementById('reset-filters'); // Removido/Ocultado
+    // const categoryTabs = document.querySelectorAll('.category-tab'); // Removido/Ocultado
+    const profileModal = document.getElementById('profile-modal');
+    const closeModal = document.getElementById('close-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    let currentChartInstance = null; // Variável para guardar a instância do gráfico atual
+    let currentSkillsChartInstance = null; // Variável para o segundo gráfico (habilidades individuais)
+
+    // Login/Logout DOM Elements
+    // const loginForm = document.getElementById('login-form'); // Removido, pois está em login.html
+    const userProfileSection = document.getElementById('user-profile-section');
+    const welcomeMessage = document.getElementById('welcome-message');
+    const logoutButton = document.getElementById('logout-button');
+
+    // Function to update stats display
+    function updateStats(members) {
+      // As estatísticas globais foram removidas/ocultadas, então esta função pode ser simplificada ou removida
+      // Se quiser estatísticas do perfil individual, teria que adaptar aqui.
+      // Por ora, vamos deixar, mas ela não será muito útil.
+      // const totalMembers = members.length;
+      // document.getElementById('stats-total-members').textContent = totalMembers;
+      // ...
+    }
+
+    // Display team members (now takes members as argument)
+    function displayTeamMembers(members) {
+      teamContainer.innerHTML = '';
+
+      // Se 'members' não for um array, transforma em um array com um único elemento
+      const membersArray = Array.isArray(members) ? members : [members];
+
+      if (!membersArray || membersArray.length === 0 || !membersArray[0]) {
+        teamContainer.innerHTML = '<p class="text-gray-600 col-span-full text-center">Nenhum membro encontrado com os filtros aplicados ou dados não carregados.</p>';
+        updateStats([]);
+        return;
+      }
+
+      membersArray.forEach(member => {
+        // Get initials
+        const names = member.name.split(' ');
+        const initials = names.length > 1
+          ? `${names[0][0]}${names[names.length - 1][0]}`
+          : names[0][0];
+
+        // Count skills
+        const totalSkills = [
+          ...(member.backend || []),
+          ...(member.frontend || []),
+          ...(member.mobile || []),
+          ...(member.architecture || []),
+          ...(member.management || []),
+          ...(member.security || []),
+          ...(member.infra || []),
+          ...(member.data || []),
+          ...(member.immersive || []),
+          ...(member.marketing || [])
+        ].length;
+
+        // Get top 3 skills (most relevant)
+        const allSkillObjectsForCard = [
+          ...(member.backend || []).map(s => ({ ...s, category: 'backend' })),
+          ...(member.frontend || []).map(s => ({ ...s, category: 'frontend' })),
+          ...(member.mobile || []).map(s => ({ ...s, category: 'mobile' })),
+          ...(member.architecture || []).map(s => ({ ...s, category: 'architecture' })),
+          ...(member.management || []).map(s => ({ ...s, category: 'management' })),
+          ...(member.security || []).map(s => ({ ...s, category: 'security' })),
+          ...(member.infra || []).map(s => ({ ...s, category: 'infra' })),
+          ...(member.data || []).map(s => ({ ...s, category: 'data' })),
+          ...(member.immersive || []).map(s => ({ ...s, category: 'immersive' })),
+          ...(member.marketing || []).map(s => ({ ...s, category: 'marketing' }))
+        ];
+
+        // Create profile card
+        const card = document.createElement('div');
+        card.className = 'profile-card bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in max-w-2xl mx-auto'; // Centralizado e com max-width
+        card.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg font-bold mr-3">
+                                ${initials}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg">${member.name}</h3>
+                                <p class="text-sm text-gray-600">${member.fullName}</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-700">Habilidades</span>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${totalSkills} competências</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                ${allSkillObjectsForCard.sort((a, b) => (b.skillLevel || 0) - (a.skillLevel || 0)).slice(0, 3).map(skillObj => `
+                                    <span class="skill-chip text-xs bg-gray-100 text-gray-800 px-3 py-1 rounded-full">
+                                        ${skillObj.skillName} ${skillObj.skillLevel > 0 ? `(N${skillObj.skillLevel})` : ''}
+                                    </span>
+                                `).join('')}
+                                ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500">Última atualização: ${formatDateTime(member.lastUpdate)}</span>
+                            <button class="view-profile-btn px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
+                                Ver perfil
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+        // Add click event to view profile
+        const viewProfileBtn = card.querySelector('.view-profile-btn');
+        viewProfileBtn.addEventListener('click', () => openProfileModal(member));
+
+        teamContainer.appendChild(card);
+      });
+    }
+
+    // Open profile modal
+    function openProfileModal(member) {
+      // Get initials
+      const names = member.name.split(' ');
+      const initials = names.length > 1
+        ? `${names[0][0]}${names[names.length - 1][0]}`
+        : names[0][0];
+
+      // Set modal content
+      document.getElementById('modal-name').textContent = member.name;
+      document.getElementById('modal-fullname').textContent = member.fullName;
+      document.getElementById('modal-initials').textContent = initials;
+      document.getElementById('modal-update').textContent = formatDateTime(member.lastUpdate);
+
+      // Set top skills
+      const topSkillsContainer = document.getElementById('modal-top-skills'); // Esta variável já existe, não precisa redeclarar com const
+      topSkillsContainer.innerHTML = '';
+
+      const allSkills = [
+        ...(member.backend || []).map(s => ({ ...s, category: 'backend' })),
+        ...(member.frontend || []).map(s => ({ ...s, category: 'frontend' })),
+        ...(member.mobile || []).map(s => ({ ...s, category: 'mobile' })),
+        ...(member.architecture || []).map(s => ({ ...s, category: 'architecture' })),
+        ...(member.management || []).map(s => ({ ...s, category: 'management' })),
+        ...(member.security || []).map(s => ({ ...s, category: 'security' })),
+        ...(member.infra || []).map(s => ({ ...s, category: 'infra' })),
+        ...(member.data || []).map(s => ({ ...s, category: 'data' })),
+        ...(member.immersive || []).map(s => ({ ...s, category: 'immersive' })),
+        ...(member.marketing || []).map(s => ({ ...s, category: 'marketing' }))
+      ];
+
+      // Ordenar por skillLevel (maior para menor) e pegar as top 5
+      const topRatedSkills = allSkills.sort((a, b) => (b.skillLevel || 0) - (a.skillLevel || 0)).slice(0, 5);
+
+      if (topRatedSkills.length === 0) {
+        topSkillsContainer.innerHTML = '<span class="text-xs text-gray-500 italic">Nenhuma habilidade principal avaliada.</span>';
+      } else {
+        topRatedSkills.forEach(skillObj => {
+          const chip = document.createElement('span');
+          chip.className = 'skill-chip text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full mb-1';
+          chip.textContent = `${skillObj.skillName} (Nível ${skillObj.skillLevel || 'N/A'})`;
+          topSkillsContainer.appendChild(chip);
+        });
+      }
+
+      // Set skills by category - AGORA COM FORMULÁRIO DE NÍVEL
+      function populateSkillsWithLevels(containerId, skillsArray, categoryKey) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = ''; // Limpa o container
+
+        const skills = skillsArray || [];
+
+        skills.forEach(skillData => {
+          const skillItemContainer = document.createElement('div');
+          skillItemContainer.className = 'skill-level-item mb-3 p-3 border rounded-md bg-gray-50';
+
+          const skillNameLabel = document.createElement('label');
+          skillNameLabel.className = 'block text-sm font-medium text-gray-800 mb-1';
+          skillNameLabel.textContent = skillData.skillName;
+
+          const selectLevel = document.createElement('select');
+          selectLevel.className = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm skill-level-select';
+          selectLevel.dataset.skillName = skillData.skillName; // Guardar o nome da skill
+          selectLevel.dataset.categoryKey = categoryKey;     // Guardar a categoria
+
+          proficiencyLevels.forEach(profLevel => {
+            const option = document.createElement('option');
+            option.value = profLevel.level;
+            option.textContent = profLevel.label;
+            if (profLevel.level === (skillData.skillLevel || 0)) {
+              option.selected = true;
+            }
+            selectLevel.appendChild(option);
+          });
+
+          // Tooltip com a descrição completa do nível
+          const tooltipText = document.createElement('p');
+          tooltipText.className = 'text-xs text-gray-500 mt-1 italic hidden proficiency-tooltip'; // Começa escondido
+
+          function updateTooltip(level) {
+            const selectedProficiency = proficiencyLevels.find(p => p.level === parseInt(level));
+            // Garante que proficiencyLevels[0].text exista, ou usa um fallback
+            const defaultTooltipText = proficiencyLevels[0]?.text || "Descrição não disponível.";
+            tooltipText.textContent = selectedProficiency ? (selectedProficiency.text || defaultTooltipText) : defaultTooltipText;
+            tooltipText.classList.remove('hidden');
+          }
+
+          selectLevel.addEventListener('change', (e) => {
+            updateTooltip(e.target.value);
+          });
+
+          // Mostrar tooltip para o nível selecionado inicialmente
+          updateTooltip(selectLevel.value);
+
+          skillItemContainer.appendChild(skillNameLabel);
+          skillItemContainer.appendChild(selectLevel);
+          skillItemContainer.appendChild(tooltipText);
+          container.appendChild(skillItemContainer);
+        });
+
+        if (skills.length === 0) {
+          container.innerHTML = '<span class="text-xs text-gray-500 italic">Nenhuma habilidade registrada nesta categoria.</span>';
+        }
+      }
+
+      // Preparar dados para o gráfico
+      const areaKeys = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
+      const areaLabels = ['Backend', 'Frontend', 'Mobile', 'Arquitetura', 'Gestão', 'Segurança', 'Infra', 'Dados/IA', 'Imersivas', 'Marketing'];
+
+      // Calcula a média de skillLevel por categoria, ou 0 se não houver skills ou níveis
+      const skillCounts = areaKeys.map(key => {
+        const skillsInCategory = member[key];
+        if (!skillsInCategory || skillsInCategory.length === 0) return 0;
+        const totalLevel = skillsInCategory.reduce((sum, s) => sum + (s.skillLevel || 0), 0);
+        return skillsInCategory.length > 0 ? (totalLevel / skillsInCategory.length) : 0; // Média ou 0
+      });
+
+      // Renderizar o gráfico de radar
+      const ctx = document.getElementById('modal-chart').getContext('2d');
+
+      // Destruir gráfico anterior se existir
+      if (currentChartInstance) {
+        currentChartInstance.destroy();
+      }
+
+      currentChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: areaLabels,
+          datasets: [{
+            label: 'Nível Médio por Área',
+            data: skillCounts,
+            fill: true,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: 'rgb(59, 130, 246)',
+            pointBackgroundColor: 'rgb(59, 130, 246)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(59, 130, 246)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            r: {
+              angleLines: { display: true },
+              suggestedMin: 0,
+              suggestedMax: 5, // Nível máximo de proficiência
+              ticks: { stepSize: 1 }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  if (context.parsed.r !== null) {
+                    label += context.parsed.r.toFixed(2); // Formata para 2 casas decimais
+                  }
+                  return label;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      populateSkillsWithLevels('modal-backend', member.backend, 'backend');
+      populateSkillsWithLevels('modal-frontend', member.frontend, 'frontend');
+      populateSkillsWithLevels('modal-mobile', member.mobile, 'mobile');
+      populateSkillsWithLevels('modal-architecture', member.architecture, 'architecture');
+      populateSkillsWithLevels('modal-management', member.management, 'management');
+      populateSkillsWithLevels('modal-security', member.security, 'security');
+      populateSkillsWithLevels('modal-infra', member.infra, 'infra');
+      populateSkillsWithLevels('modal-data', member.data, 'data');
+      populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive');
+      populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing');
+
+      // --- Lógica para o SEGUNDO GRÁFICO (Habilidades Individuais) ---
+      const allIndividualSkills = [];
+      areaKeys.forEach(categoryKey => {
+        if (member[categoryKey] && Array.isArray(member[categoryKey])) {
+          member[categoryKey].forEach(skill => {
+            if (skill.skillLevel > 0) { // Apenas habilidades com nível avaliado > 0
+              allIndividualSkills.push({
+                name: skill.skillName,
+                level: skill.skillLevel,
+                // Adiciona a descrição do nível para o tooltip
+                levelText: proficiencyLevels.find(p => p.level === skill.skillLevel)?.label || ''
+              });
+            }
+          });
+        }
+      });
+
+      // Ordenar por nível (maior para menor) e pegar as Top 10 (ou menos, se não houver 10)
+      const topIndividualSkills = allIndividualSkills.sort((a, b) => b.level - a.level).slice(0, 10);
+
+      const skillsChartCtx = document.getElementById('modal-skills-chart').getContext('2d');
+      if (currentSkillsChartInstance) {
+        currentSkillsChartInstance.destroy();
+      }
+
+      if (topIndividualSkills.length > 0) {
+        document.getElementById('modal-skills-chart').style.display = 'block'; // Garante que o canvas seja visível
+        currentSkillsChartInstance = new Chart(skillsChartCtx, {
+          type: 'bar', // Gráfico de barras
+          data: {
+            labels: topIndividualSkills.map(s => s.name), // Nomes das skills no eixo Y
+            datasets: [{
+              label: 'Nível de Proficiência',
+              data: topIndividualSkills.map(s => s.level), // Níveis das skills
+              backgroundColor: proficiencyLevels.slice(1).map((p, index) => `hsl(${index * (360 / (proficiencyLevels.length - 1))}, 70%, 60%)`), // Cores variadas
+              borderColor: proficiencyLevels.slice(1).map((p, index) => `hsl(${index * (360 / (proficiencyLevels.length - 1))}, 70%, 50%)`),
+              borderWidth: 1
+            }]
+          },
+          options: {
+            indexAxis: 'y', // Barras horizontais
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+              x: {
+                beginAtZero: true,
+                suggestedMax: 5, // Nível máximo
+                ticks: { stepSize: 1 }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    const skillIndex = context.dataIndex;
+                    return `${topIndividualSkills[skillIndex].name}: ${topIndividualSkills[skillIndex].levelText.replace(/^\d+\s*-\s*/, '')}`; // Remove o "N - " do label
+                  }
+                }
+              }
+            }
+          }
+        });
+      } else {
+        document.getElementById('modal-skills-chart').style.display = 'none'; // Esconde se não há skills para mostrar
+      }
+
+      // Adicionar botão de salvar no modal, se ainda não existir
+      const modalFooter = profileModal.querySelector('.border-t.p-4.flex.justify-end');
+      if (!modalFooter.querySelector('#save-skills-btn')) {
+        const saveButton = document.createElement('button');
+        saveButton.id = 'save-skills-btn';
+        saveButton.className = 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition mr-2';
+        saveButton.textContent = 'Salvar Habilidades';
+        saveButton.addEventListener('click', saveSkills);
+        modalFooter.insertBefore(saveButton, modalFooter.firstChild); // Adiciona antes do botão "Fechar"
+      }
+
+      // Show modal
+      profileModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Função para salvar as habilidades
+    async function saveSkills() {
+      const updatedSkills = {};
+      const skillSelects = profileModal.querySelectorAll('.skill-level-select');
+
+      skillSelects.forEach(select => {
+        const category = select.dataset.categoryKey;
+        const skillName = select.dataset.skillName;
+        const skillLevel = parseInt(select.value);
+
+        if (!updatedSkills[category]) {
+          updatedSkills[category] = [];
+        }
+        updatedSkills[category].push({ skillName, skillLevel });
+      });
+
+      console.log("Enviando para o backend:", updatedSkills);
+
+      const token = localStorage.getItem('authToken');
+      try {
+        const response = await fetch('http://localhost:3000/api/users/me/profile/skills', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ skills: updatedSkills })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        alert(result.message || "Habilidades salvas com sucesso!");
+        closeProfileModal();
+        fetchMyProfile(); // Recarrega o perfil para mostrar as atualizações
+      } catch (error) {
+        console.error("Erro ao salvar habilidades:", error);
+        alert(`Erro ao salvar habilidades: ${error.message}`);
+      }
+    }
+
+
+    // Close profile modal
+    function closeProfileModal() {
+      profileModal.classList.add('hidden');
+      // Destruir o gráfico ao fechar o modal
+      if (currentChartInstance) {
+        currentChartInstance.destroy();
+        currentChartInstance = null;
+      }
+      if (currentSkillsChartInstance) { // Destruir o segundo gráfico também
+        currentSkillsChartInstance.destroy();
+        currentSkillsChartInstance = null;
+      }
+      document.body.style.overflow = 'auto';
+    }
+
+    // Filter team members
+    function filterTeamMembers() {
+      // Não é mais necessário, pois exibimos apenas o perfil do usuário logado.
+      // Se quiser manter, teria que ser adaptado para um contexto diferente.
+      displayTeamMembers(allTeamMembers); // allTeamMembers agora conterá apenas o perfil do usuário logado
+    }
+
+    // Filter by category tab
+    function filterByCategory(category) {
+      // Não é mais necessário.
+      displayTeamMembers(allTeamMembers); // allTeamMembers agora conterá apenas o perfil do usuário logado
+    }
+
+    // Fetch o perfil do usuário logado
+    async function fetchMyProfile() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = 'login.html'; // Se não há token, volta pro login
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/api/users/me/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            // Token inválido ou expirado, redirecionar para login
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userName');
+            window.location.href = 'login.html';
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const myProfile = await response.json(); // Recebe o objeto do perfil
+
+        // Ensure all skill arrays exist, even if empty, for consistent processing
+        // Aplicar diretamente ao objeto myProfile
+        myProfile.backend = myProfile.backend || [];
+        myProfile.frontend = myProfile.frontend || [];
+        myProfile.mobile = myProfile.mobile || [];
+        myProfile.architecture = myProfile.architecture || [];
+        myProfile.management = myProfile.management || [];
+        myProfile.security = myProfile.security || [];
+        myProfile.infra = myProfile.infra || [];
+        myProfile.data = myProfile.data || [];
+        myProfile.immersive = myProfile.immersive || [];
+        myProfile.marketing = myProfile.marketing || [];
+
+        // A variável global allTeamMembers pode ser atualizada se necessário para outras lógicas,
+        // mas para display, passaremos myProfile diretamente.
+        allTeamMembers = myProfile;
+
+        // Não precisa mais ordenar, pois é um único perfil
+        displayTeamMembers(myProfile); // Passa o objeto do perfil
+        updateStats(myProfile);      // Passa o objeto do perfil
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        teamContainer.innerHTML = '<p class="text-red-500 text-center col-span-full">Erro ao carregar seu perfil. Tente fazer login novamente.</p>';
+        updateStats([]); // Clear stats on error
+      }
+    }
+
+    logoutButton.addEventListener('click', () => {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userName');
+      window.location.href = 'login.html'; // Redireciona para a página de login
+    });
+
+    function checkLoginStatus() {
+      const token = localStorage.getItem('authToken');
+      const userName = localStorage.getItem('userName');
+      if (token && userName) {
+        // loginSection.classList.add('hidden'); // Removido, pois não existe mais nesta página
+        userProfileSection.classList.remove('hidden');
+        welcomeMessage.textContent = `Bem-vindo(a), ${userName}!`;
+        // Here you could also fetch user-specific profile data if needed
+        fetchMyProfile(); // Carrega o perfil do usuário logado
+      } else {
+        window.location.href = 'login.html'; // Redireciona para login se não houver token
+      }
+    }
+
+    // Event listeners
+    // Os listeners de filtro foram removidos ou comentados, pois não são mais necessários
+    // if (searchInput) searchInput.addEventListener('input', filterTeamMembers);
+    // if (filterArea) filterArea.addEventListener('change', filterTeamMembers);
+    // if (resetFilters) {
+    //   resetFilters.addEventListener('click', () => {
+    //     if (searchInput) searchInput.value = '';
+    //     if (filterArea) filterArea.value = 'all';
+    //     if (categoryTabs) {
+    //         categoryTabs.forEach(tab => {
+    //             tab.classList.remove('active');
+    //             if (tab.dataset.category === 'all') {
+    //             tab.classList.add('active');
+    //             }
+    //         });
+    //     }
+    //     displayTeamMembers(allTeamMembers);
+    //   });
+    // }
+    // if (categoryTabs) categoryTabs.forEach(tab => {
+    //   tab.addEventListener('click', () => filterByCategory(tab.dataset.category));
+    // });
+
+    closeModal.addEventListener('click', closeProfileModal);
+    closeModalBtn.addEventListener('click', closeProfileModal);
+
+    // Initialize on page load
+    checkLoginStatus();
+  </script>
+</body>
+
+</html>
+</script>
+</body>
+
+</html>
