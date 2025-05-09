@@ -73,6 +73,7 @@
 
     <!-- Filters -->
     <div id="filters-section" class="mb-8 bg-white rounded-xl shadow-md p-6" style="display: none;">
+      <!-- Será controlado por JS -->
       <!-- Ocultado por padrão -->
       <!-- <div class="flex flex-wrap justify-between items-center gap-4">
         <div class="flex-1 min-w-[250px]">
@@ -110,7 +111,7 @@
     </div>
 
     <!-- Categories Navigation -->
-    <div id="categories-section" class="mb-8 overflow-x-auto" style="display: none;"> <!-- Ocultado por padrão -->
+    <div id="categories-section" class="mb-8 overflow-x-auto" style="display: none;"> <!-- Será controlado por JS -->
       <div class="flex space-x-1 pb-2">
         <button data-category="all" class="category-tab active px-6 py-2 font-medium rounded-t-lg">Todos</button>
         <button data-category="backend" class="category-tab px-6 py-2 font-medium rounded-t-lg">
@@ -149,7 +150,7 @@
 
     <!-- Stats -->
     <div id="stats-section" class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4" style="display: none;">
-      <!-- Ocultado por padrão -->
+      <!-- Será controlado por JS -->
       <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
         <h3 class="text-gray-500 text-sm font-medium">Total de Membros</h3>
         <p id="stats-total-members" class="text-2xl font-bold">0</p>
@@ -169,8 +170,8 @@
     </div>
 
     <!-- Team Grid -->
-    <div id="team-container" class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 gap-6">
-      <!-- Ajustado para 1 coluna -->
+    <div id="team-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Ajustado para layout de grid padrão -->
       <!-- Profiles will be inserted here by JavaScript -->
     </div>
   </div>
@@ -212,46 +213,101 @@
               <h4 class="font-bold text-lg mb-3 flex items-center">
                 <i class="fas fa-code text-blue-500 mr-2"></i>Competências Técnicas
               </h4>
-              <div class="space-y-4">
-                <div>
-                  <h5 class="font-medium text-blue-700 mb-1">Desenvolvimento Backend</h5>
-                  <div id="modal-backend" class="flex flex-wrap gap-2"></div>
+              <!-- Abas de Competências -->
+              <div class="mb-4 border-b border-gray-200">
+                <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="competency-tabs" role="tablist">
+                  <li class="mr-2" role="presentation"><button class="inline-block p-3 border-b-2 rounded-t-lg"
+                      id="backend-tab" data-tabs-target="#backend-content" type="button" role="tab"
+                      aria-controls="backend" aria-selected="false">Backend</button></li>
+                  <li class="mr-2" role="presentation"><button
+                      class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                      id="frontend-tab" data-tabs-target="#frontend-content" type="button" role="tab"
+                      aria-controls="frontend" aria-selected="false">Frontend</button></li>
+                  <li class="mr-2" role="presentation"><button
+                      class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                      id="mobile-tab" data-tabs-target="#mobile-content" type="button" role="tab" aria-controls="mobile"
+                      aria-selected="false">Mobile</button></li>
+                  <li class="mr-2" role="presentation"><button
+                      class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                      id="architecture-tab" data-tabs-target="#architecture-content" type="button" role="tab"
+                      aria-controls="architecture" aria-selected="false">Arquitetura</button></li>
+                  <li class="mr-2" role="presentation"><button
+                      class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                      id="management-tab" data-tabs-target="#management-content" type="button" role="tab"
+                      aria-controls="management" aria-selected="false">Gestão</button></li>
+                  <li class="mr-2" role="presentation"><button
+                      class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                      id="security-tab" data-tabs-target="#security-content" type="button" role="tab"
+                      aria-controls="security" aria-selected="false">Segurança</button></li>
+                  <li class="mr-2" role="presentation"><button
+                      class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                      id="infra-tab" data-tabs-target="#infra-content" type="button" role="tab" aria-controls="infra"
+                      aria-selected="false">Infra</button></li>
+                  <li class="mr-2" role="presentation"><button
+                      class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                      id="data-tab" data-tabs-target="#data-content" type="button" role="tab" aria-controls="data"
+                      aria-selected="false">Dados/IA</button></li>
+                  <li class="mr-2" role="presentation"><button
+                      class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                      id="immersive-tab" data-tabs-target="#immersive-content" type="button" role="tab"
+                      aria-controls="immersive" aria-selected="false">Imersivas</button></li>
+                  <li role="presentation"><button
+                      class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                      id="marketing-tab" data-tabs-target="#marketing-content" type="button" role="tab"
+                      aria-controls="marketing" aria-selected="false">Marketing</button></li>
+                </ul>
+              </div>
+              <!-- Conteúdo das Abas -->
+              <div id="competency-tab-content">
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="backend-content" role="tabpanel"
+                  aria-labelledby="backend-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Desenvolvimento Backend</h5>
+                  <div id="modal-backend" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
-                <div>
-                  <h5 class="font-medium text-blue-700 mb-1">Desenvolvimento Frontend</h5>
-                  <div id="modal-frontend" class="flex flex-wrap gap-2"></div>
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="frontend-content" role="tabpanel"
+                  aria-labelledby="frontend-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Desenvolvimento Frontend</h5>
+                  <div id="modal-frontend" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
-                <div>
-                  <h5 class="font-medium text-blue-700 mb-1">Desenvolvimento Mobile</h5>
-                  <div id="modal-mobile" class="flex flex-wrap gap-2"></div>
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="mobile-content" role="tabpanel"
+                  aria-labelledby="mobile-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Desenvolvimento Mobile</h5>
+                  <div id="modal-mobile" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
-                <div>
-                  <h5 class="font-medium text-blue-700 mb-1">Arquitetura de Software</h5>
-                  <div id="modal-architecture" class="flex flex-wrap gap-2"></div>
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="architecture-content" role="tabpanel"
+                  aria-labelledby="architecture-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Arquitetura de Software</h5>
+                  <div id="modal-architecture" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
-                <div>
-                  <h5 class="font-medium text-blue-700 mb-1">Gestão e Operação</h5>
-                  <div id="modal-management" class="flex flex-wrap gap-2"></div>
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="management-content" role="tabpanel"
+                  aria-labelledby="management-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Gestão e Operação</h5>
+                  <div id="modal-management" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
-                <div>
-                  <h5 class="font-medium text-blue-700 mb-1">Segurança</h5>
-                  <div id="modal-security" class="flex flex-wrap gap-2"></div>
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="security-content" role="tabpanel"
+                  aria-labelledby="security-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Segurança</h5>
+                  <div id="modal-security" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
-                <div>
-                  <h5 class="font-medium text-blue-700 mb-1">Infraestrutura</h5>
-                  <div id="modal-infra" class="flex flex-wrap gap-2"></div>
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="infra-content" role="tabpanel"
+                  aria-labelledby="infra-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Infraestrutura</h5>
+                  <div id="modal-infra" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
-                <div>
-                  <h5 class="font-medium text-blue-700 mb-1">Dados e IA</h5>
-                  <div id="modal-data" class="flex flex-wrap gap-2"></div>
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="data-content" role="tabpanel"
+                  aria-labelledby="data-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Dados e IA</h5>
+                  <div id="modal-data" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
-                <div>
-                  <h5 class="font-medium text-blue-700 mb-1">Tecnologias Imersivas</h5>
-                  <div id="modal-immersive" class="flex flex-wrap gap-2"></div>
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="immersive-content" role="tabpanel"
+                  aria-labelledby="immersive-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Tecnologias Imersivas</h5>
+                  <div id="modal-immersive" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
-                <div>
-                  <h5 class="font-medium text-blue-700 mb-1">Marketing Digital</h5>
-                  <div id="modal-marketing" class="flex flex-wrap gap-2"></div>
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="marketing-content" role="tabpanel"
+                  aria-labelledby="marketing-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Marketing Digital</h5>
+                  <div id="modal-marketing" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
               </div>
               <!-- Adicionado Canvas para o Gráfico -->
@@ -265,6 +321,13 @@
                 <h4 class="font-bold text-lg mb-3 flex items-center"><i
                     class="fas fa-tasks text-teal-500 mr-2"></i>Proficiência em Habilidades Específicas (Top 10)</h4>
                 <canvas id="modal-skills-chart"></canvas>
+              </div>
+              <!-- Nova Seção: Competências Aplicadas ao Portfólio -->
+              <div class="mt-8">
+                <h4 class="font-bold text-lg mb-3 flex items-center">
+                  <i class="fas fa-briefcase text-indigo-500 mr-2"></i>Portfólio e Competências Aplicadas
+                </h4>
+                <div id="modal-portfolio-competencies" class="space-y-3"></div>
               </div>
             </div>
           </div>
@@ -333,14 +396,140 @@
       }
     ];
 
+    const portfolioItemsMap = [
+      {
+        name: "Análise de Vulnerabilidades",
+        relevantSkills: ["Pentest", "Kali Linux", "OWASP ZAP", "Segurança em Redes", "Análise de Risco", "Hardening", "Criptografia"],
+        infrastructure: ["Toolkit para Analise de Vulnerabilidade (open-source, gratuito)", "Notebook gamer de alto desempenho"]
+      },
+      {
+        name: "Assessment do CIS Controlvs V8",
+        relevantSkills: ["ISO 27001", "Governança", "Compliance Geral", "Análise de Risco", "Adequação LGPD"], // CIS Controls não está na nova lista, usei correlatos
+        infrastructure: ["Notebook gamer de alto desempenho"]
+      },
+      {
+        name: "Assessment do CIS Controls V9", // Novo item
+        relevantSkills: ["ISO 27001", "ISO 27005 (Gestão de Riscos)", "Governança", "Compliance Geral", "Análise de Risco", "Adequação LGPD"],
+        infrastructure: ["Notebook gamer de alto desempenho", "Acesso digital a normas ABNT e ISO"]
+      },
+      {
+        name: "Assessoria em implantação de projetos de Infraestrutura de TI na Indústria",
+        relevantSkills: ["Amazon Web Services", "Azure", "Google Cloud Platform", "Docker", "Kubernetes", "Servidores Linux", "Servidores Windows", "Configurações de Rede", "Terraform", "DevOps", "Scrum", "Kanban", "ISA 62.443 (IEC 62443)"],
+        infrastructure: ["Notebook gamer de alto desempenho", "Raspberry PI 5+", "Servidores locais ou híbridos", "Roteadores industriais, switches gerenciáveis"]
+      },
+      {
+        name: "Assessoria em implantação de suíte de serviços em nuvem na indústria",
+        relevantSkills: ["Amazon Web Services", "Azure", "Google Cloud Platform", "Computação em Nuvem", "Scrum", "Kanban"], // Office 365, Google Workspace não estão na lista de skills
+        infrastructure: ["Notebook gamer de alto desempenho", "Assinatura Microsoft Azure", "Assinatura AWS", "Assinatura Google Cloud Platform"]
+      },
+      {
+        name: "Avaliação de Maturidade e conformidade em SI",
+        relevantSkills: ["ISO 27001", "ISO 27005 (Gestão de Riscos)", "ISO 27701 (Privacidade/LGPD)", "Adequação LGPD", "Governança", "Compliance Geral", "Análise de Risco"],
+        infrastructure: ["Notebook gamer de alto desempenho", "Acesso digital a normas ABNT e ISO"]
+      },
+      {
+        name: "Consultoria de comunicação e marketing Digital",
+        relevantSkills: ["SEO", "Redes Sociais", "Google ADS", "Google Analytics", "Meta ADS", "E-mail Marketing", "Mídias Digitais", "Omnichannel"], // Marketing de Conteúdo, Estratégia de Marketing Digital não estão na lista
+        infrastructure: [] // Nenhuma infraestrutura específica listada
+      },
+      {
+        name: "Consultoria em projetos de TI aplicado a Indústria",
+        relevantSkills: ["Scrum", "Kanban", "Clean Code", "Design Patterns", "SOLID", "DevOps", "ISA 62.443 (IEC 62443)"], // Arquitetura de Soluções, Gerenciamento de Projetos de TI não estão na lista
+        infrastructure: ["Notebook gamer de alto desempenho", "Servidores locais e/ou híbridos"]
+      },
+      {
+        name: "Consultoria em Sistemas ERP",
+        relevantSkills: ["Gerenciamento de Banco de Dados", "SQL Server", "Oracle", "MySQL", "PostgreSQL", "API REST", "Serviços de Mensageria PUB/SUB"], // Consultoria ERP, Sistemas ERP, Modelagem de Dados, SQL Avançado, Integração de Sistemas não estão na lista
+        infrastructure: ["Notebook gamer de alto desempenho", "SAP, Oracle ERP, Totvs Protheus", "Computação e armazenamento robustos"]
+      },
+      {
+        name: "Desenvolvimento de aplicações Mobile",
+        relevantSkills: ["React Native", "Flutter", "Swift", "Kotlin", "Dart", "API REST", "Firebase", "Publicação Apple Store", "Publicação Play Store"], // Desenvolvimento iOS/Android são cobertos por Swift/Kotlin/Frameworks
+        infrastructure: ["Notebook gamer de alto desempenho", "Smartphones Android", "Smartphones iOS", "Tablets Android", "Tablets iOS", "MacBooks"]
+      },
+      {
+        name: "Desenvolvimento de aplicações Web",
+        relevantSkills: [
+          "HTML", "CSS", "JavaScript", "TypeScript", "React", "Angular", "Next.js", // Vue.js não está na lista
+          "Node.js", "Express", "NestJS", "Python", "Java", "Spring Boot", "PHP", "C#", ".NET",
+          "API REST", "Swagger",
+          "PostgreSQL", "MySQL", "MongoDB", "SQL Server", "SQLite", "Redis",
+          "Git", "GitHub", "Design Responsivo", "Bootstrap", "Tailwind CSS", "Materialize"
+        ],
+        infrastructure: ["Notebook gamer de alto desempenho", "Figma", "Assinatura Microsoft Azure", "Assinatura AWS", "Assinatura Google Cloud Platform", "GitHub"]
+      },
+      {
+        name: "Desenvolvimento de soluções com IA",
+        relevantSkills: [
+          "Python", "Machine Learning", "Linguagem R", "Tensorflow", "Keras", "Scikit-learn", "OpenCV",
+          "Processamento de Linguagem Natural (NLP)", "Langchain", "Large Language Modelos - LLMs", "Hugging Face",
+          "Visão Computacional - Classificação", "Visão Computacional - Detecção de Objetos", "YOLO", "Reconhecimento de Caracteres", "Visão Computacional - Segmentação Semântica",
+          "Redes Neurais Convolucionais(CNN)", "Redes Neurais Recorrentes (RNN)", "Generative adversarial network (GAN)",
+          "Algoritmos Genéticos", "K-Means", "Modelos de Classificação", "Modelos de Regressão Linear", "Jupyter Notebooks", "Google Colab", "Pandas", "Matplotlib", "Seaborn", "MLOps"
+        ],
+        infrastructure: ["Notebook gamer de alto desempenho", "Servidor para processamento massivo e dedicado", "Assinatura Microsoft Azure", "Assinatura AWS", "Assinatura Google Cloud Platform"]
+      },
+      {
+        name: "Desenvolvimento de soluções de integração de negócios",
+        relevantSkills: ["API REST", "Microserviços", "Serviços de Mensageria PUB/SUB", "Apache Kafka", "RabbitMQ", "Pipelines ETL/ELT", "Node.js", "Java", "Spring Boot", "Python", "Websockets"], // Arquitetura de Integração não está na lista
+        infrastructure: [] // Nenhuma infraestrutura específica listada para este item no portfolioItemsMap original
+      },
+      {
+        name: "Softwares e soluções para análise de dados e criação de dashboards", // Corresponde a "DESENVOLVIMENTO DE SOLUÇÕES DE INTELIGÊNCIA DE NEGÓCIOS" da sua lista de infra
+        relevantSkills: [
+          "Power BI", "Tableau", // Qlik Sense não está na lista
+          "SQL Server", "PostgreSQL", "MySQL", "Oracle", "Gerenciamento de Banco de Dados",
+          "Python", "Pandas", "Matplotlib", "Seaborn", "Análise de Dados", "Análise exploratória",
+          "Data Warehouse", "Data Lake", "Pipelines ETL/ELT", "Amazon Redshift", "Azure Synapse Analytics", "Google Big Query"
+        ],
+        infrastructure: ["Notebook gamer de alto desempenho", "Servidor para processamento massivo e dedicado", "Assinatura Microsoft Azure", "Assinatura AWS", "Assinatura Google Cloud Platform", "Power BI", "Tableau"]
+      },
+      {
+        name: "Design de Produto Digital",
+        relevantSkills: ["Figma", "UI", "UX", "Prototipagem", "Design Thinking", "Design System"], // Adobe XD, Sketch, Pesquisa com Usuário não estão na lista
+        infrastructure: ["Notebook gamer de alto desempenho", "Figma", "Adobe Creative Cloud"]
+      },
+      {
+        name: "Penetration Test em aplicações Web",
+        relevantSkills: ["Pentest", "OWASP ZAP", "Kali Linux", "JavaScript", "Segurança em Código (Security by Design)"], // Burp Suite, Segurança de APIs, Ethical Hacking não estão na lista
+        infrastructure: ["Notebook gamer de alto desempenho", "Toolkit para PenTest (Open Source)"]
+      },
+      {
+        name: "Diagnóstico de comunicação e marketing digital",
+        relevantSkills: ["Google Analytics", "SEO", "Redes Sociais", "Mídias Digitais"], // Analytics Marketing, Pesquisa de Mercado Digital, Estratégia de Marketing Digital, Marketing de Conteúdo não estão na lista
+        infrastructure: []
+      },
+      {
+        name: "Implementação ISO 27001",
+        relevantSkills: ["ISO 27001", "Governança", "Compliance Geral", "Análise de Risco", "Adequação LGPD", "ISO 27005 (Gestão de Riscos)"], // GSI, Políticas de Segurança, Auditoria de SI não estão na lista
+        infrastructure: ["Notebook gamer de alto desempenho"]
+      },
+      {
+        name: "Implementação ISO 27002", // Novo item
+        relevantSkills: ["ISO 27001", "Governança", "Hardening", "Segurança em Redes"], // ISO 27002 não está na lista, usei correlatos. Controles de Segurança é muito genérico.
+        infrastructure: ["Notebook gamer de alto desempenho", "Acesso digital a normas ABNT e ISO"]
+      },
+      {
+        name: "Plano de ação digital",
+        relevantSkills: ["SEO", "Redes Sociais", "Google ADS", "Meta ADS", "Google Analytics", "E-mail Marketing", "Mídias Digitais", "Omnichannel", "Scrum", "Kanban"], // Estratégia de Marketing Digital, Planejamento de Campanhas, Marketing de Conteúdo, Gerenciamento de Projetos Digitais não estão na lista
+        infrastructure: []
+      },
+      {
+        name: "Penetration Test - Infraestrutura e Serviços",
+        relevantSkills: ["Pentest", "Segurança em Redes", "Kali Linux", "Hardening", "Servidores Linux", "Servidores Windows", "Amazon Web Services", "Azure", "Docker"], // Metasploit, Nmap não estão na lista
+        infrastructure: ["Notebook gamer de alto desempenho", "Toolkit para PenTest (Open Source)"]
+      }
+    ];
+
     // Global variable to store fetched team members
-    let allTeamMembers = [];
+    let allTeamMembersGlobal = []; // Renomeado para clareza
 
     // DOM Elements
     const teamContainer = document.getElementById('team-container');
-    // const searchInput = document.getElementById('search-name'); // Removido/Ocultado
-    // const filterArea = document.getElementById('filter-area'); // Removido/Ocultado
-    // const resetFilters = document.getElementById('reset-filters'); // Removido/Ocultado
+    // Elementos de filtro serão acessados dentro de initializeFiltersAndCategories
+    // const searchInput = document.getElementById('search-name');
+    // const filterArea = document.getElementById('filter-area');
+    // const resetFiltersBtn = document.getElementById('reset-filters');
     // const categoryTabs = document.querySelectorAll('.category-tab'); // Removido/Ocultado
     const profileModal = document.getElementById('profile-modal');
     const closeModal = document.getElementById('close-modal');
@@ -354,27 +543,56 @@
     const welcomeMessage = document.getElementById('welcome-message');
     const logoutButton = document.getElementById('logout-button');
 
+    // Helper function to check if the logged-in user is admin
+    function isAdminUser() {
+      const userEmail = localStorage.getItem('userEmail');
+      return userEmail === 'admin@example.com';
+    }
+
     // Function to update stats display
     function updateStats(members) {
-      // As estatísticas globais foram removidas/ocultadas, então esta função pode ser simplificada ou removida
-      // Se quiser estatísticas do perfil individual, teria que adaptar aqui.
-      // Por ora, vamos deixar, mas ela não será muito útil.
-      // const totalMembers = members.length;
-      // document.getElementById('stats-total-members').textContent = totalMembers;
-      // ...
+      const statsSection = document.getElementById('stats-section');
+      if (!isAdminUser() || !statsSection || statsSection.style.display === 'none') {
+        // Limpa ou não faz nada se não for admin ou a seção estiver oculta
+        if (document.getElementById('stats-total-members')) document.getElementById('stats-total-members').textContent = '0';
+        if (document.getElementById('stats-backend-experts')) document.getElementById('stats-backend-experts').textContent = '0';
+        if (document.getElementById('stats-full-stack')) document.getElementById('stats-full-stack').textContent = '0';
+        if (document.getElementById('stats-mobile-devs')) document.getElementById('stats-mobile-devs').textContent = '0';
+        return;
+      }
+
+      const totalMembers = members.length;
+      document.getElementById('stats-total-members').textContent = totalMembers;
+
+      const backendExperts = members.filter(m => m.backend && m.backend.some(s => s.skillLevel >= 4)).length;
+      document.getElementById('stats-backend-experts').textContent = backendExperts;
+
+      const fullStack = members.filter(m =>
+        (m.backend && m.backend.length > 0) && (m.frontend && m.frontend.length > 0)
+      ).length;
+      document.getElementById('stats-full-stack').textContent = fullStack;
+
+      const mobileDevs = members.filter(m => m.mobile && m.mobile.length > 0).length;
+      document.getElementById('stats-mobile-devs').textContent = mobileDevs;
     }
 
     // Display team members (now takes members as argument)
     function displayTeamMembers(members) {
       teamContainer.innerHTML = '';
 
-      // Se 'members' não for um array, transforma em um array com um único elemento
       const membersArray = Array.isArray(members) ? members : [members];
 
       if (!membersArray || membersArray.length === 0 || !membersArray[0]) {
         teamContainer.innerHTML = '<p class="text-gray-600 col-span-full text-center">Nenhum membro encontrado com os filtros aplicados ou dados não carregados.</p>';
-        updateStats([]);
+        if (isAdminUser()) updateStats([]); // Só atualiza stats para admin
         return;
+      }
+
+      // Ajusta o container de acordo com o número de perfis
+      if (!isAdminUser() && membersArray.length === 1) {
+        teamContainer.className = 'grid grid-cols-1 gap-6'; // Para card único centralizado
+      } else if (isAdminUser()) {
+        teamContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6'; // Para múltiplos cards
       }
 
       membersArray.forEach(member => {
@@ -414,7 +632,11 @@
 
         // Create profile card
         const card = document.createElement('div');
-        card.className = 'profile-card bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in max-w-2xl mx-auto'; // Centralizado e com max-width
+        let cardClasses = 'profile-card bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in';
+        if (!isAdminUser() && membersArray.length === 1) {
+          cardClasses += ' max-w-2xl mx-auto'; // Centraliza o card único
+        }
+        card.className = cardClasses;
         card.innerHTML = `
                     <div class="p-6">
                         <div class="flex items-center mb-4">
@@ -455,6 +677,7 @@
 
         teamContainer.appendChild(card);
       });
+      if (isAdminUser()) updateStats(membersArray); // Atualiza stats para admin após renderizar
     }
 
     // Open profile modal
@@ -464,6 +687,10 @@
       const initials = names.length > 1
         ? `${names[0][0]}${names[names.length - 1][0]}`
         : names[0][0];
+
+      const loggedInUserId = localStorage.getItem('userId');
+      // Pode editar skills se o perfil visualizado for o do usuário logado.
+      const canEditSkills = loggedInUserId === member.id.toString();
 
       // Set modal content
       document.getElementById('modal-name').textContent = member.name;
@@ -503,7 +730,7 @@
       }
 
       // Set skills by category - AGORA COM FORMULÁRIO DE NÍVEL
-      function populateSkillsWithLevels(containerId, skillsArray, categoryKey) {
+      function populateSkillsWithLevels(containerId, skillsArray, categoryKey, isEditable) {
         const container = document.getElementById(containerId);
         container.innerHTML = ''; // Limpa o container
 
@@ -518,9 +745,10 @@
           skillNameLabel.textContent = skillData.skillName;
 
           const selectLevel = document.createElement('select');
-          selectLevel.className = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm skill-level-select';
+          selectLevel.className = 'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm skill-level-select';
           selectLevel.dataset.skillName = skillData.skillName; // Guardar o nome da skill
           selectLevel.dataset.categoryKey = categoryKey;     // Guardar a categoria
+          selectLevel.disabled = !isEditable; // Desabilita se não for editável
 
           proficiencyLevels.forEach(profLevel => {
             const option = document.createElement('option');
@@ -629,16 +857,46 @@
         }
       });
 
-      populateSkillsWithLevels('modal-backend', member.backend, 'backend');
-      populateSkillsWithLevels('modal-frontend', member.frontend, 'frontend');
-      populateSkillsWithLevels('modal-mobile', member.mobile, 'mobile');
-      populateSkillsWithLevels('modal-architecture', member.architecture, 'architecture');
-      populateSkillsWithLevels('modal-management', member.management, 'management');
-      populateSkillsWithLevels('modal-security', member.security, 'security');
-      populateSkillsWithLevels('modal-infra', member.infra, 'infra');
-      populateSkillsWithLevels('modal-data', member.data, 'data');
-      populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive');
-      populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing');
+      populateSkillsWithLevels('modal-backend', member.backend, 'backend', canEditSkills);
+      populateSkillsWithLevels('modal-frontend', member.frontend, 'frontend', canEditSkills);
+      populateSkillsWithLevels('modal-mobile', member.mobile, 'mobile', canEditSkills);
+      populateSkillsWithLevels('modal-architecture', member.architecture, 'architecture', canEditSkills);
+      populateSkillsWithLevels('modal-management', member.management, 'management', canEditSkills);
+      populateSkillsWithLevels('modal-security', member.security, 'security', canEditSkills);
+      populateSkillsWithLevels('modal-infra', member.infra, 'infra', canEditSkills);
+      populateSkillsWithLevels('modal-data', member.data, 'data', canEditSkills);
+      populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive', canEditSkills);
+      populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing', canEditSkills);
+
+      // Lógica para as abas de competências
+      const tabs = document.querySelectorAll('#competency-tabs button[role="tab"]');
+      const tabContents = document.querySelectorAll('#competency-tab-content div[role="tabpanel"]');
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          // Desativa todas as abas e painéis
+          tabs.forEach(t => {
+            t.setAttribute('aria-selected', 'false');
+            t.classList.remove('text-blue-600', 'border-blue-600');
+            t.classList.add('hover:text-gray-600', 'hover:border-gray-300', 'border-transparent');
+          });
+          tabContents.forEach(content => {
+            content.classList.add('hidden');
+          });
+
+          // Ativa a aba clicada e seu painel
+          tab.setAttribute('aria-selected', 'true');
+          tab.classList.add('text-blue-600', 'border-blue-600');
+          tab.classList.remove('hover:text-gray-600', 'hover:border-gray-300', 'border-transparent');
+          const targetPanelId = tab.getAttribute('data-tabs-target');
+          document.querySelector(targetPanelId).classList.remove('hidden');
+        });
+      });
+
+      // Ativar a primeira aba (Backend) por padrão
+      if (tabs.length > 0) {
+        tabs[0].click();
+      }
 
       // --- Lógica para o SEGUNDO GRÁFICO (Habilidades Individuais) ---
       const allIndividualSkills = [];
@@ -707,27 +965,111 @@
         document.getElementById('modal-skills-chart').style.display = 'none'; // Esconde se não há skills para mostrar
       }
 
-      // Adicionar botão de salvar no modal, se ainda não existir
-      const modalFooter = profileModal.querySelector('.border-t.p-4.flex.justify-end');
-      if (!modalFooter.querySelector('#save-skills-btn')) {
-        const saveButton = document.createElement('button');
-        saveButton.id = 'save-skills-btn';
-        saveButton.className = 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition mr-2';
-        saveButton.textContent = 'Salvar Habilidades';
-        saveButton.addEventListener('click', saveSkills);
-        modalFooter.insertBefore(saveButton, modalFooter.firstChild); // Adiciona antes do botão "Fechar"
+      // --- Lógica para Competências Aplicadas ao Portfólio ---
+      const portfolioContainer = document.getElementById('modal-portfolio-competencies');
+      portfolioContainer.innerHTML = ''; // Limpar
+
+      const memberSkillsWithLevel = [];
+      areaKeys.forEach(categoryKey => {
+        if (member[categoryKey] && Array.isArray(member[categoryKey])) {
+          member[categoryKey].forEach(skill => {
+            if (skill.skillLevel > 0) { // Considerar apenas skills com alguma proficiência
+              memberSkillsWithLevel.push(skill.skillName);
+            }
+          });
+        }
+      });
+
+      let portfolioMatchesFound = 0;
+      portfolioItemsMap.forEach(item => {
+        const matchedSkills = item.relevantSkills.filter(rs => memberSkillsWithLevel.includes(rs));
+
+        if (matchedSkills.length > 0) { // Só mostrar se houver alguma skill correspondente
+          portfolioMatchesFound++;
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'p-3 border rounded-md bg-gray-50 shadow-sm';
+
+          const itemName = document.createElement('h5');
+          itemName.className = 'font-semibold text-gray-800 mb-1 text-sm';
+          itemName.textContent = item.name;
+          itemDiv.appendChild(itemName);
+
+          const skillsList = document.createElement('div');
+          skillsList.className = 'flex flex-wrap gap-1 mt-1';
+          matchedSkills.forEach(ms => {
+            const skillChip = document.createElement('span');
+            skillChip.className = 'text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full';
+            skillChip.textContent = ms;
+            skillsList.appendChild(skillChip);
+          });
+          itemDiv.appendChild(skillsList);
+
+          const coverage = (matchedSkills.length / item.relevantSkills.length) * 100;
+          const coverageText = document.createElement('p');
+          coverageText.className = 'text-xs text-gray-500 mt-1.5';
+          coverageText.textContent = `Relevância: ${matchedSkills.length} de ${item.relevantSkills.length} habilidades mapeadas (${coverage.toFixed(0)}%).`;
+          itemDiv.appendChild(coverageText);
+
+          // Adicionar seção de Infraestrutura
+          if (item.infrastructure && item.infrastructure.length > 0) {
+            const infraTitle = document.createElement('h6');
+            infraTitle.className = 'font-medium text-gray-700 mt-2 mb-1 text-xs';
+            infraTitle.textContent = 'Infraestrutura Necessária:';
+            itemDiv.appendChild(infraTitle);
+
+            const infraList = document.createElement('div');
+            infraList.className = 'flex flex-wrap gap-1';
+            item.infrastructure.forEach(infraItem => {
+              const infraChip = document.createElement('span');
+              infraChip.className = 'text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full';
+              infraChip.textContent = infraItem;
+              infraList.appendChild(infraChip);
+            });
+            itemDiv.appendChild(infraList);
+          }
+          portfolioContainer.appendChild(itemDiv);
+        }
+      });
+      if (portfolioMatchesFound === 0) {
+        portfolioContainer.innerHTML = '<p class="text-sm text-gray-500 italic">Nenhuma competência deste perfil corresponde diretamente aos itens de portfólio definidos com as habilidades atuais (nível > 0).</p>';
       }
 
+      // Adicionar botão de salvar no modal, se ainda não existir
+      const modalFooter = profileModal.querySelector('.border-t.p-4.flex.justify-end');
+      const existingSaveButton = modalFooter.querySelector('#save-skills-btn');
+
+      if (canEditSkills) {
+        if (!existingSaveButton) {
+          const saveButton = document.createElement('button');
+          saveButton.id = 'save-skills-btn';
+          saveButton.className = 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition mr-2';
+          saveButton.textContent = 'Salvar Habilidades';
+          saveButton.addEventListener('click', saveSkills);
+          modalFooter.insertBefore(saveButton, modalFooter.firstChild);
+        }
+      } else {
+        if (existingSaveButton) {
+          existingSaveButton.remove(); // Remove o botão se não for editável
+        }
+      }
       // Show modal
       profileModal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
 
+    let isSavingSkills = false; // Flag para debounce
+
     // Função para salvar as habilidades
     async function saveSkills() {
+      if (isSavingSkills) {
+        console.log("SaveSkills: Já está salvando, ignorando chamada duplicada.");
+        return;
+      }
+      isSavingSkills = true;
+      console.log("SaveSkills: Iniciando salvamento...");
+
       const updatedSkills = {};
       const skillSelects = profileModal.querySelectorAll('.skill-level-select');
-
       skillSelects.forEach(select => {
         const category = select.dataset.categoryKey;
         const skillName = select.dataset.skillName;
@@ -739,7 +1081,7 @@
         updatedSkills[category].push({ skillName, skillLevel });
       });
 
-      console.log("Enviando para o backend:", updatedSkills);
+      // console.log("Enviando para o backend:", updatedSkills); // Log já extenso, pode ser comentado se o de cima for suficiente
 
       const token = localStorage.getItem('authToken');
       try {
@@ -753,17 +1095,37 @@
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+          let errorMessage = `HTTP error! status: ${response.status}`;
+          try {
+            // Tenta parsear a resposta como JSON, comum para erros de API bem formatados
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            // Se response.json() falhar, o corpo da resposta pode não ser JSON (ex: erro 401/403 simples)
+            // Tenta ler como texto para obter mais informações.
+            const errorText = await response.text();
+            if (errorText) {
+              errorMessage += ` - ${errorText}`;
+            }
+          }
+          throw new Error(errorMessage);
         }
 
         const result = await response.json();
         alert(result.message || "Habilidades salvas com sucesso!");
         closeProfileModal();
-        fetchMyProfile(); // Recarrega o perfil para mostrar as atualizações
+        if (isAdminUser()) {
+          fetchAllTeamProfiles(); // Admin recarrega a lista da equipe
+        } else {
+          fetchMyProfile(); // Usuário normal recarrega seu próprio perfil
+        }
       } catch (error) {
-        console.error("Erro ao salvar habilidades:", error);
+        console.error("Erro detalhado ao salvar habilidades:", error);
+        console.error("Mensagem do erro:", error.message);
+        console.error("Stack do erro:", error.stack);
         alert(`Erro ao salvar habilidades: ${error.message}`);
+      } finally {
+        isSavingSkills = false; // Reseta a flag
       }
     }
 
@@ -783,18 +1145,51 @@
       document.body.style.overflow = 'auto';
     }
 
-    // Filter team members
+    // Filter team members (for Admin view)
     function filterTeamMembers() {
-      // Não é mais necessário, pois exibimos apenas o perfil do usuário logado.
-      // Se quiser manter, teria que ser adaptado para um contexto diferente.
-      displayTeamMembers(allTeamMembers); // allTeamMembers agora conterá apenas o perfil do usuário logado
+      if (!isAdminUser()) {
+        // Para usuários normais, apenas exibe seu perfil (allTeamMembersGlobal terá 1 item)
+        displayTeamMembers(allTeamMembersGlobal);
+        return;
+      }
+
+      const searchTerm = document.getElementById('search-name').value.toLowerCase();
+      const selectedAreaDropdown = document.getElementById('filter-area').value;
+      const activeCategoryTab = document.querySelector('.category-tab.active');
+      const selectedCategoryTab = activeCategoryTab ? activeCategoryTab.dataset.category : 'all';
+
+      let filtered = [...allTeamMembersGlobal]; // Começa com todos os membros (admin já filtrado na carga inicial)
+
+      // Filtrar por nome
+      if (searchTerm) {
+        filtered = filtered.filter(member =>
+          member.name.toLowerCase().includes(searchTerm) ||
+          member.fullName.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      // Determinar a área/categoria final para filtrar
+      let areaToFilterBy = 'all';
+      if (selectedAreaDropdown !== 'all') {
+        areaToFilterBy = selectedAreaDropdown;
+      } else if (selectedCategoryTab !== 'all') {
+        areaToFilterBy = selectedCategoryTab;
+      }
+
+      // Filtrar por área/categoria se uma específica for selecionada
+      if (areaToFilterBy !== 'all') {
+        filtered = filtered.filter(member => {
+          const skillsInCategory = member[areaToFilterBy]; // e.g., member.backend
+          // Verifica se a categoria existe no membro e se tem skills nela
+          return skillsInCategory && Array.isArray(skillsInCategory) && skillsInCategory.length > 0;
+        });
+      }
+
+      displayTeamMembers(filtered);
+      updateStats(filtered); // Atualiza as estatísticas com base nos membros filtrados
     }
 
-    // Filter by category tab
-    function filterByCategory(category) {
-      // Não é mais necessário.
-      displayTeamMembers(allTeamMembers); // allTeamMembers agora conterá apenas o perfil do usuário logado
-    }
+
 
     // Fetch o perfil do usuário logado
     async function fetchMyProfile() {
@@ -835,17 +1230,49 @@
         myProfile.immersive = myProfile.immersive || [];
         myProfile.marketing = myProfile.marketing || [];
 
-        // A variável global allTeamMembers pode ser atualizada se necessário para outras lógicas,
-        // mas para display, passaremos myProfile diretamente.
-        allTeamMembers = myProfile;
+        allTeamMembersGlobal = [myProfile]; // Armazena para consistência
 
-        // Não precisa mais ordenar, pois é um único perfil
         displayTeamMembers(myProfile); // Passa o objeto do perfil
-        updateStats(myProfile);      // Passa o objeto do perfil
+        updateStats([myProfile]);      // Passa o objeto do perfil (ou será ignorado por updateStats)
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
         teamContainer.innerHTML = '<p class="text-red-500 text-center col-span-full">Erro ao carregar seu perfil. Tente fazer login novamente.</p>';
-        updateStats([]); // Clear stats on error
+        if (isAdminUser()) updateStats([]); // Clear stats on error for admin
+      }
+    }
+
+    // Fetch todos os perfis da equipe (para o Admin)
+    async function fetchAllTeamProfiles() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      try {
+        const response = await fetch('http://localhost:3000/api/team', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userId');
+            window.location.href = 'login.html';
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const team = await response.json();
+        const loggedInUserId = localStorage.getItem('userId');
+        // Filtra o próprio admin da lista
+        allTeamMembersGlobal = team.filter(member => member.id.toString() !== loggedInUserId);
+
+        displayTeamMembers(allTeamMembersGlobal);
+        updateStats(allTeamMembersGlobal);
+      } catch (error) {
+        console.error("Failed to fetch team profiles:", error);
+        teamContainer.innerHTML = '<p class="text-red-500 text-center col-span-full">Erro ao carregar perfis da equipe.</p>';
+        updateStats([]);
       }
     }
 
@@ -858,50 +1285,70 @@
     function checkLoginStatus() {
       const token = localStorage.getItem('authToken');
       const userName = localStorage.getItem('userName');
+
       if (token && userName) {
-        // loginSection.classList.add('hidden'); // Removido, pois não existe mais nesta página
         userProfileSection.classList.remove('hidden');
         welcomeMessage.textContent = `Bem-vindo(a), ${userName}!`;
-        // Here you could also fetch user-specific profile data if needed
-        fetchMyProfile(); // Carrega o perfil do usuário logado
+
+        if (isAdminUser()) {
+          document.getElementById('filters-section').style.display = 'block';
+          document.getElementById('categories-section').style.display = 'block';
+          document.getElementById('stats-section').style.display = 'grid'; // 'grid' para manter o layout
+          initializeFiltersAndCategories();
+          fetchAllTeamProfiles();
+        } else {
+          document.getElementById('filters-section').style.display = 'none';
+          document.getElementById('categories-section').style.display = 'none';
+          document.getElementById('stats-section').style.display = 'none';
+          fetchMyProfile();
+        }
       } else {
         window.location.href = 'login.html'; // Redireciona para login se não houver token
       }
     }
 
-    // Event listeners
-    // Os listeners de filtro foram removidos ou comentados, pois não são mais necessários
-    // if (searchInput) searchInput.addEventListener('input', filterTeamMembers);
-    // if (filterArea) filterArea.addEventListener('change', filterTeamMembers);
-    // if (resetFilters) {
-    //   resetFilters.addEventListener('click', () => {
-    //     if (searchInput) searchInput.value = '';
-    //     if (filterArea) filterArea.value = 'all';
-    //     if (categoryTabs) {
-    //         categoryTabs.forEach(tab => {
-    //             tab.classList.remove('active');
-    //             if (tab.dataset.category === 'all') {
-    //             tab.classList.add('active');
-    //             }
-    //         });
-    //     }
-    //     displayTeamMembers(allTeamMembers);
-    //   });
-    // }
-    // if (categoryTabs) categoryTabs.forEach(tab => {
-    //   tab.addEventListener('click', () => filterByCategory(tab.dataset.category));
-    // });
+    function initializeFiltersAndCategories() {
+      const searchInput = document.getElementById('search-name');
+      const filterArea = document.getElementById('filter-area');
+      const resetFiltersBtn = document.getElementById('reset-filters');
+      const categoryTabs = document.querySelectorAll('.category-tab');
 
+      if (searchInput) searchInput.addEventListener('input', filterTeamMembers);
+      if (filterArea) filterArea.addEventListener('change', filterTeamMembers);
+
+      if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', () => {
+          if (searchInput) searchInput.value = '';
+          if (filterArea) filterArea.value = 'all';
+          categoryTabs.forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.dataset.category === 'all') {
+              tab.classList.add('active');
+            }
+          });
+          // Re-display all (filtered by admin's self-exclusion) members
+          // allTeamMembersGlobal já está filtrado, então apenas chamamos filterTeamMembers para resetar
+          filterTeamMembers();
+        });
+      }
+
+      categoryTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          categoryTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          filterTeamMembers(); // filterTeamMembers considerará a categoria ativa
+        });
+      });
+    }
+
+    // Event listeners
     closeModal.addEventListener('click', closeProfileModal);
     closeModalBtn.addEventListener('click', closeProfileModal);
 
     // Initialize on page load
     checkLoginStatus();
   </script>
-</body>
-
-</html>
-</script>
+  </script>
 </body>
 
 </html>
