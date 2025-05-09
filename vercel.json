@@ -2,33 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/server.js",
+      "src": "api/index.js",
       "use": "@vercel/node"
     },
     {
-      "src": "public",
+      "src": "public/**/*",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "api/server.js"
-    },
-    {
-      "src": "^/$",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/login",
-      "dest": "/login.html"
-    },
-    {
-      "handle": "filesystem"
+      "dest": "api/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/public/$1"
     }
   ]
 }
