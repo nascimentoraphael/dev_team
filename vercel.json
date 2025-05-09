@@ -16,6 +16,10 @@
       "dest": "api/server.js"
     },
     {
+      "src": "^/$",
+      "dest": "/index.html"
+    },
+    {
       "src": "/login",
       "dest": "/login.html"
     },
