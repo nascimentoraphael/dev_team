@@ -2,31 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "back-end/server.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "front-end",
+      "src": "index.html",
       "use": "@vercel/static"
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "back-end/server.js"
-    },
-    {
-      "src": "/login",
-      "rewrite": "/login.html"
-    },
-    {
-      "src": "/script.js",
-      "dest": "/script.js"
-    },
-    {
-      "src": "/styles.css",
-      "dest": "/styles.css"
-    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
