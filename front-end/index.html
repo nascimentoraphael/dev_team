@@ -68,7 +68,11 @@
       <h2 class="text-2xl font-bold text-gray-800 mb-4">Meu Perfil</h2>
       <p id="welcome-message" class="text-lg mb-4"></p>
       <button id="logout-button"
-        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">Sair</button>
+        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition mr-2">Sair</button>
+      <!-- Botão para Adicionar Usuário (apenas admin) -->
+      <button id="show-create-user-modal-btn"
+        class="hidden px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+        Criar usuário</button>
     </div>
 
     <!-- Filters -->
@@ -173,6 +177,37 @@
     <div id="team-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Ajustado para layout de grid padrão -->
       <!-- Profiles will be inserted here by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Create User Modal -->
+  <div id="create-user-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full">
+      <div class="flex justify-between items-center border-b p-4">
+        <h3 class="text-xl font-bold">Criar Novo Usuário</h3>
+        <button id="close-create-user-modal" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <form id="create-user-form">
+          <div class="mb-4">
+            <label for="new-user-fullname" class="block text-sm font-medium text-gray-700">Nome Completo:</label>
+            <input type="text" id="new-user-fullname" name="fullName" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
+          <div class="mb-4">
+            <label for="new-user-email" class="block text-sm font-medium text-gray-700">Email (Login):</label>
+            <input type="email" id="new-user-email" name="email" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
+          <p class="text-xs text-gray-500 mb-4">A senha padrão será "password123".</p>
+          <button type="submit" id="create-user-submit-btn"
+            class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Criar
+            Usuário</button>
+          <p id="create-user-message" class="mt-3 text-sm text-center"></p>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -542,6 +577,12 @@
     const userProfileSection = document.getElementById('user-profile-section');
     const welcomeMessage = document.getElementById('welcome-message');
     const logoutButton = document.getElementById('logout-button');
+    const showCreateUserModalBtn = document.getElementById('show-create-user-modal-btn');
+    const createUserModal = document.getElementById('create-user-modal');
+    const closeCreateUserModalBtn = document.getElementById('close-create-user-modal');
+    const createUserForm = document.getElementById('create-user-form');
+    const createUserMessage = document.getElementById('create-user-message');
+
 
     // Helper function to check if the logged-in user is admin
     function isAdminUser() {
@@ -1291,6 +1332,7 @@
         welcomeMessage.textContent = `Bem-vindo(a), ${userName}!`;
 
         if (isAdminUser()) {
+          showCreateUserModalBtn.classList.remove('hidden');
           document.getElementById('filters-section').style.display = 'block';
           document.getElementById('categories-section').style.display = 'block';
           document.getElementById('stats-section').style.display = 'grid'; // 'grid' para manter o layout
@@ -1298,6 +1340,7 @@
           fetchAllTeamProfiles();
         } else {
           document.getElementById('filters-section').style.display = 'none';
+          showCreateUserModalBtn.classList.add('hidden');
           document.getElementById('categories-section').style.display = 'none';
           document.getElementById('stats-section').style.display = 'none';
           fetchMyProfile();
@@ -1341,13 +1384,71 @@
       });
     }
 
+    // --- Create User Modal Logic ---
+    if (showCreateUserModalBtn) {
+      showCreateUserModalBtn.addEventListener('click', () => {
+        createUserModal.classList.remove('hidden');
+        createUserForm.reset();
+        createUserMessage.textContent = '';
+        createUserMessage.className = 'mt-3 text-sm text-center';
+      });
+    }
+
+    if (closeCreateUserModalBtn) {
+      closeCreateUserModalBtn.addEventListener('click', () => {
+        createUserModal.classList.add('hidden');
+      });
+    }
+
+    if (createUserForm) {
+      createUserForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        createUserMessage.textContent = '';
+        const submitButton = document.getElementById('create-user-submit-btn');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Criando...';
+
+        const fullName = document.getElementById('new-user-fullname').value;
+        const email = document.getElementById('new-user-email').value;
+        const name = fullName.split(' ')[0]; // Pega o primeiro nome
+        const password = "password123"; // Senha padrão
+
+        try {
+          const response = await fetch('http://localhost:3000/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: email, password, name, fullName })
+          });
+          const data = await response.json();
+
+          if (response.ok) {
+            createUserMessage.textContent = data.message || "Usuário criado com sucesso!";
+            createUserMessage.className = 'mt-3 text-sm text-center text-green-600';
+            fetchAllTeamProfiles(); // Atualiza a lista de usuários no dashboard do admin
+            setTimeout(() => {
+              createUserModal.classList.add('hidden');
+            }, 2000); // Fecha o modal após 2 segundos
+          } else {
+            createUserMessage.textContent = data.message || 'Falha ao criar usuário.';
+            createUserMessage.className = 'mt-3 text-sm text-center text-red-600';
+          }
+        } catch (error) {
+          console.error('Create user error:', error);
+          createUserMessage.textContent = 'Erro ao tentar criar usuário. Verifique a conexão.';
+          createUserMessage.className = 'mt-3 text-sm text-center text-red-600';
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Criar Usuário';
+        }
+      });
+    }
+
     // Event listeners
     closeModal.addEventListener('click', closeProfileModal);
     closeModalBtn.addEventListener('click', closeProfileModal);
 
     // Initialize on page load
     checkLoginStatus();
-  </script>
   </script>
 </body>
 
