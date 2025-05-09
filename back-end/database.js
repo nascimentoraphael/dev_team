@@ -1,8 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 
-// Conecta ou cria o banco de dados. O arquivo será 'devteam.db' na mesma pasta.
-const DBSOURCE = "devteam.db";
+const DBSOURCE = process.env.VERCEL ? "/tmp/devteam.db" : "devteam.db";
 
 const db = new sqlite3.Database(DBSOURCE, (err) => {
   if (err) {

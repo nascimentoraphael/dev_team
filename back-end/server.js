@@ -33,3 +33,5 @@ app.listen(PORT, () => {
     else console.error("Tabela 'users' não encontrada no banco de dados.", err);
   });
 });
+
+module.exports = app; // Export the app for Vercel
