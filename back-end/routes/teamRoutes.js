@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Rota para buscar todos os membros da equipe
 router.get('/', (req, res) => {
-  const sql = "SELECT id, name, fullName, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users";
+  const sql = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users";
   db.all(sql, [], (err, rows) => {
     if (err) {
       res.status(500).json({ "error": err.message });

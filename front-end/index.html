@@ -180,6 +180,43 @@
     </div>
   </div>
 
+  <!-- Edit User Modal -->
+  <div id="edit-user-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full">
+      <div class="flex justify-between items-center border-b p-4">
+        <h3 class="text-xl font-bold">Editar Usuário</h3>
+        <button id="close-edit-user-modal" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <form id="edit-user-form">
+          <input type="hidden" id="edit-user-id">
+          <div class="mb-4">
+            <label for="edit-user-fullname" class="block text-sm font-medium text-gray-700">Nome Completo:</label>
+            <input type="text" id="edit-user-fullname" name="fullName" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
+          <div class="mb-4">
+            <label for="edit-user-email" class="block text-sm font-medium text-gray-700">Email (Login):</label>
+            <input type="email" id="edit-user-email" name="email" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
+          <div class="mb-4">
+            <label for="edit-user-unit" class="block text-sm font-medium text-gray-700">Unidade (Ex: 1.16,
+              1.27):</label>
+            <input type="text" id="edit-user-unit" name="unit" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
+          <button type="submit" id="edit-user-submit-btn"
+            class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Salvar
+            Alterações</button>
+          <p id="edit-user-message" class="mt-3 text-sm text-center"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Create User Modal -->
   <div id="create-user-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-xl max-w-md w-full">
@@ -231,6 +268,7 @@
                 </div>
                 <div>
                   <h4 id="modal-fullname" class="font-bold"></h4>
+                  <p class="text-sm text-gray-600">Unidade: <span id="modal-unit" class="font-medium">N/A</span></p>
                   <p class="text-sm text-gray-600">Última atualização: <span id="modal-update"
                       class="font-medium">1.27</span></p>
                 </div>
@@ -582,6 +620,10 @@
     const closeCreateUserModalBtn = document.getElementById('close-create-user-modal');
     const createUserForm = document.getElementById('create-user-form');
     const createUserMessage = document.getElementById('create-user-message');
+    const editUserModal = document.getElementById('edit-user-modal');
+    const closeEditUserModalBtn = document.getElementById('close-edit-user-modal');
+    const editUserForm = document.getElementById('edit-user-form');
+    const editUserMessage = document.getElementById('edit-user-message');
 
 
     // Helper function to check if the logged-in user is admin
@@ -689,11 +731,23 @@
                                 <p class="text-sm text-gray-600">${member.fullName}</p>
                             </div>
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-2">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-sm font-medium text-gray-700">Habilidades</span>
                                 <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${totalSkills} competências</span>
                             </div>
+                            <div class="text-xs text-gray-500 mb-2">
+                                Email: ${member.username || 'N/A'} <br>
+                                Unidade: ${member.unit || 'N/A'}
+                            </div>
+                            <div class="flex justify-between items-center text-sm mb-3">
+                                <span class="text-gray-500">Última atualização: ${formatDateTime(member.lastUpdate)}</span>
+                                <button class="view-profile-btn px-3 py-1 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition">
+                                    Ver Perfil Completo
+                                </button>
+                            </div>
+                            <div class="mb-4"> <!-- Movido para dentro do card principal -->
+                                <h6 class="text-xs font-medium text-gray-600 mb-1">Principais Habilidades:</h6>
                             <div class="flex flex-wrap gap-2">
                                 ${allSkillObjectsForCard.sort((a, b) => (b.skillLevel || 0) - (a.skillLevel || 0)).slice(0, 3).map(skillObj => `
                                     <span class="skill-chip text-xs bg-gray-100 text-gray-800 px-3 py-1 rounded-full">
@@ -703,18 +757,25 @@
                                 ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
                             </div>
                         </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-500">Última atualização: ${formatDateTime(member.lastUpdate)}</span>
-                            <button class="view-profile-btn px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
-                                Ver perfil
+                          ${isAdminUser() && member.username !== 'admin@example.com' ? `
+                        <div class="mt-4 pt-3 border-t border-gray-200 flex justify-end space-x-2">
+                            <button class="edit-user-btn text-xs px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition" data-user-id="${member.id}">
+                                <i class="fas fa-edit mr-1"></i>Editar
                             </button>
-                        </div>
+                            <button class="delete-user-btn text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition" data-user-id="${member.id}" data-user-name="${member.fullName}">
+                                <i class="fas fa-trash-alt mr-1"></i>Excluir
+                            </button>
+                        </div>` : ''}
                     </div>
                 `;
 
         // Add click event to view profile
         const viewProfileBtn = card.querySelector('.view-profile-btn');
         viewProfileBtn.addEventListener('click', () => openProfileModal(member));
+
+        // Add click events for admin actions
+        card.querySelector('.edit-user-btn')?.addEventListener('click', (e) => openEditUserModal(member));
+        card.querySelector('.delete-user-btn')?.addEventListener('click', (e) => handleDeleteUser(member.id, member.fullName));
 
         teamContainer.appendChild(card);
       });
@@ -737,6 +798,7 @@
       document.getElementById('modal-name').textContent = member.name;
       document.getElementById('modal-fullname').textContent = member.fullName;
       document.getElementById('modal-initials').textContent = initials;
+      document.getElementById('modal-unit').textContent = member.unit || 'N/A';
       document.getElementById('modal-update').textContent = formatDateTime(member.lastUpdate);
 
       // Set top skills
@@ -1410,14 +1472,15 @@
 
         const fullName = document.getElementById('new-user-fullname').value;
         const email = document.getElementById('new-user-email').value;
+        const unit = document.getElementById('new-user-unit').value; // Coletar o valor da unidade
         const name = fullName.split(' ')[0]; // Pega o primeiro nome
         const password = "password123"; // Senha padrão
 
         try {
           const response = await fetch('http://localhost:3000/api/auth/register', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: email, password, name, fullName })
+            headers: { 'Content-Type': 'application/json' }, // Não precisa de token de autorização para registrar
+            body: JSON.stringify({ username: email, password, name, fullName, unit }) // Adicionado 'unit' ao corpo
           });
           const data = await response.json();
 
@@ -1441,6 +1504,91 @@
           submitButton.textContent = 'Criar Usuário';
         }
       });
+    }
+
+    // --- Edit User Modal Logic ---
+    function openEditUserModal(member) {
+      editUserModal.classList.remove('hidden');
+      editUserForm.reset();
+      editUserMessage.textContent = '';
+      editUserMessage.className = 'mt-3 text-sm text-center';
+
+      document.getElementById('edit-user-id').value = member.id;
+      document.getElementById('edit-user-fullname').value = member.fullName;
+      document.getElementById('edit-user-email').value = member.username; // username é o email
+      document.getElementById('edit-user-unit').value = member.unit || '';
+    }
+
+    if (closeEditUserModalBtn) {
+      closeEditUserModalBtn.addEventListener('click', () => {
+        editUserModal.classList.add('hidden');
+      });
+    }
+
+    if (editUserForm) {
+      editUserForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        editUserMessage.textContent = '';
+        const submitButton = document.getElementById('edit-user-submit-btn');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Salvando...';
+
+        const userId = document.getElementById('edit-user-id').value;
+        const fullName = document.getElementById('edit-user-fullname').value;
+        const email = document.getElementById('edit-user-email').value;
+        const unit = document.getElementById('edit-user-unit').value;
+        const token = localStorage.getItem('authToken');
+
+        try {
+          const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ fullName, email, unit })
+          });
+          const data = await response.json();
+
+          if (response.ok) {
+            editUserMessage.textContent = data.message || "Usuário atualizado com sucesso!";
+            editUserMessage.className = 'mt-3 text-sm text-center text-green-600';
+            fetchAllTeamProfiles(); // Atualiza a lista
+            setTimeout(() => {
+              editUserModal.classList.add('hidden');
+            }, 2000);
+          } else {
+            editUserMessage.textContent = data.message || 'Falha ao atualizar usuário.';
+            editUserMessage.className = 'mt-3 text-sm text-center text-red-600';
+          }
+        } catch (error) {
+          console.error('Edit user error:', error);
+          editUserMessage.textContent = 'Erro ao tentar atualizar usuário.';
+          editUserMessage.className = 'mt-3 text-sm text-center text-red-600';
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Salvar Alterações';
+        }
+      });
+    }
+
+    // --- Delete User Logic ---
+    async function handleDeleteUser(userId, userName) {
+      if (confirm(`Tem certeza que deseja excluir o usuário "${userName}" (ID: ${userId})? Esta ação não pode ser desfeita.`)) {
+        const token = localStorage.getItem('authToken');
+        try {
+          const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await response.json();
+          alert(data.message || (response.ok ? "Usuário excluído com sucesso." : "Falha ao excluir usuário."));
+          if (response.ok) fetchAllTeamProfiles(); // Atualiza a lista
+        } catch (error) {
+          console.error('Delete user error:', error);
+          alert('Erro ao tentar excluir usuário.');
+        }
+      }
     }
 
     // Event listeners

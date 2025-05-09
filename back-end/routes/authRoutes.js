@@ -7,21 +7,21 @@ const router = express.Router();
 
 // Rota de Registro (opcional, mas útil para adicionar novos usuários)
 router.post('/register', (req, res) => {
-  const { username, password, name, fullName, lastUpdate = "N/A", skills = {} } = req.body;
+  const { username, password, name, fullName, unit, lastUpdate = new Date().toISOString(), skills = {} } = req.body; // Adicionado 'unit'
 
-  if (!username || !password || !name || !fullName) {
-    return res.status(400).json({ message: "Todos os campos (username, password, name, fullName) são obrigatórios." });
+  if (!username || !password || !name || !fullName || !unit) { // Adicionada verificação para 'unit'
+    return res.status(400).json({ message: "Todos os campos (username, password, name, fullName, unit) são obrigatórios." });
   }
 
   bcrypt.hash(password, 10, (err, hash) => {
     if (err) {
       return res.status(500).json({ message: "Erro ao gerar hash da senha." });
     }
-
-    const sql = `INSERT INTO users (username, password_hash, name, fullName, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing) 
-                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    // Adicionada a coluna 'unit' e o placeholder correspondente
+    const sql = `INSERT INTO users (username, password_hash, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing) 
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
     const params = [
-      username, hash, name, fullName, lastUpdate,
+      username, hash, name, fullName, unit, lastUpdate, // Adicionado 'unit' aos parâmetros
       JSON.stringify(skills.backend || []), JSON.stringify(skills.frontend || []),
       JSON.stringify(skills.mobile || []), JSON.stringify(skills.architecture || []),
       JSON.stringify(skills.management || []), JSON.stringify(skills.security || []),

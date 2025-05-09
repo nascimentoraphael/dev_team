@@ -17,6 +17,7 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
             password_hash TEXT,
             name TEXT,
             fullName TEXT,
+            unit TEXT,
             lastUpdate TEXT,
             backend TEXT,
             frontend TEXT,
@@ -46,7 +47,7 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
 function insertInitialData() {
   const initialUsers = [
     {
-      username: "italo@example.com", password: "password123", name: "Italo Ignacio", fullName: "Italo Felipe Ignacio", lastUpdate: new Date().toISOString(),
+      username: "italo@example.com", password: "password123", name: "Italo Ignacio", fullName: "Italo Felipe Ignacio", unit: "Sede", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -152,7 +153,7 @@ function insertInitialData() {
       ])
     },
     {
-      username: "janaina@example.com", password: "password123", name: "Janaina Falco", fullName: "Janaina Ferreira Falco", lastUpdate: new Date().toISOString(),
+      username: "janaina@example.com", password: "password123", name: "Janaina Falco", fullName: "Janaina Ferreira Falco", unit: "Filial A", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([ // Repetir a mesma estrutura de skills para todos os usuários iniciais
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -258,7 +259,7 @@ function insertInitialData() {
       ])
     },
     {
-      username: "admin@example.com", password: "adminpassword", name: "Admin", fullName: "System Administrator", lastUpdate: new Date().toISOString(),
+      username: "admin@example.com", password: "adminpassword", name: "Admin", fullName: "System Administrator", unit: "Sede", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([ // Repetir a mesma estrutura de skills para todos os usuários iniciais
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -473,7 +474,7 @@ function insertInitialData() {
     // Exemplo para o próximo:
     /*
     ,{
-      username: "christian.alonso@example.com", password: "password123", name: "Christian", fullName: "Christian Albuquerque Alonso", lastUpdate: new Date().toISOString(),
+      username: "christian.alonso@example.com", password: "password123", name: "Christian", fullName: "Christian Albuquerque Alonso", unit: "Sede", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([ ... cópia das skills ... ]),
       frontend: JSON.stringify([ ... cópia das skills ... ]),
       // ... e assim por diante para todas as categorias
@@ -481,7 +482,7 @@ function insertInitialData() {
     */
   ];
 
-  const insert = 'INSERT OR IGNORE INTO users (username, password_hash, name, fullName, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+  const insert = 'INSERT OR IGNORE INTO users (username, password_hash, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
 
   const allSkillCategories = {
     backend: [
@@ -609,7 +610,7 @@ function insertInitialData() {
       username: u.username,
       password: "password123",
       name: u.name,
-      fullName: u.fullName,
+      fullName: u.fullName, unit: u.unit || "Não Definida", // Adiciona unidade, com um padrão se não especificado
       lastUpdate: new Date().toISOString(),
       backend: JSON.stringify(allSkillCategories.backend),
       frontend: JSON.stringify(allSkillCategories.frontend),
@@ -631,7 +632,7 @@ function insertInitialData() {
         return;
       }
       db.run(insert, [
-        user.username, hash, user.name, user.fullName, user.lastUpdate,
+        user.username, hash, user.name, user.fullName, user.unit, user.lastUpdate,
         user.backend, user.frontend, user.mobile, user.architecture,
         user.management, user.security, user.infra, user.data,
         user.immersive, user.marketing

@@ -9,7 +9,7 @@ router.get('/me/profile', authenticateToken, (req, res) => {
   // req.user foi adicionado pelo middleware authenticateToken e contém o id do usuário
   const userId = req.user.id;
 
-  const sql = "SELECT id, name, fullName, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = ?";
+  const sql = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = ?";
   db.get(sql, [userId], (err, row) => {
     if (err) {
       res.status(500).json({ "error": err.message });
@@ -74,6 +74,73 @@ router.put('/me/profile/skills', authenticateToken, (req, res) => {
     }
     console.log('[UserRoutes] Skills atualizadas com sucesso para userID:', userId);
     res.json({ message: "Habilidades atualizadas com sucesso!" });
+  });
+});
+
+// Rota para o admin editar um usuário (fullName, username/email, unit)
+router.put('/:id', authenticateToken, (req, res) => {
+  // Verifica se o requisitante é o admin
+  if (req.user.username !== 'admin@example.com') {
+    return res.status(403).json({ message: "Acesso negado. Apenas administradores podem editar usuários." });
+  }
+
+  const userIdToEdit = req.params.id;
+  const { fullName, email, unit } = req.body; // username no frontend é o email
+
+  if (!fullName || !email || !unit) {
+    return res.status(400).json({ message: "Nome completo, email e unidade são obrigatórios." });
+  }
+
+  // Não permitir que o admin edite seu próprio email para algo diferente de admin@example.com
+  // ou que edite o ID 1 (assumindo que o admin é o ID 1 e seu email não pode mudar)
+  if (parseInt(userIdToEdit) === req.user.id && email !== 'admin@example.com') {
+    return res.status(400).json({ message: "O email do administrador principal não pode ser alterado." });
+  }
+
+  const sql = `UPDATE users SET fullName = ?, username = ?, unit = ?, name = ?, lastUpdate = ? WHERE id = ?`;
+  const name = fullName.split(' ')[0]; // Pega o primeiro nome
+  const lastUpdate = new Date().toISOString();
+
+  db.run(sql, [fullName, email, unit, name, lastUpdate, userIdToEdit], function (err) {
+    if (err) {
+      if (err.message.includes("UNIQUE constraint failed")) {
+        return res.status(400).json({ message: "O novo email (username) já está em uso." });
+      }
+      console.error('[UserRoutes] Erro ao editar usuário no DB:', err.message);
+      return res.status(500).json({ error: "Erro ao atualizar usuário: " + err.message });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ message: "Usuário não encontrado para edição." });
+    }
+    console.log('[UserRoutes] Usuário ID:', userIdToEdit, 'editado com sucesso pelo admin ID:', req.user.id);
+    res.json({ message: "Usuário atualizado com sucesso!" });
+  });
+});
+
+// Rota para o admin excluir um usuário
+router.delete('/:id', authenticateToken, (req, res) => {
+  // Verifica se o requisitante é o admin
+  if (req.user.username !== 'admin@example.com') {
+    return res.status(403).json({ message: "Acesso negado. Apenas administradores podem excluir usuários." });
+  }
+
+  const userIdToDelete = req.params.id;
+
+  // Prevenir que o admin se auto-exclua (assumindo que o ID do admin é conhecido ou comparando com req.user.id)
+  if (parseInt(userIdToDelete) === req.user.id) {
+    return res.status(400).json({ message: "O administrador não pode se auto-excluir." });
+  }
+
+  const sql = 'DELETE FROM users WHERE id = ?';
+  db.run(sql, userIdToDelete, function (err) {
+    if (err) {
+      return res.status(500).json({ error: "Erro ao excluir usuário: " + err.message });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ message: "Usuário não encontrado para exclusão." });
+    }
+    console.log('[UserRoutes] Usuário ID:', userIdToDelete, 'excluído com sucesso pelo admin ID:', req.user.id);
+    res.json({ message: "Usuário excluído com sucesso!" });
   });
 });
 
