@@ -78,6 +78,6 @@ router.post('/login', async (req, res) => {
         .json({ message: 'Erro interno ao processar login.' });
     }
   });
-}); //fix project
+});
 
 module.exports = router;
