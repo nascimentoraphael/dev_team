@@ -1,21 +1,29 @@
+// back-end/middleware/authenticateToken.js
+
 const jwt = require('jsonwebtoken');
 
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  // Suporta headers 'authorization' e 'Authorization'
+  const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+  // Extrai apenas o token (remove "Bearer ")
+  const token = authHeader && authHeader.startsWith('Bearer ')
+    ? authHeader.slice(7).trim()
+    : null;
 
-  if (token == null) {
-    return res.sendStatus(401); // Se não há token, não autorizado
+  if (!token) {
+    return res.status(401).json({ error: 'Token não fornecido.' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      console.error("Erro na verificação do token:", err.message);
-      return res.sendStatus(403); // Se o token não é válido, proibido
-    }
-    req.user = user; // Adiciona o payload do token (que inclui id e username) ao objeto req
-    next(); // Passa para a próxima função de middleware ou rota
-  });
+  try {
+    // Isso lançará se o token for inválido ou expirado
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    // Armazena o payload (e.g. { id, username }) em req.user
+    req.user = payload;
+    next();
+  } catch (err) {
+    console.error('Token inválido ou expirado:', err.message);
+    return res.status(403).json({ error: 'Token inválido ou expirado.' });
+  }
 }
 
 module.exports = authenticateToken;
