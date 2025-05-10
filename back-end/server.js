@@ -49,4 +49,8 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+app.get('/api/ping', (req, res) => {
+  res.json({ pong: true });
+});
+
 module.exports = app;
