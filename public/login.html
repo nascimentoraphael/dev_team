@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login - Equipe de Desenvolvimento</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -13,7 +13,6 @@
       justify-content: center;
       min-height: 100vh;
       background-color: #f9fafb;
-      /* bg-gray-50 */
     }
 
     .login-container {
@@ -31,19 +30,18 @@
       <div class="w-16 h-1 bg-blue-500 mx-auto mt-3 rounded-full"></div>
     </header>
 
-    <!-- Login Section -->
     <div id="login-section" class="bg-white rounded-xl shadow-xl p-6 sm:p-8">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Área de membros</h2>
       <form id="login-form">
         <div class="mb-4">
           <label for="username" class="block text-sm font-medium text-gray-700">Usuário:</label>
           <input type="text" id="username" name="username" required
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
         </div>
         <div class="mb-6">
           <label for="password" class="block text-sm font-medium text-gray-700">Senha:</label>
           <input type="password" id="password" name="password" required
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
         </div>
         <button type="submit"
           class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -65,7 +63,8 @@
       const password = event.target.password.value;
 
       try {
-        const response = await fetch('http://localhost:3000/api/auth/login', {
+        // Usa rota relativa para chamar sua função serverless na Vercel
+        const response = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -75,9 +74,9 @@
         if (response.ok) {
           localStorage.setItem('authToken', data.token);
           localStorage.setItem('userName', data.user.name || username);
-          localStorage.setItem('userEmail', username); // Salvar o email/username
-          localStorage.setItem('userId', data.user.id); // Salvar o ID do usuário
-          window.location.href = 'index.html'; // Redireciona para a página principal
+          localStorage.setItem('userEmail', username);
+          localStorage.setItem('userId', data.user.id);
+          window.location.href = 'index.html';
         } else {
           loginMessage.textContent = data.message || 'Falha no login.';
           loginMessage.className = 'mt-3 text-sm text-center text-red-600';
@@ -89,7 +88,7 @@
       }
     });
 
-    // Se já estiver logado, redirecionar para index.html
+    // Redireciona se já estiver logado
     if (localStorage.getItem('authToken')) {
       window.location.href = 'index.html';
     }
