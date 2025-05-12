@@ -443,8 +443,29 @@ document.addEventListener('DOMContentLoaded', function () {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'p-3 border rounded-md bg-gray-50 shadow-sm';
         const itemName = document.createElement('h5');
-        itemName.className = 'font-semibold text-gray-800 mb-1 text-sm';
-        itemName.textContent = item.name;
+        itemName.className = 'font-semibold text-gray-800 mb-1 text-sm flex items-center justify-between';
+
+        if (item.link && item.link.trim() !== "") {
+          // Tornar o nome do item um link
+          const itemNameLink = document.createElement('a');
+          itemNameLink.href = item.link;
+          itemNameLink.target = '_blank';
+          itemNameLink.rel = 'noopener noreferrer';
+          itemNameLink.textContent = item.name;
+          itemNameLink.className = 'hover:underline focus:outline-none focus:ring-2 focus:ring-blue-300 rounded'; // Adiciona underline no hover e estilo de foco
+          itemName.appendChild(itemNameLink);
+
+          // Ícone de link externo (continua como um link separado para manter o ícone)
+          const linkIcon = document.createElement('a');
+          linkIcon.href = item.link;
+          linkIcon.target = '_blank';
+          linkIcon.rel = 'noopener noreferrer';
+          linkIcon.innerHTML = '<i class="fas fa-external-link-alt text-blue-500 hover:text-blue-700 ml-2 text-xs" title="Abrir anexo"></i>'; // ml-2 para espaço
+          itemName.appendChild(linkIcon);
+        } else {
+          itemName.textContent = item.name; // Se não houver link, apenas o texto do nome
+        }
+
         itemDiv.appendChild(itemName);
         const skillsList = document.createElement('div');
         skillsList.className = 'flex flex-wrap gap-1 mt-1';

@@ -436,56 +436,67 @@
     const portfolioItemsMap = [
       {
         name: "Análise de Vulnerabilidades",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/An%C3%A1lise%20de%20Vulnerabilidades.pptx?d=wf00cfba39cb342c8b6ddf19595f055d5&csf=1&web=1&e=AY6zt6",
         relevantSkills: ["Pentest", "Kali Linux", "OWASP ZAP", "Segurança em Redes", "Análise de Risco", "Hardening", "Criptografia"],
         infrastructure: ["Toolkit para Analise de Vulnerabilidade (open-source, gratuito)", "Notebook gamer de alto desempenho"]
       },
       {
         name: "Assessment do CIS Controlvs V8",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Assessment%20CIS%20Controls%20v8.pptx?d=wf1a0f84445574bafa59b9ddbae3b0d14&csf=1&web=1&e=Uu4s2q",
         relevantSkills: ["ISO 27001", "Governança", "Compliance Geral", "Análise de Risco", "Adequação LGPD"], // CIS Controls não está na nova lista, usei correlatos
         infrastructure: ["Notebook gamer de alto desempenho"]
       },
       {
         name: "Assessment do CIS Controls V9", // Novo item
+        link: "", // Link vazio conforme lista de URLs fornecida
         relevantSkills: ["ISO 27001", "ISO 27005 (Gestão de Riscos)", "Governança", "Compliance Geral", "Análise de Risco", "Adequação LGPD"],
         infrastructure: ["Notebook gamer de alto desempenho", "Acesso digital a normas ABNT e ISO"]
       },
       {
         name: "Assessoria em implantação de projetos de Infraestrutura de TI na Indústria",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Assessoria%20em%20implanta%C3%A7%C3%A3o%20de%20projetos%20de%20Infra%20TI%20na%20ind%C3%BAstria.pptx?d=w7a7e44fd00bf4574be08db0561b6a8f9&csf=1&web=1&e=klQ2wF",
         relevantSkills: ["Amazon Web Services", "Azure", "Google Cloud Platform", "Docker", "Kubernetes", "Servidores Linux", "Servidores Windows", "Configurações de Rede", "Terraform", "DevOps", "Scrum", "Kanban", "ISA 62.443 (IEC 62443)"],
         infrastructure: ["Notebook gamer de alto desempenho", "Raspberry PI 5+", "Servidores locais ou híbridos", "Roteadores industriais, switches gerenciáveis"]
       },
       {
         name: "Assessoria em implantação de suíte de serviços em nuvem na indústria",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Assessoria%20em%20implanta%C3%A7%C3%A3o%20de%20su%C3%ADte%20de%20servi%C3%A7os%20em%20nuvem%20na%20ind%C3%BAstria.pptx?d=w94835bab29bd4d209d8584e719c2a9d2&csf=1&web=1&e=bMteeM",
         relevantSkills: ["Amazon Web Services", "Azure", "Google Cloud Platform", "Computação em Nuvem", "Scrum", "Kanban"], // Office 365, Google Workspace não estão na lista de skills
         infrastructure: ["Notebook gamer de alto desempenho", "Assinatura Microsoft Azure", "Assinatura AWS", "Assinatura Google Cloud Platform"]
       },
       {
         name: "Avaliação de Maturidade e conformidade em SI",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Avalia%C3%A7%C3%A3o%20de%20Maturidade%20e%20Conformidade%20em%20SI%20e%20Privacidade.pptx?d=w860a30ac60c0463097103461cd7fcbd9&csf=1&web=1&e=cljWMg",
         relevantSkills: ["ISO 27001", "ISO 27005 (Gestão de Riscos)", "ISO 27701 (Privacidade/LGPD)", "Adequação LGPD", "Governança", "Compliance Geral", "Análise de Risco"],
         infrastructure: ["Notebook gamer de alto desempenho", "Acesso digital a normas ABNT e ISO"]
       },
       {
         name: "Consultoria de comunicação e marketing Digital",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Consultoria%20de%20Comunica%C3%A7%C3%A3o%20e%20Marketing%20Digital.pptx?d=w620aa68627e148cb900f33b602605a73&csf=1&web=1&e=EbC11T",
         relevantSkills: ["SEO", "Redes Sociais", "Google ADS", "Google Analytics", "Meta ADS", "E-mail Marketing", "Mídias Digitais", "Omnichannel"], // Marketing de Conteúdo, Estratégia de Marketing Digital não estão na lista
         infrastructure: [] // Nenhuma infraestrutura específica listada
       },
       {
         name: "Consultoria em projetos de TI aplicado a Indústria",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Consultoria%20em%20projetos%20de%20TI%20aplicado%20a%20ind%C3%BAstria.pptx?d=wf42954bb5be147369ba035da69a5a67e&csf=1&web=1&e=fr8gq7",
         relevantSkills: ["Scrum", "Kanban", "Clean Code", "Design Patterns", "SOLID", "DevOps", "ISA 62.443 (IEC 62443)"], // Arquitetura de Soluções, Gerenciamento de Projetos de TI não estão na lista
         infrastructure: ["Notebook gamer de alto desempenho", "Servidores locais e/ou híbridos"]
       },
       {
         name: "Consultoria em Sistemas ERP",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Consultoria%20em%20sistemas%20ERP.pptx?d=wa90db435c83a485dbe5046759abeef39&csf=1&web=1&e=Swe6po",
         relevantSkills: ["Gerenciamento de Banco de Dados", "SQL Server", "Oracle", "MySQL", "PostgreSQL", "API REST", "Serviços de Mensageria PUB/SUB"], // Consultoria ERP, Sistemas ERP, Modelagem de Dados, SQL Avançado, Integração de Sistemas não estão na lista
         infrastructure: ["Notebook gamer de alto desempenho", "SAP, Oracle ERP, Totvs Protheus", "Computação e armazenamento robustos"]
       },
       {
         name: "Desenvolvimento de aplicações Mobile",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Desenvolvimento%20de%20Aplica%C3%A7%C3%B5es%20Mobile.pptx?d=w9991e5fb156e4cf1a20ff64ee3393167&csf=1&web=1&e=qVOfGg",
         relevantSkills: ["React Native", "Flutter", "Swift", "Kotlin", "Dart", "API REST", "Firebase", "Publicação Apple Store", "Publicação Play Store"], // Desenvolvimento iOS/Android são cobertos por Swift/Kotlin/Frameworks
         infrastructure: ["Notebook gamer de alto desempenho", "Smartphones Android", "Smartphones iOS", "Tablets Android", "Tablets iOS", "MacBooks"]
       },
       {
         name: "Desenvolvimento de aplicações Web",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Desenvolvimento%20de%20Aplica%C3%A7%C3%B5es%20Web.pptx?d=w0d7fdcbede2b48fe84ad79e0565d112a&csf=1&web=1&e=Z5fM4s",
         relevantSkills: [
           "HTML", "CSS", "JavaScript", "TypeScript", "React", "Angular", "Next.js", // Vue.js não está na lista
           "Node.js", "Express", "NestJS", "Python", "Java", "Spring Boot", "PHP", "C#", ".NET",
@@ -497,6 +508,7 @@
       },
       {
         name: "Desenvolvimento de soluções com IA",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Desenvolvimento%20de%20Solu%C3%A7%C3%B5es%20com%20IA%E2%80%8B.pptx?d=w1b11a20fa66e4cfda746637fc19387de&csf=1&web=1&e=BrdAAO",
         relevantSkills: [
           "Python", "Machine Learning", "Linguagem R", "Tensorflow", "Keras", "Scikit-learn", "OpenCV",
           "Processamento de Linguagem Natural (NLP)", "Langchain", "Large Language Modelos - LLMs", "Hugging Face",
@@ -508,12 +520,14 @@
       },
       {
         name: "Desenvolvimento de soluções de integração de negócios",
+        link: "", // Não consta na lista de URLs fornecida
         relevantSkills: ["API REST", "Microserviços", "Serviços de Mensageria PUB/SUB", "Apache Kafka", "RabbitMQ", "Pipelines ETL/ELT", "Node.js", "Java", "Spring Boot", "Python", "Websockets"], // Arquitetura de Integração não está na lista
         infrastructure: [] // Nenhuma infraestrutura específica listada para este item no portfolioItemsMap original
       },
       {
         name: "Softwares e soluções para análise de dados e criação de dashboards", // Corresponde a "DESENVOLVIMENTO DE SOLUÇÕES DE INTELIGÊNCIA DE NEGÓCIOS" da sua lista de infra
-        relevantSkills: [
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Desenvolvimento%20de%20Solu%C3%A7%C3%B5es%20de%20Int.%20de%20Neg%C3%B3cios%E2%80%8B.pptx?d=w2f498021b6e64de8b35d65403227f305&csf=1&web=1&e=5OS4r4",
+        relevantSkills: [ // Mantido como estava, apenas adicionado o link
           "Power BI", "Tableau", // Qlik Sense não está na lista
           "SQL Server", "PostgreSQL", "MySQL", "Oracle", "Gerenciamento de Banco de Dados",
           "Python", "Pandas", "Matplotlib", "Seaborn", "Análise de Dados", "Análise exploratória",
@@ -523,36 +537,43 @@
       },
       {
         name: "Design de Produto Digital",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Design%20de%20Produto%20Digital%20ou%20Design%20UIUX.pptx?d=wce7215ab1f504eb48e681aafebb729ab&csf=1&web=1&e=ZrMror",
         relevantSkills: ["Figma", "UI", "UX", "Prototipagem", "Design Thinking", "Design System"], // Adobe XD, Sketch, Pesquisa com Usuário não estão na lista
         infrastructure: ["Notebook gamer de alto desempenho", "Figma", "Adobe Creative Cloud"]
       },
       {
         name: "Penetration Test em aplicações Web",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Penetration%20Test%20em%20Aplica%C3%A7%C3%B5es%20WEB%E2%80%8B.pptx?d=w660462eba03644b4b0bfe98027ba1966&csf=1&web=1&e=8SYYvJ",
         relevantSkills: ["Pentest", "OWASP ZAP", "Kali Linux", "JavaScript", "Segurança em Código (Security by Design)"], // Burp Suite, Segurança de APIs, Ethical Hacking não estão na lista
         infrastructure: ["Notebook gamer de alto desempenho", "Toolkit para PenTest (Open Source)"]
       },
       {
         name: "Diagnóstico de comunicação e marketing digital",
+        link: "", // Não consta na lista de URLs fornecida
         relevantSkills: ["Google Analytics", "SEO", "Redes Sociais", "Mídias Digitais"], // Analytics Marketing, Pesquisa de Mercado Digital, Estratégia de Marketing Digital, Marketing de Conteúdo não estão na lista
         infrastructure: []
       },
       {
         name: "Implementação ISO 27001",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Implementa%C3%A7%C3%A3o%20ISO%2027001.pptx?d=w5527301b3b624d46824f0f00ad4a19d0&csf=1&web=1&e=Z37nGc",
         relevantSkills: ["ISO 27001", "Governança", "Compliance Geral", "Análise de Risco", "Adequação LGPD", "ISO 27005 (Gestão de Riscos)"], // GSI, Políticas de Segurança, Auditoria de SI não estão na lista
         infrastructure: ["Notebook gamer de alto desempenho"]
       },
       {
         name: "Implementação ISO 27002", // Novo item
+        link: "", // Link vazio conforme lista de URLs fornecida
         relevantSkills: ["ISO 27001", "Governança", "Hardening", "Segurança em Redes"], // ISO 27002 não está na lista, usei correlatos. Controles de Segurança é muito genérico.
         infrastructure: ["Notebook gamer de alto desempenho", "Acesso digital a normas ABNT e ISO"]
       },
       {
         name: "Plano de ação digital",
+        link: "", // Não consta na lista de URLs fornecida
         relevantSkills: ["SEO", "Redes Sociais", "Google ADS", "Meta ADS", "Google Analytics", "E-mail Marketing", "Mídias Digitais", "Omnichannel", "Scrum", "Kanban"], // Estratégia de Marketing Digital, Planejamento de Campanhas, Marketing de Conteúdo, Gerenciamento de Projetos Digitais não estão na lista
         infrastructure: []
       },
       {
         name: "Penetration Test - Infraestrutura e Serviços",
+        link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Penetration%20Test%20%E2%80%93%20Infra%20e%20Servi%C3%A7os%E2%80%8B.pptx?d=wab0d6b5b8f2f4d45b0a41d76b4b67899&csf=1&web=1&e=0clvU2",
         relevantSkills: ["Pentest", "Segurança em Redes", "Kali Linux", "Hardening", "Servidores Linux", "Servidores Windows", "Amazon Web Services", "Azure", "Docker"], // Metasploit, Nmap não estão na lista
         infrastructure: ["Notebook gamer de alto desempenho", "Toolkit para PenTest (Open Source)"]
       }
