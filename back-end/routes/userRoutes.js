@@ -57,7 +57,8 @@ router.put('/me/profile/skills', authenticateToken, (req, res) => {
   setClauses.push('lastUpdate = ?');
   params.push(new Date().toISOString());
 
-  if (setClauses.length === 0) {
+  // Se apenas lastUpdate está sendo setado, significa que nenhuma skill foi enviada.
+  if (setClauses.length <= 1) { // Ajustado para <= 1 pois sempre teremos lastUpdate
     return res.status(400).json({ message: "Nenhuma habilidade fornecida para atualização." });
   }
 

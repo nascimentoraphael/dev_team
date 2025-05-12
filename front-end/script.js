@@ -240,7 +240,8 @@ document.addEventListener('DOMContentLoaded', function () {
       : (names[0] ? names[0][0] : 'U');
 
     const loggedInUserId = localStorage.getItem('userId');
-    const canEditSkills = loggedInUserId === member.id.toString();
+    // Verifica se o usuário logado é o dono do perfil que está sendo visualizado
+    const isOwnerOfProfile = loggedInUserId === member.id.toString();
 
     document.getElementById('modal-name').textContent = member.name;
     document.getElementById('modal-fullname').textContent = member.fullName;
@@ -277,12 +278,16 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    function populateSkillsWithLevels(containerId, skillsArray, categoryKey, isEditable) {
+    function populateSkillsWithLevels(containerId, skillsArray, categoryKey, isOwnerViewingOwnProfile) {
       const container = document.getElementById(containerId);
       container.innerHTML = '';
       const skills = skillsArray || [];
       skills.forEach(skillData => {
         const skillItemContainer = document.createElement('div');
+        // A skill é editável SE:
+        // 1. O usuário logado é o dono do perfil E
+        // 2. A skill ainda não foi avaliada (skillLevel é 0 ou undefined)
+        const isThisSkillEditable = isOwnerViewingOwnProfile && (skillData.skillLevel === 0 || typeof skillData.skillLevel === 'undefined');
         skillItemContainer.className = 'skill-level-item mb-3 p-3 border rounded-md bg-gray-50';
         const skillNameLabel = document.createElement('label');
         skillNameLabel.className = 'block text-sm font-medium text-gray-800 mb-1';
@@ -291,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function () {
         selectLevel.className = 'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm skill-level-select';
         selectLevel.dataset.skillName = skillData.skillName;
         selectLevel.dataset.categoryKey = categoryKey;
-        selectLevel.disabled = !isEditable;
+        selectLevel.disabled = !isThisSkillEditable; // Desabilita se não for editável
         proficiencyLevels.forEach(profLevel => {
           const option = document.createElement('option');
           option.value = profLevel.level;
@@ -358,16 +363,16 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    populateSkillsWithLevels('modal-backend', member.backend, 'backend', canEditSkills);
-    populateSkillsWithLevels('modal-frontend', member.frontend, 'frontend', canEditSkills);
-    populateSkillsWithLevels('modal-mobile', member.mobile, 'mobile', canEditSkills);
-    populateSkillsWithLevels('modal-architecture', member.architecture, 'architecture', canEditSkills);
-    populateSkillsWithLevels('modal-management', member.management, 'management', canEditSkills);
-    populateSkillsWithLevels('modal-security', member.security, 'security', canEditSkills);
-    populateSkillsWithLevels('modal-infra', member.infra, 'infra', canEditSkills);
-    populateSkillsWithLevels('modal-data', member.data, 'data', canEditSkills);
-    populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive', canEditSkills);
-    populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing', canEditSkills);
+    populateSkillsWithLevels('modal-backend', member.backend, 'backend', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-frontend', member.frontend, 'frontend', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-mobile', member.mobile, 'mobile', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-architecture', member.architecture, 'architecture', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-management', member.management, 'management', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-security', member.security, 'security', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-infra', member.infra, 'infra', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-data', member.data, 'data', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing', isOwnerOfProfile);
 
     const tabs = document.querySelectorAll('#competency-tabs button[role="tab"]');
     const tabContents = document.querySelectorAll('#competency-tab-content div[role="tabpanel"]');
@@ -504,20 +509,31 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const modalFooter = profileModal.querySelector('.border-t.p-4.flex.justify-end');
-    const existingSaveButton = modalFooter.querySelector('#save-skills-btn');
-    if (canEditSkills) {
-      if (!existingSaveButton) {
-        const saveButton = document.createElement('button');
+    let saveButton = modalFooter.querySelector('#save-skills-btn');
+    const competencyTabsContainer = document.getElementById('competency-tabs');
+
+    // Remover mensagem de submissão anterior, se houver
+    const existingSubmittedMessage = competencyTabsContainer.previousElementSibling;
+    if (existingSubmittedMessage && existingSubmittedMessage.classList.contains('skills-submitted-info')) {
+      existingSubmittedMessage.remove();
+    }
+
+    // O botão de salvar aparece se o usuário logado for o dono do perfil
+    if (isOwnerOfProfile) {
+      if (!saveButton) {
+        saveButton = document.createElement('button');
         saveButton.id = 'save-skills-btn';
         saveButton.className = 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition mr-2';
         saveButton.textContent = 'Salvar Habilidades';
         saveButton.addEventListener('click', saveSkills);
         modalFooter.insertBefore(saveButton, modalFooter.firstChild);
       }
+      saveButton.style.display = 'inline-block'; // Garante que está visível
     } else {
-      if (existingSaveButton) {
-        existingSaveButton.remove();
+      if (saveButton) {
+        saveButton.style.display = 'none'; // Esconde o botão se não for editável
       }
+      // A mensagem de "skills já submetidas" foi removida, pois a lógica agora é por skill individual.
     }
     profileModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';

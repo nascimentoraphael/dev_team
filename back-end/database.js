@@ -35,14 +35,14 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
         // Tabela já criada ou outro erro
         console.log("Tabela 'users' já existe ou erro ao criar:", err.message);
       } else {
-        // Tabela acabou de ser criada, vamos adicionar alguns usuários de exemplo
-        // Apenas se a tabela foi recém-criada (para evitar duplicatas em reinícios)
+        // Tabela acabou de ser criada.
         console.log("Tabela 'users' criada. Inserindo dados de exemplo se necessário.");
         insertInitialData();
       }
     });
-  }
-});
+
+  } // Fecha o bloco 'else' da conexão bem-sucedida
+}); // Fecha o callback do construtor new sqlite3.Database
 
 function insertInitialData() {
   const initialUsers = [
@@ -367,7 +367,7 @@ function insertInitialData() {
     // Novos usuários adicionados
     ,
     {
-      username: "bruno.fernandes@example.com", password: "password123", name: "Bruno", fullName: "Bruno Henrique Fernandes", lastUpdate: new Date().toISOString(),
+      username: "bruno.fernandes@example.com", password: "password123", name: "Bruno", fullName: "Bruno Henrique Fernandes", unit: "Não Definida", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
