@@ -307,15 +307,21 @@ document.addEventListener('DOMContentLoaded', function () {
           selectLevel.appendChild(option);
         });
         const tooltipText = document.createElement('p');
-        tooltipText.className = 'text-xs text-gray-500 mt-1 italic hidden proficiency-tooltip';
-        function updateTooltip(level) {
+        tooltipText.className = 'text-xs text-gray-600 mt-2 proficiency-tooltip bg-gray-100 p-2 rounded-md border border-gray-200'; // Estilizado e sempre visível
+
+        function updateTooltip(level, skillNameForTooltip) {
           const selectedProficiency = proficiencyLevels.find(p => p.level === parseInt(level));
-          const defaultTooltipText = proficiencyLevels[0]?.text || "Descrição não disponível.";
-          tooltipText.textContent = selectedProficiency ? (selectedProficiency.text || defaultTooltipText) : defaultTooltipText;
-          tooltipText.classList.remove('hidden');
+          let baseText = "Descrição não disponível.";
+          if (selectedProficiency && selectedProficiency.text) {
+            baseText = selectedProficiency.text;
+          } else if (level === 0 && proficiencyLevels[0] && proficiencyLevels[0].text) {
+            baseText = proficiencyLevels[0].text;
+          }
+          tooltipText.textContent = baseText.replace(/\{\{skillName\}\}/g, skillNameForTooltip);
         }
-        selectLevel.addEventListener('change', (e) => updateTooltip(e.target.value));
-        updateTooltip(selectLevel.value);
+        selectLevel.addEventListener('change', (e) => updateTooltip(e.target.value, skillData.skillName));
+        updateTooltip(selectLevel.value, skillData.skillName); // Chamada inicial para exibir a descrição do nível atual
+
         skillItemContainer.appendChild(skillNameLabel);
         skillItemContainer.appendChild(selectLevel);
         skillItemContainer.appendChild(tooltipText);
