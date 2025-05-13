@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     try {
-      const response = await fetch('http://dev-team.onrender.com/api/team', {
+      const response = await fetch('https://dev-team.onrender.com/api/team', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!response.ok) {
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     try {
-      const response = await fetch('http://dev-team.onrender.com/api/users/me/profile', {
+      const response = await fetch('https://dev-team.onrender.com/api/users/me/profile', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -697,9 +697,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let endpoint = '';
     if (isAdminSaving && !isEditingOwnProfile) { // Admin editando outro usuário
-      endpoint = `http://dev-team.onrender.com/api/users/${targetUserIdForSave}/skills`;
+      endpoint = `https://dev-team.onrender.com/api/users/${targetUserIdForSave}/skills`;
     } else if (isEditingOwnProfile) { // Usuário (admin ou não) editando o próprio perfil
-      endpoint = 'http://dev-team.onrender.com/api/users/me/profile/skills';
+      endpoint = 'https://dev-team.onrender.com/api/users/me/profile/skills';
     } else {
       showToastNotification("Não autorizado a salvar estas habilidades.", 'error');
       isSavingSkills = false;
@@ -919,7 +919,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const password = "password123"; // Senha padrão
 
       try {
-        const response = await fetch('http://dev-team.onrender.com/api/auth/register', {
+        const response = await fetch('https://dev-team.onrender.com/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: email, password, name, fullName, unit })
@@ -979,7 +979,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const token = localStorage.getItem('authToken');
 
       try {
-        const response = await fetch(`http://dev-team.onrender.com/api/users/${userId}`, {
+        const response = await fetch(`https://dev-team.onrender.com/api/users/${userId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -1013,7 +1013,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (confirm(`Tem certeza que deseja excluir o usuário "${userName}" (ID: ${userId})? Esta ação não pode ser desfeita.`)) {
       const token = localStorage.getItem('authToken');
       try {
-        const response = await fetch(`http://dev-team.onrender.com/api/users/${userId}`, {
+        const response = await fetch(`https://dev-team.onrender.com/api/users/${userId}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
