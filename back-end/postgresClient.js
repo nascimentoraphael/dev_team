@@ -3,6 +3,9 @@ require('dotenv').config();
 const postgres = require('postgres');
 const bcrypt = require('bcryptjs');
 
+console.log("URL do banco carregada do ambiente:", process.env.DATABASE_URL);
+
+
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
