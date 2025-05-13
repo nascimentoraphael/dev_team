@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const skillItemContainer = document.createElement('div');
         // A skill é editável SE:
         // 1. O usuário logado é o dono do perfil E
-        // 2. A skill ainda não foi avaliada (skillLevel é 0 ou undefined)
+        // 2. A skill ainda não foi avaliada (skillLevel é 0 ou undefined update)
         const isThisSkillEditable = isOwnerViewingOwnProfile && (skillData.skillLevel === 0 || typeof skillData.skillLevel === 'undefined');
         skillItemContainer.className = 'skill-level-item mb-3 p-3 border rounded-md bg-gray-50';
         const skillNameLabel = document.createElement('label');

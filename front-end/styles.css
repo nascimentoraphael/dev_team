@@ -60,7 +60,7 @@
   margin-bottom: 0.5rem;
   /* space-y-2 in container */
   pointer-events: auto;
-  /* Allow clicks on the toast if needed in future */
+  /* Allow clicks on the toast if needed in future  update*/
 }
 
 .toast.show {
