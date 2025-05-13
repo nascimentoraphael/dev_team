@@ -10,7 +10,7 @@ router.get('/me/profile', authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const queryText = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = $1";
+    const queryText = `SELECT id, username, name, "fullName", unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = $1`;
     const result = await db.query(queryText, [userId]);
     const row = result.rows[0];
 
@@ -110,7 +110,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
   const lastUpdate = new Date().toISOString();
 
   try {
-    const queryText = `UPDATE users SET fullName = $1, username = $2, unit = $3, name = $4, lastUpdate = $5 WHERE id = $6`;
+    const queryText = `UPDATE users SET "fullName" = $1, username = $2, unit = $3, name = $4, lastUpdate = $5 WHERE id = $6`;
     const result = await db.query(queryText, [fullName, email, unit, name, lastUpdate, userIdToEdit]);
 
     if (result.rowCount === 0) {

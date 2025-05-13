@@ -27,9 +27,9 @@ async function initializeDatabase() {
         id SERIAL PRIMARY KEY,
         username TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        fullName VARCHAR(255) NOT NULL,
-        unit VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NOT NULL,        -- Mantido como lowercase, pois o código JS parece usar user.name
+        "fullName" VARCHAR(255) NOT NULL,  -- Citado para preservar o case
+        unit VARCHAR(255) NOT NULL,        -- Mantido como lowercase
         lastUpdate TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         backend JSONB DEFAULT '[]',
         frontend JSONB DEFAULT '[]',
@@ -102,7 +102,7 @@ async function initializeDatabase() {
 
       await pool.query(
         `INSERT INTO users (
-          username, password_hash, name, fullName, unit, lastUpdate,
+          username, password_hash, name, "fullName", unit, lastUpdate,
           backend, frontend, mobile, architecture, management,
           security, infra, data, immersive, marketing
         ) VALUES (

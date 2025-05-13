@@ -6,7 +6,7 @@ const router = express.Router();
 // Rota para buscar todos os membros da equipe
 router.get('/', async (req, res) => {
   try {
-    const queryText = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users";
+    const queryText = `SELECT id, username, name, "fullName", unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users`;
     const result = await db.query(queryText);
 
     // Com 'pg', os resultados estão em result.rows

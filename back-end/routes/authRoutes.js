@@ -17,7 +17,7 @@ router.post('/register', async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
 
     // Adicionada a coluna 'unit' e placeholders ajustados para PostgreSQL, e RETURNING id
-    const queryText = `INSERT INTO users (username, password_hash, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing)
+    const queryText = `INSERT INTO users (username, password_hash, name, "fullName", unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing)
                      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id`;
     const values = [
       username, hash, name, fullName, unit, lastUpdate,
@@ -50,7 +50,8 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    const queryText = "SELECT * FROM users WHERE username = $1";
+    // Selecionar explicitamente com aspas garante o case, ou confiar que SELECT * com coluna citada na criação funcione.
+    const queryText = `SELECT id, username, password_hash, name, "fullName", unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE username = $1`;
     const result = await db.query(queryText, [username]);
     const user = result.rows[0];
 
