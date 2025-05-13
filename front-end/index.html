@@ -366,12 +366,47 @@
                 </h4>
                 <div id="modal-portfolio-competencies" class="space-y-3"></div>
               </div>
+              <!-- Nova Seção: Tabela Detalhada de Competências -->
+              <div class="mt-8">
+                <h4 class="font-bold text-lg mb-3 flex items-center">
+                  <i class="fas fa-table text-green-500 mr-2"></i>Resumo Detalhado das Competências
+                </h4>
+                <button id="open-competencies-table-view-btn"
+                  class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-sm">
+                  <i class="fas fa-external-link-alt mr-2"></i>Ver Tabela Detalhada
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
       <div class="border-t p-4 flex justify-end sticky bottom-0 bg-white">
         <button id="close-modal-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Competencies Table Modal -->
+  <div id="competencies-table-modal"
+    class="fixed inset-0 bg-black bg-opacity-70 z-[60] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+      <div class="flex justify-between items-center border-b p-4 sticky top-0 bg-white z-10">
+        <h3 id="competencies-table-modal-title" class="text-xl font-bold text-gray-800">Resumo Detalhado das
+          Competências</h3>
+        <button id="close-competencies-table-modal-action" class="text-gray-500 hover:text-gray-800 transition-colors">
+          <i class="fas fa-times fa-lg"></i>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-grow">
+        <div id="competencies-table-modal-content" class="overflow-x-auto">
+          <!-- A tabela será inserida aqui pelo JavaScript -->
+        </div>
+      </div>
+      <div class="border-t p-4 flex justify-end sticky bottom-0 bg-white">
+        <button id="close-competencies-table-modal-btn"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
           Fechar
         </button>
       </div>
@@ -641,7 +676,8 @@
     // Helper function to check if the logged-in user is admin
     function isAdminUser() {
       const userEmail = localStorage.getItem('userEmail');
-      return userEmail === 'admin@example.com';
+
+      return userEmail === 'admin@senai.br';
     }
 
     // Function to update stats display

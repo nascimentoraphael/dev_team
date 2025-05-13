@@ -16,6 +16,11 @@ document.addEventListener('DOMContentLoaded', function () {
   const editUserModal = document.getElementById('edit-user-modal');
   const closeEditUserModalBtn = document.getElementById('close-edit-user-modal');
   const editUserForm = document.getElementById('edit-user-form');
+
+  // Elementos do modal da tabela de competências
+  const competenciesTableModal = document.getElementById('competencies-table-modal');
+  const closeCompetenciesTableModalAction = document.getElementById('close-competencies-table-modal-action'); // Botão X no header do modal da tabela
+  const closeCompetenciesTableModalBtn = document.getElementById('close-competencies-table-modal-btn'); // Botão "Fechar" no footer do modal da tabela
   const editUserMessage = document.getElementById('edit-user-message');
 
   let allTeamMembersGlobal = []; // Para armazenar os dados dos usuários
@@ -208,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
                             </div>
                         </div>
-                        ${isAdminUser() && member.username !== 'admin@example.com' ? `
+                        ${isAdminUser() && member.username !== 'admin@senai.br' ? `
                         <div class="mt-4 pt-3 border-t border-gray-200 flex justify-end space-x-2">
                             <button class="edit-user-btn text-xs px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition" data-user-id="${member.id}">
                                 <i class="fas fa-edit mr-1"></i>Editar
@@ -521,6 +526,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Remover mensagem de submissão anterior, se houver
     const existingSubmittedMessage = competencyTabsContainer.previousElementSibling;
     if (existingSubmittedMessage && existingSubmittedMessage.classList.contains('skills-submitted-info')) {
+      // Esta classe não existe mais, mas a lógica de remover um elemento anterior pode ser útil
+      // Se houver alguma mensagem específica de "salvo" ou "erro" diretamente antes das abas.
       existingSubmittedMessage.remove();
     }
 
@@ -539,10 +546,99 @@ document.addEventListener('DOMContentLoaded', function () {
       if (saveButton) {
         saveButton.style.display = 'none'; // Esconde o botão se não for editável
       }
-      // A mensagem de "skills já submetidas" foi removida, pois a lógica agora é por skill individual.
     }
+
+    // Configurar botão para abrir o modal da tabela de competências
+    const openCompetenciesTableViewBtn = document.getElementById('open-competencies-table-view-btn');
+    if (openCompetenciesTableViewBtn) {
+      // Remover listener antigo para evitar duplicação, clonando o botão
+      const newBtn = openCompetenciesTableViewBtn.cloneNode(true);
+      openCompetenciesTableViewBtn.parentNode.replaceChild(newBtn, openCompetenciesTableViewBtn);
+
+      newBtn.addEventListener('click', () => {
+        openCompetenciesTableModal(member);
+      });
+    } else {
+      console.warn("Botão 'open-competencies-table-view-btn' não encontrado.");
+    }
+
     profileModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+  }
+
+
+
+  // Função para popular a tabela de competências detalhadas
+  function populateCompetenciesTable(member, containerId) {
+    const tableContainer = document.getElementById(containerId);
+    tableContainer.innerHTML = ''; // Limpa conteúdo anterior
+
+    const table = document.createElement('table');
+    table.className = 'min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg shadow-sm';
+    const thead = document.createElement('thead');
+    thead.className = 'bg-gray-100';
+    thead.innerHTML = `
+      <tr>
+        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Categoria</th>
+        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Habilidade</th>
+        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Nível</th>
+        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Descrição Detalhada</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    tbody.className = 'bg-white divide-y divide-gray-200';
+
+    let evaluatedSkillsCount = 0;
+    const areaKeys = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
+    const categoryDisplayNames = { backend: 'Backend', frontend: 'Frontend', mobile: 'Mobile', architecture: 'Arquitetura', management: 'Gestão', security: 'Segurança', infra: 'Infra', data: 'Dados/IA', immersive: 'Imersivas', marketing: 'Marketing' };
+
+    areaKeys.forEach(categoryKey => {
+      if (member[categoryKey] && Array.isArray(member[categoryKey])) {
+        member[categoryKey].forEach(skill => {
+          if (skill.skillLevel > 0) { // Apenas habilidades avaliadas
+            evaluatedSkillsCount++;
+            const proficiency = proficiencyLevels.find(p => p.level === skill.skillLevel);
+            const description = proficiency ? proficiency.text.replace(/\{\{skillName\}\}/g, skill.skillName) : 'N/A';
+            const levelLabel = proficiency ? proficiency.label : 'N/A';
+
+            const row = tbody.insertRow();
+            row.className = 'hover:bg-gray-50 transition-colors duration-150';
+            row.innerHTML = `
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${categoryDisplayNames[categoryKey] || categoryKey}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${skill.skillName}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">${levelLabel}</td>
+              <td class="px-4 py-3 text-sm text-gray-600">${description}</td>
+            `;
+          }
+        });
+      }
+    });
+
+    table.appendChild(tbody);
+    tableContainer.appendChild(table);
+
+    if (evaluatedSkillsCount === 0) {
+      tableContainer.innerHTML = '<p class="text-sm text-gray-500 italic p-4 text-center">Nenhuma competência avaliada (nível > 0) para exibir na tabela.</p>';
+    }
+  }
+
+  // Função para abrir o modal da tabela de competências
+  function openCompetenciesTableModal(member) {
+    const competenciesTableModalTitle = document.getElementById('competencies-table-modal-title');
+    if (competenciesTableModalTitle) {
+      competenciesTableModalTitle.textContent = `Resumo Detalhado das Competências - ${member.fullName || member.name}`;
+    }
+
+    populateCompetenciesTable(member, 'competencies-table-modal-content');
+
+    if (competenciesTableModal) {
+      competenciesTableModal.classList.remove('hidden');
+      // O profileModal permanece aberto por baixo, e o body.style.overflow já está 'hidden'
+    } else {
+      console.error("Elemento 'competencies-table-modal' não encontrado.");
+    }
   }
 
   let isSavingSkills = false; // Flag para debounce
@@ -901,6 +997,20 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   if (closeModalBtn) { // closeModalBtn é o botão "Fechar" no rodapé do modal de perfil
     closeModalBtn.addEventListener('click', closeProfileModal);
+  }
+
+  // Event listeners para o novo modal da tabela de competências
+  if (closeCompetenciesTableModalAction) {
+    closeCompetenciesTableModalAction.addEventListener('click', () => {
+      if (competenciesTableModal) competenciesTableModal.classList.add('hidden');
+    });
+  } else {
+    console.warn("Elemento 'close-competencies-table-modal-action' não encontrado.");
+  }
+  if (closeCompetenciesTableModalBtn) {
+    closeCompetenciesTableModalBtn.addEventListener('click', () => {
+      if (competenciesTableModal) competenciesTableModal.classList.add('hidden');
+    });
   }
 
   // Initialize on page load

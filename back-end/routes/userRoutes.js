@@ -81,7 +81,7 @@ router.put('/me/profile/skills', authenticateToken, (req, res) => {
 // Rota para o admin editar um usuário (fullName, username/email, unit)
 router.put('/:id', authenticateToken, (req, res) => {
   // Verifica se o requisitante é o admin
-  if (req.user.username !== 'admin@example.com') {
+  if (req.user.username !== 'admin@senai.br') {
     return res.status(403).json({ message: "Acesso negado. Apenas administradores podem editar usuários." });
   }
 
@@ -93,8 +93,8 @@ router.put('/:id', authenticateToken, (req, res) => {
   }
 
   // Não permitir que o admin edite seu próprio email para algo diferente de admin@example.com
-  // ou que edite o ID 1 (assumindo que o admin é o ID 1 e seu email não pode mudar)
-  if (parseInt(userIdToEdit) === req.user.id && email !== 'admin@example.com') {
+  // ou que edite o ID do admin (req.user.id) para um email diferente de admin@senai.br
+  if (parseInt(userIdToEdit) === req.user.id && email !== 'admin@senai.br') {
     return res.status(400).json({ message: "O email do administrador principal não pode ser alterado." });
   }
 
@@ -121,7 +121,7 @@ router.put('/:id', authenticateToken, (req, res) => {
 // Rota para o admin excluir um usuário
 router.delete('/:id', authenticateToken, (req, res) => {
   // Verifica se o requisitante é o admin
-  if (req.user.username !== 'admin@example.com') {
+  if (req.user.username !== 'admin@senai.br') {
     return res.status(403).json({ message: "Acesso negado. Apenas administradores podem excluir usuários." });
   }
 

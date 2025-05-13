@@ -47,7 +47,7 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
 function insertInitialData() {
   const initialUsers = [
     {
-      username: "italo@example.com", password: "password123", name: "Italo Ignacio", fullName: "Italo Felipe Ignacio", unit: "Sede", lastUpdate: new Date().toISOString(),
+      username: "italo@senai.br", password: "password123", name: "Italo Ignacio", fullName: "Italo Felipe Ignacio", unit: "Sede", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -153,7 +153,7 @@ function insertInitialData() {
       ])
     },
     {
-      username: "janaina@example.com", password: "password123", name: "Janaina Falco", fullName: "Janaina Ferreira Falco", unit: "Filial A", lastUpdate: new Date().toISOString(),
+      username: "janaina@senai.br", password: "password123", name: "Janaina Falco", fullName: "Janaina Ferreira Falco", unit: "Filial A", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([ // Repetir a mesma estrutura de skills para todos os usuários iniciais
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -259,7 +259,7 @@ function insertInitialData() {
       ])
     },
     {
-      username: "admin@example.com", password: "adminpassword", name: "Admin", fullName: "System Administrator", unit: "Sede", lastUpdate: new Date().toISOString(),
+      username: "admin@senai.br", password: "adminpassword", name: "Admin", fullName: "System Administrator", unit: "Sede", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([ // Repetir a mesma estrutura de skills para todos os usuários iniciais
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -367,7 +367,7 @@ function insertInitialData() {
     // Novos usuários adicionados
     ,
     {
-      username: "bruno.fernandes@example.com", password: "password123", name: "Bruno", fullName: "Bruno Henrique Fernandes", unit: "Não Definida", lastUpdate: new Date().toISOString(),
+      username: "bruno.fernandes@senai.br", password: "password123", name: "Bruno", fullName: "Bruno Henrique Fernandes", unit: "Não Definida", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -589,20 +589,20 @@ function insertInitialData() {
   };
 
   const newUsersList = [
-    { username: "bruno.fernandes@example.com", name: "Bruno", fullName: "Bruno Henrique Fernandes" },
-    { username: "christian.alonso@example.com", name: "Christian", fullName: "Christian Albuquerque Alonso" },
-    { username: "daniel.santos@example.com", name: "Daniel", fullName: "Daniel Wilson Alves dos Santos" },
-    { username: "erick.barbosa@example.com", name: "Erick", fullName: "Erick Araujo Barbosa" },
-    { username: "flavio.dias@example.com", name: "Flávio", fullName: "Flávio Camilo Dias" },
-    { username: "joao.meyer@example.com", name: "João", fullName: "João Henrique Parizoti Meyer" },
-    { username: "lucas.silva@example.com", name: "Lucas", fullName: "Lucas Araujo Oliveira Silva" },
-    { username: "lukas.venancio@example.com", name: "Lukas", fullName: "Lukas Santos Venâncio" },
-    { username: "pedro.santos@example.com", name: "Pedro", fullName: "Pedro Henrique Silva Santos" },
-    { username: "raphael.nascimento@example.com", name: "Raphael", fullName: "Raphael Lima Marques do Nascimento" },
-    { username: "rodrigo.silva@example.com", name: "Rodrigo", fullName: "Rodrigo Areias da Silva" },
-    { username: "rogger.silveira@example.com", name: "Rogger", fullName: "Rogger da Silva Silveira" },
-    { username: "wesley.meneghini@example.com", name: "Wesley", fullName: "Wesley Meneghini" },
-    { username: "wilson.carneiro@example.com", name: "Wilson", fullName: "Wilson Rogerio Carneiro" }
+    { username: "bruno.fernandes@senai.br", name: "Bruno", fullName: "Bruno Henrique Fernandes" },
+    { username: "christian.alonso@senai.br", name: "Christian", fullName: "Christian Albuquerque Alonso" },
+    { username: "daniel.santos@senai.br", name: "Daniel", fullName: "Daniel Wilson Alves dos Santos" },
+    { username: "erick.barbosa@senai.br", name: "Erick", fullName: "Erick Araujo Barbosa" },
+    { username: "flavio.dias@senai.br", name: "Flávio", fullName: "Flávio Camilo Dias" },
+    { username: "joao.meyer@senai.br", name: "João", fullName: "João Henrique Parizoti Meyer" },
+    { username: "lucas.silva@senai.br", name: "Lucas", fullName: "Lucas Araujo Oliveira Silva" },
+    { username: "lukas.venancio@senai.br", name: "Lukas", fullName: "Lukas Santos Venâncio" },
+    { username: "pedro.santos@senai.br", name: "Pedro", fullName: "Pedro Henrique Silva Santos" },
+    { username: "raphael.nascimento@senai.br", name: "Raphael", fullName: "Raphael Lima Marques do Nascimento" },
+    { username: "rodrigo.silva@senai.br", name: "Rodrigo", fullName: "Rodrigo Areias da Silva" },
+    { username: "rogger.silveira@senai.br", name: "Rogger", fullName: "Rogger da Silva Silveira" },
+    { username: "wesley.meneghini@senai.br", name: "Wesley", fullName: "Wesley Meneghini" },
+    { username: "wilson.carneiro@senai.br", name: "Wilson", fullName: "Wilson Rogerio Carneiro" }
   ];
 
   newUsersList.forEach(u => {
