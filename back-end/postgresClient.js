@@ -10,7 +10,13 @@ if (!connectionString) {
   // process.exit(1);
 }
 
-const sql = postgres(connectionString);
+// const sql = postgres(connectionString);
+
+const sql = postgres({
+  url: connectionString,
+  ssl: 'require',
+  preferIPv6: false // 👈 ESSENCIAL: evita erro ENETUNREACH na Render
+});
 
 async function initializeDatabase() {
   try {

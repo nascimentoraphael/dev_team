@@ -1,7 +1,7 @@
 require('dotenv').config(); // Carrega variáveis de ambiente do .env
 const express = require('express');
 const cors = require('cors');
-const pool = require('./postgresClient.js'); // Importa a configuração do banco de dados (e inicializa)
+const sql = require('./postgresClient.js'); // Importa a instância 'postgres' (geralmente nomeada sql)
 
 const authRoutes = require('./routes/authRoutes');
 const teamRoutes = require('./routes/teamRoutes');
@@ -34,9 +34,9 @@ app.listen(PORT, async () => {
   console.log(`Servidor rodando na porta ${PORT}`);
   // Uma pequena verificação para garantir que o DB está conectado após o servidor iniciar
   try {
-    // Tenta fazer uma query simples para verificar a conexão e a existência da tabela
-    const res = await pool.query("SELECT to_regclass('public.users')");
-    if (res.rows[0].to_regclass) {
+    // Tenta fazer uma query simples para verificar a conexão e a existência da tabela usando a sintaxe do 'postgres'
+    const result = await sql`SELECT to_regclass('public.users')`;
+    if (result[0] && result[0].to_regclass) {
       console.log("Conexão com o banco de dados PostgreSQL e tabela 'users' verificada.");
     } else {
       console.error("Tabela 'users' não encontrada no banco de dados PostgreSQL.");
