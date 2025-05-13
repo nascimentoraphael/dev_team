@@ -1,36 +1,41 @@
 const express = require('express');
-const pool = require('../postgresClient.js');
+const sql = require('../postgresClient.js'); // Assuming postgresClient exports the 'postgres' instance as 'sql'
 const authenticateToken = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
 // Rota para buscar o perfil do usuário autenticado
-router.get('/me/profile', authenticateToken, (req, res) => {
+router.get('/me/profile', authenticateToken, async (req, res) => {
   // req.user foi adicionado pelo middleware authenticateToken e contém o id do usuário
   const userId = req.user.id;
 
-  const sql = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = $1";
-  pool.query(sql, [userId], (err, result) => {
-    if (err) {
-      res.status(500).json({ "error": err.message });
-      return;
-    }
-    const row = result.rows[0];
+  try {
+    const result = await sql`SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = ${userId}`;
+    const row = result[0];
+
     if (!row) {
       res.status(404).json({ "message": "Perfil do usuário não encontrado." });
       return;
     }
     // As colunas de skills são armazenadas como JSON string, precisamos parseá-las
+    // 'postgres' library often auto-parses JSON/JSONB types. If not, manual parsing is needed.
     const userProfile = {
       ...row,
-      ...Object.fromEntries(Object.entries(row).map(([key, value]) => [key, ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'].includes(key) ? JSON.parse(value || '[]') : value]))
+      ...Object.fromEntries(Object.entries(row).map(([key, value]) => {
+        if (['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'].includes(key)) {
+          return [key, typeof value === 'string' ? JSON.parse(value || '[]') : (value || [])];
+        }
+        return [key, value];
+      }))
     };
     res.json(userProfile);
-  });
+  } catch (err) {
+    res.status(500).json({ "error": err.message });
+  }
 });
 
 // Rota para atualizar as habilidades do usuário autenticado
-router.put('/me/profile/skills', authenticateToken, (req, res) => {
+router.put('/me/profile/skills', authenticateToken, async (req, res) => {
   const userId = req.user.id;
   const { skills } = req.body; // Espera um objeto como: { backend: [{skillName: "Java", skillLevel: 3}], frontend: [...] }
 
@@ -44,44 +49,40 @@ router.put('/me/profile/skills', authenticateToken, (req, res) => {
   // Validar e preparar os campos de skills para o update
   const skillCategories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
   let setClauses = [];
-  let params = [];
+  let values = [];
 
   skillCategories.forEach(category => {
     if (skills[category] !== undefined) { // Verifica se a categoria de skill foi enviada
-      setClauses.push(`${category} = ?`);
-      // Garante que mesmo um array vazio seja stringificado corretamente
-      params.push(JSON.stringify(skills[category] || []));
+      setClauses.push(sql`${sql(category)} = ${JSON.stringify(skills[category] || [])}`);
     }
   });
 
   // Adiciona lastUpdate aos campos a serem atualizados
-  setClauses.push('lastUpdate = ?');
-  params.push(new Date().toISOString());
+  setClauses.push(sql`lastUpdate = ${new Date().toISOString()}`);
 
   // Se apenas lastUpdate está sendo setado, significa que nenhuma skill foi enviada.
   if (setClauses.length <= 1) { // Ajustado para <= 1 pois sempre teremos lastUpdate
     return res.status(400).json({ message: "Nenhuma habilidade fornecida para atualização." });
   }
 
-  params.push(userId); // Adiciona o userId ao final para a cláusula WHERE
-  // Placeholders for SET clauses are $1, $2, ..., and the last one for WHERE id = $N
-  const sql = `UPDATE users SET ${setClauses.map((clause, index) => clause.replace('?', `$${index + 1}`)).join(', ')} WHERE id = $${params.length}`;
+  try {
+    // Constructing the query using 'postgres' library features
+    // sql.join will handle the commas between setClauses
+    const result = await sql`UPDATE users SET ${sql.join(setClauses, sql`, `)} WHERE id = ${userId}`;
 
-  pool.query(sql, params, (err, result) => {
-    if (err) {
-      console.error('[UserRoutes] Erro ao atualizar skills no DB:', err.message);
-      return res.status(500).json({ error: err.message });
-    }
-    if (result.rowCount === 0) {
+    if (result.count === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para atualização de skills." });
     }
     console.log('[UserRoutes] Skills atualizadas com sucesso para userID:', userId);
     res.json({ message: "Habilidades atualizadas com sucesso!" });
-  });
+  } catch (err) {
+    console.error('[UserRoutes] Erro ao atualizar skills no DB:', err.message);
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 // Rota para o admin editar um usuário (fullName, username/email, unit)
-router.put('/:id', authenticateToken, (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
   // Verifica se o requisitante é o admin
   if (req.user.username !== 'admin@senai.br') {
     return res.status(403).json({ message: "Acesso negado. Apenas administradores podem editar usuários." });
@@ -100,29 +101,31 @@ router.put('/:id', authenticateToken, (req, res) => {
     return res.status(400).json({ message: "O email do administrador principal não pode ser alterado." });
   }
 
-  const sql = `UPDATE users SET fullName = $1, username = $2, unit = $3, name = $4, lastUpdate = $5 WHERE id = $6`;
   const name = fullName.split(' ')[0]; // Pega o primeiro nome
   const lastUpdate = new Date().toISOString();
 
-  pool.query(sql, [fullName, email, unit, name, lastUpdate, userIdToEdit], (err, result) => {
-    if (err) {
-      // Código 23505 é para unique_violation no PostgreSQL
-      if (err.code === '23505') {
-        return res.status(400).json({ message: "O novo email (username) já está em uso." });
-      }
-      console.error('[UserRoutes] Erro ao editar usuário no DB:', err.message);
-      return res.status(500).json({ error: "Erro ao atualizar usuário: " + err.message });
-    }
-    if (result.rowCount === 0) {
+  try {
+    const result = await sql`
+      UPDATE users 
+      SET fullName = ${fullName}, username = ${email}, unit = ${unit}, name = ${name}, lastUpdate = ${lastUpdate} 
+      WHERE id = ${userIdToEdit}`;
+
+    if (result.count === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para edição." });
     }
     console.log('[UserRoutes] Usuário ID:', userIdToEdit, 'editado com sucesso pelo admin ID:', req.user.id);
     res.json({ message: "Usuário atualizado com sucesso!" });
-  });
+  } catch (err) {
+    if (err.code === '23505') { // unique_violation
+      return res.status(400).json({ message: "O novo email (username) já está em uso." });
+    }
+    console.error('[UserRoutes] Erro ao editar usuário no DB:', err.message);
+    return res.status(500).json({ error: "Erro ao atualizar usuário: " + err.message });
+  }
 });
 
 // Rota para o admin excluir um usuário
-router.delete('/:id', authenticateToken, (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   // Verifica se o requisitante é o admin
   if (req.user.username !== 'admin@senai.br') {
     return res.status(403).json({ message: "Acesso negado. Apenas administradores podem excluir usuários." });
@@ -135,21 +138,20 @@ router.delete('/:id', authenticateToken, (req, res) => {
     return res.status(400).json({ message: "O administrador não pode se auto-excluir." });
   }
 
-  const sql = 'DELETE FROM users WHERE id = $1';
-  pool.query(sql, [userIdToDelete], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: "Erro ao excluir usuário: " + err.message });
-    }
-    if (result.rowCount === 0) {
+  try {
+    const result = await sql`DELETE FROM users WHERE id = ${userIdToDelete}`;
+    if (result.count === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para exclusão." });
     }
     console.log('[UserRoutes] Usuário ID:', userIdToDelete, 'excluído com sucesso pelo admin ID:', req.user.id);
     res.json({ message: "Usuário excluído com sucesso!" });
-  });
+  } catch (err) {
+    return res.status(500).json({ error: "Erro ao excluir usuário: " + err.message });
+  }
 });
 
 // Rota para o ADMIN atualizar as habilidades de um usuário específico
-router.put('/:userId/skills', authenticateToken, (req, res) => {
+router.put('/:userId/skills', authenticateToken, async (req, res) => {
   // 1. Verificar se o requisitante é admin
   if (req.user.username !== 'admin@senai.br') {
     return res.status(403).json({ message: "Acesso negado. Apenas administradores podem realizar esta ação." });
@@ -173,38 +175,33 @@ router.put('/:userId/skills', authenticateToken, (req, res) => {
 
   const skillCategories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
   let setClauses = [];
-  let params = [];
 
   skillCategories.forEach(category => {
     if (skills[category] !== undefined) { // Verifica se a categoria de skill foi enviada
-      setClauses.push(`${category} = ?`);
-      // Garante que mesmo um array vazio seja stringificado corretamente
-      params.push(JSON.stringify(skills[category] || []));
+      // Use sql(category) to treat category as a column name, not a string literal
+      setClauses.push(sql`${sql(category)} = ${JSON.stringify(skills[category] || [])}`);
     }
   });
 
-  setClauses.push('lastUpdate = ?');
-  params.push(new Date().toISOString());
+  setClauses.push(sql`lastUpdate = ${new Date().toISOString()}`);
 
   if (setClauses.length <= 1) { // Se apenas lastUpdate está sendo setado
     return res.status(400).json({ message: "Nenhuma habilidade fornecida para atualização." });
   }
 
-  params.push(targetUserId); // Adiciona o targetUserId ao final para a cláusula WHERE
-  // Placeholders for SET clauses are $1, $2, ..., and the last one for WHERE id = $N
-  const sql = `UPDATE users SET ${setClauses.map((clause, index) => clause.replace('?', `$${index + 1}`)).join(', ')} WHERE id = $${params.length}`;
+  try {
+    // Constructing the query using 'postgres' library features
+    const result = await sql`UPDATE users SET ${sql.join(setClauses, sql`, `)} WHERE id = ${targetUserId}`;
 
-  pool.query(sql, params, (err, result) => {
-    if (err) {
-      console.error('[Admin UserRoutes] Erro ao atualizar skills no DB para userID ' + targetUserId + ':', err.message);
-      return res.status(500).json({ error: err.message });
-    }
-    if (result.rowCount === 0) {
+    if (result.count === 0) {
       return res.status(404).json({ message: "Usuário alvo não encontrado para atualização de skills." });
     }
     console.log(`[Admin UserRoutes] Skills atualizadas com sucesso para userID: ${targetUserId} pelo Admin ${req.user.username}`);
     res.json({ message: `Habilidades do usuário (ID: ${targetUserId}) atualizadas com sucesso!` });
-  });
+  } catch (err) {
+    console.error('[Admin UserRoutes] Erro ao atualizar skills no DB para userID ' + targetUserId + ':', err.message);
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
