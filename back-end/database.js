@@ -1,50 +1,56 @@
-const sqlite3 = require('sqlite3').verbose();
+require('dotenv').config(); // Garante que DATABASE_URL seja carregado
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
-// Conecta ou cria o banco de dados. O arquivo será 'devteam.db' na mesma pasta.
-const DBSOURCE = "devteam.db";
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  // Se estiver usando SSL com o Supabase (geralmente necessário para conexões externas)
+  // ssl: {
+  //   rejectUnauthorized: false // Pode ser necessário dependendo da configuração do Supabase/Render
+  // }
+});
 
-const db = new sqlite3.Database(DBSOURCE, (err) => {
-  if (err) {
-    // Não pode abrir o banco de dados
-    console.error(err.message);
-    throw err;
-  } else {
-    console.log('Conectado ao banco de dados SQLite.');
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
-            password_hash TEXT,
-            name TEXT,
-            fullName TEXT,
-            unit TEXT,
-            lastUpdate TEXT,
-            backend TEXT,
-            frontend TEXT,
-            mobile TEXT,
-            architecture TEXT,
-            management TEXT,
-            security TEXT,
-            infra TEXT,
-            data TEXT,
-            immersive TEXT,
-            marketing TEXT,
-            CONSTRAINT username_unique UNIQUE (username)
-        )`, (err) => {
-      if (err) {
-        // Tabela já criada ou outro erro
-        console.log("Tabela 'users' já existe ou erro ao criar:", err.message);
-      } else {
-        // Tabela acabou de ser criada.
-        console.log("Tabela 'users' criada. Inserindo dados de exemplo se necessário.");
-        insertInitialData();
-      }
-    });
+pool.on('connect', () => {
+  console.log('Conectado ao banco de dados PostgreSQL.');
+});
 
-  } // Fecha o bloco 'else' da conexão bem-sucedida
-}); // Fecha o callback do construtor new sqlite3.Database
+pool.on('error', (err) => {
+  console.error('Erro inesperado no cliente idle do pool', err);
+  process.exit(-1);
+});
 
-function insertInitialData() {
+const createTableQuery = `
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    name VARCHAR(255),
+    fullName VARCHAR(255),
+    unit VARCHAR(255),
+    lastUpdate TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    backend TEXT,
+    frontend TEXT,
+    mobile TEXT,
+    architecture TEXT,
+    management TEXT,
+    security TEXT,
+    infra TEXT,
+    data TEXT,
+    immersive TEXT,
+    marketing TEXT
+);`;
+
+async function initializeDatabase() {
+  try {
+    await pool.query(createTableQuery);
+    console.log("Tabela 'users' verificada/criada com sucesso.");
+    await insertInitialData();
+  } catch (err) {
+    console.error("Erro ao inicializar o banco de dados:", err.message, err.stack);
+  }
+}
+
+async function insertInitialData() {
   const initialUsers = [
     {
       username: "italo@example.com", password: "password123", name: "Italo Ignacio", fullName: "Italo Felipe Ignacio", unit: "Sede", lastUpdate: new Date().toISOString(),
@@ -482,7 +488,7 @@ function insertInitialData() {
     */
   ];
 
-  const insert = 'INSERT OR IGNORE INTO users (username, password_hash, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+  const insertQuery = 'INSERT INTO users (username, password_hash, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) ON CONFLICT (username) DO NOTHING';
 
   const allSkillCategories = {
     backend: [
@@ -625,23 +631,28 @@ function insertInitialData() {
     });
   });
 
-  initialUsers.forEach(user => {
-    bcrypt.hash(user.password, 10, (err, hash) => {
-      if (err) {
-        console.error("Erro ao gerar hash para usuário inicial:", user.username, err);
-        return;
-      }
-      db.run(insert, [
+  for (const user of initialUsers) {
+    try {
+      const hash = await bcrypt.hash(user.password, 10);
+      const params = [
         user.username, hash, user.name, user.fullName, user.unit, user.lastUpdate,
         user.backend, user.frontend, user.mobile, user.architecture,
         user.management, user.security, user.infra, user.data,
         user.immersive, user.marketing
-      ], (err) => {
-        if (err) console.error("Erro ao inserir usuário inicial:", user.username, err.message);
-        else console.log("Usuário inicial inserido/ignorado:", user.username);
-      });
-    });
-  });
+      ];
+      const res = await pool.query(insertQuery, params);
+      if (res.rowCount > 0) {
+        console.log("Usuário inicial inserido:", user.username);
+      } else {
+        console.log("Usuário inicial ignorado (já existe):", user.username);
+      }
+    } catch (err) {
+      console.error("Erro ao inserir usuário inicial:", user.username, err.message);
+    }
+  }
+  console.log("Inserção de dados iniciais concluída.");
 }
 
-module.exports = db;
+initializeDatabase();
+
+module.exports = pool;
