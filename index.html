@@ -14,7 +14,7 @@
 
 <body class="bg-gray-50 font-sans">
   <div class="container mx-auto px-4 py-8">
-    <!-- Header  update -->
+    <!-- Header -->
     <header class="mb-12 text-center">
       <h1 class="text-4xl font-bold text-blue-800 mb-2">Equipe de Desenvolvimento</h1>
       <p class="text-xl text-gray-600">Perfis profissionais e competências técnicas</p>
@@ -366,12 +366,47 @@
                 </h4>
                 <div id="modal-portfolio-competencies" class="space-y-3"></div>
               </div>
+              <!-- Nova Seção: Tabela Detalhada de Competências -->
+              <div class="mt-8">
+                <h4 class="font-bold text-lg mb-3 flex items-center">
+                  <i class="fas fa-table text-green-500 mr-2"></i>Resumo Detalhado das Competências
+                </h4>
+                <button id="open-competencies-table-view-btn"
+                  class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition text-sm">
+                  <i class="fas fa-external-link-alt mr-2"></i>Ver Tabela Detalhada
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
       <div class="border-t p-4 flex justify-end sticky bottom-0 bg-white">
         <button id="close-modal-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Competencies Table Modal -->
+  <div id="competencies-table-modal"
+    class="fixed inset-0 bg-black bg-opacity-70 z-[60] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+      <div class="flex justify-between items-center border-b p-4 sticky top-0 bg-white z-10">
+        <h3 id="competencies-table-modal-title" class="text-xl font-bold text-gray-800">Resumo Detalhado das
+          Competências</h3>
+        <button id="close-competencies-table-modal-action" class="text-gray-500 hover:text-gray-800 transition-colors">
+          <i class="fas fa-times fa-lg"></i>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-grow">
+        <div id="competencies-table-modal-content" class="overflow-x-auto">
+          <!-- A tabela será inserida aqui pelo JavaScript -->
+        </div>
+      </div>
+      <div class="border-t p-4 flex justify-end sticky bottom-0 bg-white">
+        <button id="close-competencies-table-modal-btn"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
           Fechar
         </button>
       </div>
@@ -404,32 +439,32 @@
       {
         level: 0,
         label: "0 - Não Avaliado / Sem Experiência",
-        text: "Nenhuma avaliação ou experiência prática registrada para esta habilidade."
+        text: "Nenhuma avaliação ou experiência prática registrada para {{skillName}}."
       },
       {
         level: 1,
         label: "1 - Familiar (Conceitos Básicos)",
-        text: "Familiarizado com os conceitos básicos, como algoritmos de aprendizado supervisionado e não supervisionado, mas ainda não aplicou esses conhecimentos em projetos reais."
+        text: "Familiarizado com os conceitos básicos de {{skillName}}, como seus princípios fundamentais e aplicações comuns, mas ainda não aplicou esses conhecimentos em projetos reais."
       },
       {
         level: 2,
         label: "2 - Iniciante (Entende Terminologia)",
-        text: "Entende e consegue discutir a terminologia e os conceitos fundamentais, como modelos de regressão, classificação e clustering. Pode participar de discussões sobre projetos e contribuir com ideias básicas."
+        text: "Entende e consegue discutir a terminologia e os conceitos fundamentais de {{skillName}}, como seus componentes chave e casos de uso. Pode participar de discussões sobre projetos e contribuir com ideias básicas relacionadas a {{skillName}}."
       },
       {
         level: 3,
         label: "3 - Intermediário (Aplica com Orientação)",
-        text: "Capaz de aplicar as habilidades de forma independente em situações familiares, como a criação de modelos preditivos simples. Pode preparar dados, treinar modelos e avaliar resultados, com orientação ocasional."
+        text: "Capaz de aplicar as habilidades de {{skillName}} de forma independente em situações familiares, como a implementação de funcionalidades padrão ou a resolução de problemas comuns. Pode preparar o ambiente, desenvolver soluções e avaliar resultados com orientação ocasional para {{skillName}}."
       },
       {
         level: 4,
         label: "4 - Avançado (Orienta Outros)",
-        text: "Pode orientar ou guiar outros na aplicação, incluindo a explicação de nuances complexas, como ajuste de hiperparâmetros, validação cruzada e interpretação de resultados. Tem experiência em liderar equipes de desenvolvimento e garantir que os objetivos sejam alcançados dentro do prazo e do orçamento."
+        text: "Pode orientar ou guiar outros na aplicação de {{skillName}}, incluindo a explicação de nuances complexas, melhores práticas e otimizações. Tem experiência em liderar aspectos técnicos de projetos envolvendo {{skillName}} e garantir que os objetivos sejam alcançados dentro do prazo e do orçamento."
       },
       {
         level: 5,
         label: "5 - Especialista (Gerencia Projetos Complexos)",
-        text: "Demonstrou resultados consistentes na aplicação em diversos contextos e desafios. Capaz de gerenciar projetos complexos e de grande escala, implementar metodologias avançadas e inovar na abordagem para resolver problemas. Seus resultados são mensuráveis e alinhados com as necessidades e objetivos departamentais."
+        text: "Demonstrou resultados consistentes na aplicação de {{skillName}} em diversos contextos e desafios. Capaz de gerenciar projetos complexos e de grande escala, implementar metodologias avançadas com {{skillName}} e inovar na abordagem para resolver problemas. Seus resultados são mensuráveis e alinhados com as necessidades e objetivos departamentais."
       }
     ];
 
@@ -641,7 +676,8 @@
     // Helper function to check if the logged-in user is admin
     function isAdminUser() {
       const userEmail = localStorage.getItem('userEmail');
-      return userEmail === 'admin@example.com';
+
+      return userEmail === 'admin@senai.br';
     }
 
     // Function to update stats display
