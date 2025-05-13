@@ -145,4 +145,62 @@ router.delete('/:id', authenticateToken, (req, res) => {
   });
 });
 
+// Rota para o ADMIN atualizar as habilidades de um usuário específico
+router.put('/:userId/skills', authenticateToken, (req, res) => {
+  // 1. Verificar se o requisitante é admin
+  if (req.user.username !== 'admin@senai.br') {
+    return res.status(403).json({ message: "Acesso negado. Apenas administradores podem realizar esta ação." });
+  }
+
+  const targetUserId = req.params.userId;
+  const { skills } = req.body;
+
+  // 2. Opcional: Impedir que o admin edite a si mesmo por esta rota (ele deve usar /me/profile/skills)
+  //    Isso é mais uma regra de consistência.
+  if (req.user.id.toString() === targetUserId) {
+    return res.status(400).json({ message: "Para editar suas próprias habilidades, use o endpoint /me/profile/skills. Esta rota é para editar outros usuários." });
+  }
+
+  console.log(`[Admin UserRoutes] Admin ${req.user.username} (ID: ${req.user.id}) está atualizando skills para userID: ${targetUserId}`);
+  console.log('[Admin UserRoutes] Skills recebidas:', JSON.stringify(skills, null, 2));
+
+  if (!skills || typeof skills !== 'object') {
+    return res.status(400).json({ message: "Formato de habilidades inválido." });
+  }
+
+  const skillCategories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
+  let setClauses = [];
+  let params = [];
+
+  skillCategories.forEach(category => {
+    if (skills[category] !== undefined) { // Verifica se a categoria de skill foi enviada
+      setClauses.push(`${category} = ?`);
+      // Garante que mesmo um array vazio seja stringificado corretamente
+      params.push(JSON.stringify(skills[category] || []));
+    }
+  });
+
+  setClauses.push('lastUpdate = ?');
+  params.push(new Date().toISOString());
+
+  if (setClauses.length <= 1) { // Se apenas lastUpdate está sendo setado
+    return res.status(400).json({ message: "Nenhuma habilidade fornecida para atualização." });
+  }
+
+  params.push(targetUserId); // Adiciona o targetUserId ao final para a cláusula WHERE
+  const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`;
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      console.error('[Admin UserRoutes] Erro ao atualizar skills no DB para userID ' + targetUserId + ':', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ message: "Usuário alvo não encontrado para atualização de skills." });
+    }
+    console.log(`[Admin UserRoutes] Skills atualizadas com sucesso para userID: ${targetUserId} pelo Admin ${req.user.username}`);
+    res.json({ message: `Habilidades do usuário (ID: ${targetUserId}) atualizadas com sucesso!` });
+  });
+});
+
 module.exports = router;

@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const editUserMessage = document.getElementById('edit-user-message');
 
   let allTeamMembersGlobal = []; // Para armazenar os dados dos usuários
+  let currentProfileInModalId = null; // Para saber qual perfil está no modal e permitir edições pelo admin
   let currentChartInstance = null; // Instância do gráfico de radar no modal
   let currentSkillsChartInstance = null; // Instância do gráfico de barras de skills no modal
 
@@ -239,6 +240,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Open profile modal
   function openProfileModal(member) {
+    currentProfileInModalId = member.id; // Define o ID do usuário cujo perfil está no modal
+
+
     const names = (member.name || "Usuário").split(' ');
     const initials = names.length > 1
       ? `${names[0][0]}${names[names.length - 1][0]}`
@@ -246,7 +250,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const loggedInUserId = localStorage.getItem('userId');
     // Verifica se o usuário logado é o dono do perfil que está sendo visualizado
-    const isOwnerOfProfile = loggedInUserId === member.id.toString();
+    const isOwnerOfProfile = loggedInUserId === currentProfileInModalId.toString();
+    const isAdminViewingOtherProfile = isAdminUser() && !isOwnerOfProfile;
 
     document.getElementById('modal-name').textContent = member.name;
     document.getElementById('modal-fullname').textContent = member.fullName;
@@ -283,25 +288,34 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    function populateSkillsWithLevels(containerId, skillsArray, categoryKey, isOwnerViewingOwnProfile) {
+    // Modificado para aceitar flags de permissão de edição
+    function populateSkillsWithLevels(containerId, skillsArray, categoryKey, isAdminEditingOtherUser, isOwnerEditingOwnProfile) {
       const container = document.getElementById(containerId);
       container.innerHTML = '';
       const skills = skillsArray || [];
       skills.forEach(skillData => {
         const skillItemContainer = document.createElement('div');
-        // A skill é editável SE:
-        // 1. O usuário logado é o dono do perfil E
-        // 2. A skill ainda não foi avaliada (skillLevel é 0 ou undefined)
-        const isThisSkillEditable = isOwnerViewingOwnProfile && (skillData.skillLevel === 0 || typeof skillData.skillLevel === 'undefined');
         skillItemContainer.className = 'skill-level-item mb-3 p-3 border rounded-md bg-gray-50';
+
         const skillNameLabel = document.createElement('label');
         skillNameLabel.className = 'block text-sm font-medium text-gray-800 mb-1';
         skillNameLabel.textContent = skillData.skillName;
+
         const selectLevel = document.createElement('select');
         selectLevel.className = 'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm skill-level-select';
         selectLevel.dataset.skillName = skillData.skillName;
         selectLevel.dataset.categoryKey = categoryKey;
-        selectLevel.disabled = !isThisSkillEditable; // Desabilita se não for editável
+
+        // Lógica de habilitação do select:
+        selectLevel.disabled = true; // Desabilitado por padrão
+        if (isAdminEditingOtherUser) { // Admin editando perfil de outro usuário: pode editar qualquer nível
+          selectLevel.disabled = false;
+        } else if (isOwnerEditingOwnProfile) { // Dono do perfil editando o próprio
+          if (skillData.skillLevel === 0 || typeof skillData.skillLevel === 'undefined') {
+            selectLevel.disabled = false; // Só pode editar se nível for 0
+          }
+        }
+
         proficiencyLevels.forEach(profLevel => {
           const option = document.createElement('option');
           option.value = profLevel.level;
@@ -311,6 +325,7 @@ document.addEventListener('DOMContentLoaded', function () {
           }
           selectLevel.appendChild(option);
         });
+
         const tooltipText = document.createElement('p');
         tooltipText.className = 'text-xs text-gray-600 mt-2 proficiency-tooltip bg-gray-100 p-2 rounded-md border border-gray-200'; // Estilizado e sempre visível
 
@@ -374,16 +389,16 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    populateSkillsWithLevels('modal-backend', member.backend, 'backend', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-frontend', member.frontend, 'frontend', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-mobile', member.mobile, 'mobile', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-architecture', member.architecture, 'architecture', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-management', member.management, 'management', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-security', member.security, 'security', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-infra', member.infra, 'infra', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-data', member.data, 'data', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-backend', member.backend, 'backend', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-frontend', member.frontend, 'frontend', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-mobile', member.mobile, 'mobile', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-architecture', member.architecture, 'architecture', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-management', member.management, 'management', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-security', member.security, 'security', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-infra', member.infra, 'infra', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-data', member.data, 'data', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing', isAdminViewingOtherProfile, isOwnerOfProfile);
 
     const tabs = document.querySelectorAll('#competency-tabs button[role="tab"]');
     const tabContents = document.querySelectorAll('#competency-tab-content div[role="tabpanel"]');
@@ -531,14 +546,15 @@ document.addEventListener('DOMContentLoaded', function () {
       existingSubmittedMessage.remove();
     }
 
-    // O botão de salvar aparece se o usuário logado for o dono do perfil
-    if (isOwnerOfProfile) {
+    // O botão de salvar aparece se o usuário logado for o dono do perfil OU se for admin editando outro perfil
+    const canEffectivelyEditSkills = isOwnerOfProfile || isAdminViewingOtherProfile;
+    if (canEffectivelyEditSkills) {
       if (!saveButton) {
         saveButton = document.createElement('button');
         saveButton.id = 'save-skills-btn';
         saveButton.className = 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition mr-2';
         saveButton.textContent = 'Salvar Habilidades';
-        saveButton.addEventListener('click', saveSkills);
+        saveButton.addEventListener('click', saveSkills); // saveSkills usará currentProfileInModalId
         modalFooter.insertBefore(saveButton, modalFooter.firstChild);
       }
       saveButton.style.display = 'inline-block'; // Garante que está visível
@@ -652,6 +668,13 @@ document.addEventListener('DOMContentLoaded', function () {
     isSavingSkills = true;
     console.log("SaveSkills: Iniciando salvamento...");
 
+    const targetUserIdForSave = currentProfileInModalId; // Usa a variável de escopo mais amplo
+    if (!targetUserIdForSave) {
+      showToastNotification("ID do usuário alvo não encontrado para salvar.", 'error');
+      isSavingSkills = false;
+      return;
+    }
+
     const updatedSkills = {};
     const skillSelects = profileModal.querySelectorAll('.skill-level-select');
     skillSelects.forEach(select => {
@@ -668,8 +691,23 @@ document.addEventListener('DOMContentLoaded', function () {
     // console.log("Enviando para o backend:", updatedSkills); // Log já extenso, pode ser comentado se o de cima for suficiente
 
     const token = localStorage.getItem('authToken');
+    const loggedInUserId = localStorage.getItem('userId');
+    const isAdminSaving = isAdminUser();
+    const isEditingOwnProfile = loggedInUserId === targetUserIdForSave.toString();
+
+    let endpoint = '';
+    if (isAdminSaving && !isEditingOwnProfile) { // Admin editando outro usuário
+      endpoint = `http://localhost:3000/api/users/${targetUserIdForSave}/skills`;
+    } else if (isEditingOwnProfile) { // Usuário (admin ou não) editando o próprio perfil
+      endpoint = 'http://localhost:3000/api/users/me/profile/skills';
+    } else {
+      showToastNotification("Não autorizado a salvar estas habilidades.", 'error');
+      isSavingSkills = false;
+      return;
+    }
+
     try {
-      const response = await fetch('http://localhost:3000/api/users/me/profile/skills', {
+      const response = await fetch(endpoint, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -698,7 +736,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const result = await response.json();
       showToastNotification(result.message || "Habilidades salvas com sucesso!", 'success');
       closeProfileModal();
-      if (isAdminUser()) {
+      if (isAdminSaving) { // Se o admin salvou (seja o seu ou de outro)
         fetchAllTeamProfiles(); // Admin recarrega a lista da equipe
       } else {
         fetchMyProfile(); // Usuário normal recarrega seu próprio perfil
@@ -726,6 +764,7 @@ document.addEventListener('DOMContentLoaded', function () {
       currentSkillsChartInstance.destroy();
       currentSkillsChartInstance = null;
     }
+    currentProfileInModalId = null; // Resetar o ID ao fechar o modal
     document.body.style.overflow = 'auto';
   }
 
