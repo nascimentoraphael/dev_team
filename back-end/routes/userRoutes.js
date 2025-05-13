@@ -1,5 +1,5 @@
 const express = require('express');
-const sql = require('../postgresClient.js'); // Assuming postgresClient exports the 'postgres' instance as 'sql'
+const db = require('../postgresClient.js'); // Importa a conexão com o banco de dados
 const authenticateToken = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -10,7 +10,7 @@ router.get('/me/profile', authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const result = await sql`SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = ${userId}`;
+    const result = await db`SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = ${userId}`;
     const row = result[0];
 
     if (!row) {
@@ -53,12 +53,12 @@ router.put('/me/profile/skills', authenticateToken, async (req, res) => {
 
   skillCategories.forEach(category => {
     if (skills[category] !== undefined) { // Verifica se a categoria de skill foi enviada
-      setClauses.push(sql`${sql(category)} = ${JSON.stringify(skills[category] || [])}`);
+      setClauses.push(db`${db(category)} = ${JSON.stringify(skills[category] || [])}`);
     }
   });
 
   // Adiciona lastUpdate aos campos a serem atualizados
-  setClauses.push(sql`lastUpdate = ${new Date().toISOString()}`);
+  setClauses.push(db`lastUpdate = ${new Date().toISOString()}`);
 
   // Se apenas lastUpdate está sendo setado, significa que nenhuma skill foi enviada.
   if (setClauses.length <= 1) { // Ajustado para <= 1 pois sempre teremos lastUpdate
@@ -67,8 +67,8 @@ router.put('/me/profile/skills', authenticateToken, async (req, res) => {
 
   try {
     // Constructing the query using 'postgres' library features
-    // sql.join will handle the commas between setClauses
-    const result = await sql`UPDATE users SET ${sql.join(setClauses, sql`, `)} WHERE id = ${userId}`;
+    // db.join will handle the commas between setClauses
+    const result = await db`UPDATE users SET ${db.join(setClauses, db`, `)} WHERE id = ${userId}`;
 
     if (result.count === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para atualização de skills." });
@@ -105,7 +105,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
   const lastUpdate = new Date().toISOString();
 
   try {
-    const result = await sql`
+    const result = await db`
       UPDATE users 
       SET fullName = ${fullName}, username = ${email}, unit = ${unit}, name = ${name}, lastUpdate = ${lastUpdate} 
       WHERE id = ${userIdToEdit}`;
@@ -139,7 +139,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 
   try {
-    const result = await sql`DELETE FROM users WHERE id = ${userIdToDelete}`;
+    const result = await db`DELETE FROM users WHERE id = ${userIdToDelete}`;
     if (result.count === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para exclusão." });
     }
@@ -179,11 +179,11 @@ router.put('/:userId/skills', authenticateToken, async (req, res) => {
   skillCategories.forEach(category => {
     if (skills[category] !== undefined) { // Verifica se a categoria de skill foi enviada
       // Use sql(category) to treat category as a column name, not a string literal
-      setClauses.push(sql`${sql(category)} = ${JSON.stringify(skills[category] || [])}`);
+      setClauses.push(db`${db(category)} = ${JSON.stringify(skills[category] || [])}`);
     }
   });
 
-  setClauses.push(sql`lastUpdate = ${new Date().toISOString()}`);
+  setClauses.push(db`lastUpdate = ${new Date().toISOString()}`);
 
   if (setClauses.length <= 1) { // Se apenas lastUpdate está sendo setado
     return res.status(400).json({ message: "Nenhuma habilidade fornecida para atualização." });
@@ -191,7 +191,7 @@ router.put('/:userId/skills', authenticateToken, async (req, res) => {
 
   try {
     // Constructing the query using 'postgres' library features
-    const result = await sql`UPDATE users SET ${sql.join(setClauses, sql`, `)} WHERE id = ${targetUserId}`;
+    const result = await db`UPDATE users SET ${db.join(setClauses, db`, `)} WHERE id = ${targetUserId}`;
 
     if (result.count === 0) {
       return res.status(404).json({ message: "Usuário alvo não encontrado para atualização de skills." });

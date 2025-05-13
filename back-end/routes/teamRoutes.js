@@ -1,5 +1,5 @@
 const express = require('express');
-const sql = require('../postgresClient.js'); // Assuming postgresClient exports the 'postgres' instance as 'sql'
+const db = require('../postgresClient.js'); // Importa a conexão com o banco de dados
 
 const router = express.Router();
 
@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const queryText = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users";
-    const result = await sql.unsafe(queryText); // or await sql`SELECT ... FROM users`
+    const result = await db.unsafe(queryText); // or await db`SELECT ... FROM users`
 
     // As colunas de skills são armazenadas como JSON string, precisamos parseá-las
     // With 'postgres' library, result is directly the array of rows

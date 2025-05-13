@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const sql = require('../postgresClient.js');// Importa a conexão com o banco de dados (postgres instance)
+const db = require('../postgresClient.js');// Importa a conexão com o banco de dados
 
 const router = express.Router();
 
@@ -28,9 +28,9 @@ router.post('/register', async (req, res) => {
       JSON.stringify(skills.immersive || []), JSON.stringify(skills.marketing || [])
     ];
 
-    const result = await sql.unsafe(queryText, values); // Using sql.unsafe for dynamic query with $n placeholders
+    const result = await db.unsafe(queryText, values); // Using db.unsafe for dynamic query with $n placeholders
     // Or, more idiomatically with 'postgres' library if not using $n directly in template:
-    // const result = await sql`
+    // const result = await db`
     //   INSERT INTO users (username, password_hash, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing)
     //   VALUES (${username}, ${hash}, ${name}, ${fullName}, ${unit}, ${lastUpdate},
     //           ${JSON.stringify(skills.backend || [])}, ${JSON.stringify(skills.frontend || [])},
@@ -61,7 +61,7 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    const result = await sql`SELECT * FROM users WHERE username = ${username}`;
+    const result = await db`SELECT * FROM users WHERE username = ${username}`;
     const user = result[0];
 
     if (!user) {

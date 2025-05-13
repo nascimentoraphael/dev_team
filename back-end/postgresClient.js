@@ -244,4 +244,4 @@ initializeDatabase().catch(err => {
   console.error("Falha crítica ao inicializar o banco de dados PostgreSQL:", err);
 });
 
-module.exports = sql;
+module.exports = pool;
