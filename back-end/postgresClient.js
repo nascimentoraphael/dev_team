@@ -15,10 +15,18 @@ if (!connectionString) {
 
 // const sql = postgres(connectionString);
 
+const { URL } = require('url');
+
+const dbUrl = new URL(connectionString);
+
 const sql = postgres({
-  url: connectionString,
+  host: dbUrl.hostname,           // db.jnmahtekllvwjtadsvbr.supabase.co
+  port: Number(dbUrl.port),       // 5432
+  database: dbUrl.pathname.slice(1), // remove o '/' do início
+  username: dbUrl.username,       // postgres
+  password: dbUrl.password,       // sua senha
   ssl: 'require',
-  preferIPv6: false // 👈 ESSENCIAL: evita erro ENETUNREACH na Render
+  preferIPv6: false
 });
 
 async function initializeDatabase() {
