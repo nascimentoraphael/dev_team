@@ -1,60 +1,53 @@
-require('dotenv').config(); // Garante que DATABASE_URL seja carregado
-const { Pool } = require('pg');
+const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  family: 4, // Força o uso de IPv4
-  // Se estiver usando SSL com o Supabase (geralmente necessário para conexões externas)
-  ssl: {
-    rejectUnauthorized: false // Pode ser necessário dependendo da configuração do Supabase/Render
-  }
-});
+// Conecta ou cria o banco de dados. O arquivo será 'devteam.db' na mesma pasta.
+const DBSOURCE = "devteam.db";
 
-pool.on('connect', () => {
-  console.log('Conectado ao banco de dados PostgreSQL.');
-});
+const db = new sqlite3.Database(DBSOURCE, (err) => {
+  if (err) {
+    // Não pode abrir o banco de dados
+    console.error(err.message);
+    throw err;
+  } else {
+    console.log('Conectado ao banco de dados SQLite.');
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password_hash TEXT,
+            name TEXT,
+            fullName TEXT,
+            unit TEXT,
+            lastUpdate TEXT,
+            backend TEXT,
+            frontend TEXT,
+            mobile TEXT,
+            architecture TEXT,
+            management TEXT,
+            security TEXT,
+            infra TEXT,
+            data TEXT,
+            immersive TEXT,
+            marketing TEXT,
+            CONSTRAINT username_unique UNIQUE (username)
+        )`, (err) => {
+      if (err) {
+        // Tabela já criada ou outro erro
+        console.log("Tabela 'users' já existe ou erro ao criar:", err.message);
+      } else {
+        // Tabela acabou de ser criada.
+        console.log("Tabela 'users' criada. Inserindo dados de exemplo se necessário.");
+        insertInitialData();
+      }
+    });
 
-pool.on('error', (err) => {
-  console.error('Erro inesperado no cliente idle do pool', err);
-  process.exit(-1);
-});
+  } // Fecha o bloco 'else' da conexão bem-sucedida
+}); // Fecha o callback do construtor new sqlite3.Database
 
-const createTableQuery = `
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    name VARCHAR(255),
-    fullName VARCHAR(255),
-    unit VARCHAR(255),
-    lastUpdate TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    backend TEXT,
-    frontend TEXT,
-    mobile TEXT,
-    architecture TEXT,
-    management TEXT,
-    security TEXT,
-    infra TEXT,
-    data TEXT,
-    immersive TEXT,
-    marketing TEXT
-);`;
-
-async function initializeDatabase() {
-  try {
-    await pool.query(createTableQuery);
-    console.log("Tabela 'users' verificada/criada com sucesso.");
-    await insertInitialData();
-  } catch (err) {
-    console.error("Erro ao inicializar o banco de dados:", err.message, err.stack);
-  }
-}
-
-async function insertInitialData() {
+function insertInitialData() {
   const initialUsers = [
     {
-      username: "italo@example.com", password: "password123", name: "Italo Ignacio", fullName: "Italo Felipe Ignacio", unit: "Sede", lastUpdate: new Date().toISOString(),
+      username: "italo@senai.br", password: "password123", name: "Italo Ignacio", fullName: "Italo Felipe Ignacio", unit: "Sede", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -160,7 +153,7 @@ async function insertInitialData() {
       ])
     },
     {
-      username: "janaina@example.com", password: "password123", name: "Janaina Falco", fullName: "Janaina Ferreira Falco", unit: "Filial A", lastUpdate: new Date().toISOString(),
+      username: "janaina@senai.br", password: "password123", name: "Janaina Falco", fullName: "Janaina Ferreira Falco", unit: "Filial A", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([ // Repetir a mesma estrutura de skills para todos os usuários iniciais
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -266,7 +259,7 @@ async function insertInitialData() {
       ])
     },
     {
-      username: "admin@example.com", password: "adminpassword", name: "Admin", fullName: "System Administrator", unit: "Sede", lastUpdate: new Date().toISOString(),
+      username: "admin@senai.br", password: "adminpassword", name: "Admin", fullName: "System Administrator", unit: "Sede", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([ // Repetir a mesma estrutura de skills para todos os usuários iniciais
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -374,7 +367,7 @@ async function insertInitialData() {
     // Novos usuários adicionados
     ,
     {
-      username: "bruno.fernandes@example.com", password: "password123", name: "Bruno", fullName: "Bruno Henrique Fernandes", unit: "Não Definida", lastUpdate: new Date().toISOString(),
+      username: "bruno.fernandes@senai.br", password: "password123", name: "Bruno", fullName: "Bruno Henrique Fernandes", unit: "Não Definida", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -489,7 +482,7 @@ async function insertInitialData() {
     */
   ];
 
-  const insertQuery = 'INSERT INTO users (username, password_hash, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) ON CONFLICT (username) DO NOTHING';
+  const insert = 'INSERT OR IGNORE INTO users (username, password_hash, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
 
   const allSkillCategories = {
     backend: [
@@ -596,20 +589,20 @@ async function insertInitialData() {
   };
 
   const newUsersList = [
-    { username: "bruno.fernandes@example.com", name: "Bruno", fullName: "Bruno Henrique Fernandes" },
-    { username: "christian.alonso@example.com", name: "Christian", fullName: "Christian Albuquerque Alonso" },
-    { username: "daniel.santos@example.com", name: "Daniel", fullName: "Daniel Wilson Alves dos Santos" },
-    { username: "erick.barbosa@example.com", name: "Erick", fullName: "Erick Araujo Barbosa" },
-    { username: "flavio.dias@example.com", name: "Flávio", fullName: "Flávio Camilo Dias" },
-    { username: "joao.meyer@example.com", name: "João", fullName: "João Henrique Parizoti Meyer" },
-    { username: "lucas.silva@example.com", name: "Lucas", fullName: "Lucas Araujo Oliveira Silva" },
-    { username: "lukas.venancio@example.com", name: "Lukas", fullName: "Lukas Santos Venâncio" },
-    { username: "pedro.santos@example.com", name: "Pedro", fullName: "Pedro Henrique Silva Santos" },
-    { username: "raphael.nascimento@example.com", name: "Raphael", fullName: "Raphael Lima Marques do Nascimento" },
-    { username: "rodrigo.silva@example.com", name: "Rodrigo", fullName: "Rodrigo Areias da Silva" },
-    { username: "rogger.silveira@example.com", name: "Rogger", fullName: "Rogger da Silva Silveira" },
-    { username: "wesley.meneghini@example.com", name: "Wesley", fullName: "Wesley Meneghini" },
-    { username: "wilson.carneiro@example.com", name: "Wilson", fullName: "Wilson Rogerio Carneiro" }
+    { username: "bruno.fernandes@senai.br", name: "Bruno", fullName: "Bruno Henrique Fernandes" },
+    { username: "christian.alonso@senai.br", name: "Christian", fullName: "Christian Albuquerque Alonso" },
+    { username: "daniel.santos@senai.br", name: "Daniel", fullName: "Daniel Wilson Alves dos Santos" },
+    { username: "erick.barbosa@senai.br", name: "Erick", fullName: "Erick Araujo Barbosa" },
+    { username: "flavio.dias@senai.br", name: "Flávio", fullName: "Flávio Camilo Dias" },
+    { username: "joao.meyer@senai.br", name: "João", fullName: "João Henrique Parizoti Meyer" },
+    { username: "lucas.silva@senai.br", name: "Lucas", fullName: "Lucas Araujo Oliveira Silva" },
+    { username: "lukas.venancio@senai.br", name: "Lukas", fullName: "Lukas Santos Venâncio" },
+    { username: "pedro.santos@senai.br", name: "Pedro", fullName: "Pedro Henrique Silva Santos" },
+    { username: "raphael.nascimento@senai.br", name: "Raphael", fullName: "Raphael Lima Marques do Nascimento" },
+    { username: "rodrigo.silva@senai.br", name: "Rodrigo", fullName: "Rodrigo Areias da Silva" },
+    { username: "rogger.silveira@senai.br", name: "Rogger", fullName: "Rogger da Silva Silveira" },
+    { username: "wesley.meneghini@senai.br", name: "Wesley", fullName: "Wesley Meneghini" },
+    { username: "wilson.carneiro@senai.br", name: "Wilson", fullName: "Wilson Rogerio Carneiro" }
   ];
 
   newUsersList.forEach(u => {
@@ -632,28 +625,23 @@ async function insertInitialData() {
     });
   });
 
-  for (const user of initialUsers) {
-    try {
-      const hash = await bcrypt.hash(user.password, 10);
-      const params = [
+  initialUsers.forEach(user => {
+    bcrypt.hash(user.password, 10, (err, hash) => {
+      if (err) {
+        console.error("Erro ao gerar hash para usuário inicial:", user.username, err);
+        return;
+      }
+      db.run(insert, [
         user.username, hash, user.name, user.fullName, user.unit, user.lastUpdate,
         user.backend, user.frontend, user.mobile, user.architecture,
         user.management, user.security, user.infra, user.data,
         user.immersive, user.marketing
-      ];
-      const res = await pool.query(insertQuery, params);
-      if (res.rowCount > 0) {
-        console.log("Usuário inicial inserido:", user.username);
-      } else {
-        console.log("Usuário inicial ignorado (já existe):", user.username);
-      }
-    } catch (err) {
-      console.error("Erro ao inserir usuário inicial:", user.username, err.message);
-    }
-  }
-  console.log("Inserção de dados iniciais concluída.");
+      ], (err) => {
+        if (err) console.error("Erro ao inserir usuário inicial:", user.username, err.message);
+        else console.log("Usuário inicial inserido/ignorado:", user.username);
+      });
+    });
+  });
 }
 
-initializeDatabase();
-
-module.exports = pool;
+module.exports = db;
