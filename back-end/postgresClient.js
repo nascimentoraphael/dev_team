@@ -17,7 +17,7 @@ async function initializeDatabase() {
     console.log('Conectando ao banco de dados PostgreSQL...');
     // A conexão é implícita com a primeira query usando a biblioteca 'postgres'
 
-    await sql`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username TEXT UNIQUE NOT NULL,
@@ -37,7 +37,7 @@ async function initializeDatabase() {
         immersive JSONB,
         marketing JSONB
       );
-    `;
+    `);
     console.log("Tabela 'users' verificada/criada no PostgreSQL.");
 
     // Lógica de inserção de dados iniciais adaptada do database.js
@@ -212,7 +212,7 @@ async function initializeDatabase() {
     for (const user of initialUsers) {
       try {
         const hash = await bcrypt.hash(user.password, 10);
-        await sql`
+        await pool.query(`
           INSERT INTO users (
             username, password_hash, name, fullName, unit, lastUpdate,
             backend, frontend, mobile, architecture, management,
@@ -224,7 +224,7 @@ async function initializeDatabase() {
             ${user.immersive}::jsonb, ${user.marketing}::jsonb
           )
           ON CONFLICT (username) DO NOTHING;
-        `;
+        `);
         console.log("Usuário inicial inserido/ignorado no PostgreSQL:", user.username);
       } catch (insertErr) {
         console.error("Erro ao inserir usuário inicial no PostgreSQL:", user.username, insertErr.message);
