@@ -4,10 +4,11 @@ const bcrypt = require('bcryptjs');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  family: 4, // Força o uso de IPv4
   // Se estiver usando SSL com o Supabase (geralmente necessário para conexões externas)
-  // ssl: {
-  //   rejectUnauthorized: false // Pode ser necessário dependendo da configuração do Supabase/Render
-  // }
+  ssl: {
+    rejectUnauthorized: false // Pode ser necessário dependendo da configuração do Supabase/Render
+  }
 });
 
 pool.on('connect', () => {
