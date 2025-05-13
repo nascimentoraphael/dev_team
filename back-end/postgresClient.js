@@ -1,32 +1,15 @@
-// e:\dev_squad\back-end\postgresClient.js (versão CommonJS)
+// postgresClient.js
 require('dotenv').config();
-const postgres = require('postgres');
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
-console.log("URL do banco carregada do ambiente:", process.env.DATABASE_URL);
-
-
 const connectionString = process.env.DATABASE_URL;
+console.log("URL do banco carregada do ambiente:", connectionString);
 
-if (!connectionString) {
-  console.error("Erro: A variável de ambiente DATABASE_URL não está definida.");
-  // process.exit(1);
-}
-
-// const sql = postgres(connectionString);
-
-const { URL } = require('url');
-
-const dbUrl = new URL(connectionString);
-
-const sql = postgres({
-  host: dbUrl.hostname,           // db.jnmahtekllvwjtadsvbr.supabase.co
-  port: Number(dbUrl.port),       // 5432
-  database: dbUrl.pathname.slice(1), // remove o '/' do início
-  username: dbUrl.username,       // postgres
-  password: dbUrl.password,       // sua senha
-  ssl: 'require',
-  preferIPv6: false
+const pool = new Pool({
+  connectionString,
+  ssl: { rejectUnauthorized: false },
+  family: 4 // 👈 força uso de IPv4
 });
 
 async function initializeDatabase() {
