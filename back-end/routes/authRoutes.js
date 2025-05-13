@@ -28,19 +28,8 @@ router.post('/register', async (req, res) => {
       JSON.stringify(skills.immersive || []), JSON.stringify(skills.marketing || [])
     ];
 
-    const result = await db.unsafe(queryText, values); // Using db.unsafe for dynamic query with $n placeholders
-    // Or, more idiomatically with 'postgres' library if not using $n directly in template:
-    // const result = await db`
-    //   INSERT INTO users (username, password_hash, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing)
-    //   VALUES (${username}, ${hash}, ${name}, ${fullName}, ${unit}, ${lastUpdate},
-    //           ${JSON.stringify(skills.backend || [])}, ${JSON.stringify(skills.frontend || [])},
-    //           ${JSON.stringify(skills.mobile || [])}, ${JSON.stringify(skills.architecture || [])},
-    //           ${JSON.stringify(skills.management || [])}, ${JSON.stringify(skills.security || [])},
-    //           ${JSON.stringify(skills.infra || [])}, ${JSON.stringify(skills.data || [])},
-    //           ${JSON.stringify(skills.immersive || [])}, ${JSON.stringify(skills.marketing || [])})
-    //   RETURNING id`;
-
-    res.status(201).json({ message: "Usuário registrado com sucesso!", userId: result[0].id });
+    const result = await db.query(queryText, values);
+    res.status(201).json({ message: "Usuário registrado com sucesso!", userId: result.rows[0].id });
   } catch (err) {
     if (err.code === '23505') { // unique_violation
       return res.status(400).json({ message: "Nome de usuário já existe." });
@@ -61,8 +50,9 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    const result = await db`SELECT * FROM users WHERE username = ${username}`;
-    const user = result[0];
+    const queryText = "SELECT * FROM users WHERE username = $1";
+    const result = await db.query(queryText, [username]);
+    const user = result.rows[0];
 
     if (!user) {
       return res.status(401).json({ message: "Usuário não encontrado ou senha incorreta." }); // Mensagem genérica por segurança

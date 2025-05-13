@@ -7,11 +7,10 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const queryText = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users";
-    const result = await db.unsafe(queryText); // or await db`SELECT ... FROM users`
+    const result = await db.query(queryText);
 
-    // As colunas de skills são armazenadas como JSON string, precisamos parseá-las
-    // With 'postgres' library, result is directly the array of rows
-    const teamMembers = result.map(member => ({
+    // Com 'pg', os resultados estão em result.rows
+    const teamMembers = result.rows.map(member => ({
       ...member,
       // JSON.parse should not be needed if your DB returns JSONB as objects already,
       // but if they are strings, then parse. 'postgres' lib often auto-parses JSON/JSONB.

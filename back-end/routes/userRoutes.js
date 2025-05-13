@@ -10,8 +10,9 @@ router.get('/me/profile', authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const result = await db`SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = ${userId}`;
-    const row = result[0];
+    const queryText = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = $1";
+    const result = await db.query(queryText, [userId]);
+    const row = result.rows[0];
 
     if (!row) {
       res.status(404).json({ "message": "Perfil do usuário não encontrado." });
@@ -49,28 +50,32 @@ router.put('/me/profile/skills', authenticateToken, async (req, res) => {
   // Validar e preparar os campos de skills para o update
   const skillCategories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
   let setClauses = [];
-  let values = [];
+  let queryParams = [];
+  let paramIndex = 1;
 
   skillCategories.forEach(category => {
     if (skills[category] !== undefined) { // Verifica se a categoria de skill foi enviada
-      setClauses.push(db`${db(category)} = ${JSON.stringify(skills[category] || [])}`);
+      setClauses.push(`${category} = $${paramIndex++}`);
+      queryParams.push(JSON.stringify(skills[category] || []));
     }
   });
 
   // Adiciona lastUpdate aos campos a serem atualizados
-  setClauses.push(db`lastUpdate = ${new Date().toISOString()}`);
+  setClauses.push(`lastUpdate = $${paramIndex++}`);
+  queryParams.push(new Date().toISOString());
 
   // Se apenas lastUpdate está sendo setado, significa que nenhuma skill foi enviada.
   if (setClauses.length <= 1) { // Ajustado para <= 1 pois sempre teremos lastUpdate
     return res.status(400).json({ message: "Nenhuma habilidade fornecida para atualização." });
   }
 
-  try {
-    // Constructing the query using 'postgres' library features
-    // db.join will handle the commas between setClauses
-    const result = await db`UPDATE users SET ${db.join(setClauses, db`, `)} WHERE id = ${userId}`;
+  const queryText = `UPDATE users SET ${setClauses.join(', ')} WHERE id = $${paramIndex}`;
+  queryParams.push(userId);
 
-    if (result.count === 0) {
+  try {
+    const result = await db.query(queryText, queryParams);
+
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para atualização de skills." });
     }
     console.log('[UserRoutes] Skills atualizadas com sucesso para userID:', userId);
@@ -105,12 +110,10 @@ router.put('/:id', authenticateToken, async (req, res) => {
   const lastUpdate = new Date().toISOString();
 
   try {
-    const result = await db`
-      UPDATE users 
-      SET fullName = ${fullName}, username = ${email}, unit = ${unit}, name = ${name}, lastUpdate = ${lastUpdate} 
-      WHERE id = ${userIdToEdit}`;
+    const queryText = `UPDATE users SET fullName = $1, username = $2, unit = $3, name = $4, lastUpdate = $5 WHERE id = $6`;
+    const result = await db.query(queryText, [fullName, email, unit, name, lastUpdate, userIdToEdit]);
 
-    if (result.count === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para edição." });
     }
     console.log('[UserRoutes] Usuário ID:', userIdToEdit, 'editado com sucesso pelo admin ID:', req.user.id);
@@ -139,8 +142,9 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 
   try {
-    const result = await db`DELETE FROM users WHERE id = ${userIdToDelete}`;
-    if (result.count === 0) {
+    const queryText = "DELETE FROM users WHERE id = $1";
+    const result = await db.query(queryText, [userIdToDelete]);
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para exclusão." });
     }
     console.log('[UserRoutes] Usuário ID:', userIdToDelete, 'excluído com sucesso pelo admin ID:', req.user.id);
@@ -175,25 +179,29 @@ router.put('/:userId/skills', authenticateToken, async (req, res) => {
 
   const skillCategories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
   let setClauses = [];
+  let queryParams = [];
+  let paramIndex = 1;
 
   skillCategories.forEach(category => {
     if (skills[category] !== undefined) { // Verifica se a categoria de skill foi enviada
-      // Use sql(category) to treat category as a column name, not a string literal
-      setClauses.push(db`${db(category)} = ${JSON.stringify(skills[category] || [])}`);
+      setClauses.push(`${category} = $${paramIndex++}`);
+      queryParams.push(JSON.stringify(skills[category] || []));
     }
   });
 
-  setClauses.push(db`lastUpdate = ${new Date().toISOString()}`);
+  setClauses.push(`lastUpdate = $${paramIndex++}`);
+  queryParams.push(new Date().toISOString());
 
   if (setClauses.length <= 1) { // Se apenas lastUpdate está sendo setado
     return res.status(400).json({ message: "Nenhuma habilidade fornecida para atualização." });
   }
 
-  try {
-    // Constructing the query using 'postgres' library features
-    const result = await db`UPDATE users SET ${db.join(setClauses, db`, `)} WHERE id = ${targetUserId}`;
+  const queryText = `UPDATE users SET ${setClauses.join(', ')} WHERE id = $${paramIndex}`;
+  queryParams.push(targetUserId);
 
-    if (result.count === 0) {
+  try {
+    const result = await db.query(queryText, queryParams);
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: "Usuário alvo não encontrado para atualização de skills." });
     }
     console.log(`[Admin UserRoutes] Skills atualizadas com sucesso para userID: ${targetUserId} pelo Admin ${req.user.username}`);

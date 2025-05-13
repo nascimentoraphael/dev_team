@@ -34,9 +34,9 @@ app.listen(PORT, async () => {
   console.log(`Servidor rodando na porta ${PORT}`);
   // Uma pequena verificação para garantir que o DB está conectado após o servidor iniciar
   try {
-    // Tenta fazer uma query simples para verificar a conexão e a existência da tabela
-    const result = await db`SELECT to_regclass('public.users')`;
-    if (result[0] && result[0].to_regclass) {
+    // Tenta fazer uma query simples para verificar a conexão e a existência da tabela usando 'pg'
+    const result = await db.query("SELECT to_regclass('public.users')");
+    if (result.rows[0] && result.rows[0].to_regclass) {
       console.log("Conexão com o banco de dados PostgreSQL e tabela 'users' verificada.");
     } else {
       console.error("Tabela 'users' não encontrada no banco de dados PostgreSQL.");
