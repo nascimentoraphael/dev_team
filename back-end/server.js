@@ -1,7 +1,7 @@
 require('dotenv').config(); // Carrega variáveis de ambiente do .env
 const express = require('express');
 const cors = require('cors');
-const pool = require('./database'); // Importa a configuração do banco de dados (e inicializa)
+const pool = require('./postgresClient.js'); // Importa a configuração do banco de dados (e inicializa)
 
 const authRoutes = require('./routes/authRoutes');
 const teamRoutes = require('./routes/teamRoutes');
