@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('../database');
+const pool = require('../postgresClient.js');
 const authenticateToken = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -9,12 +9,13 @@ router.get('/me/profile', authenticateToken, (req, res) => {
   // req.user foi adicionado pelo middleware authenticateToken e contém o id do usuário
   const userId = req.user.id;
 
-  const sql = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = ?";
-  db.get(sql, [userId], (err, row) => {
+  const sql = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = $1";
+  pool.query(sql, [userId], (err, result) => {
     if (err) {
       res.status(500).json({ "error": err.message });
       return;
     }
+    const row = result.rows[0];
     if (!row) {
       res.status(404).json({ "message": "Perfil do usuário não encontrado." });
       return;
@@ -63,14 +64,15 @@ router.put('/me/profile/skills', authenticateToken, (req, res) => {
   }
 
   params.push(userId); // Adiciona o userId ao final para a cláusula WHERE
-  const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`;
+  // Placeholders for SET clauses are $1, $2, ..., and the last one for WHERE id = $N
+  const sql = `UPDATE users SET ${setClauses.map((clause, index) => clause.replace('?', `$${index + 1}`)).join(', ')} WHERE id = $${params.length}`;
 
-  db.run(sql, params, function (err) {
+  pool.query(sql, params, (err, result) => {
     if (err) {
       console.error('[UserRoutes] Erro ao atualizar skills no DB:', err.message);
       return res.status(500).json({ error: err.message });
     }
-    if (this.changes === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para atualização de skills." });
     }
     console.log('[UserRoutes] Skills atualizadas com sucesso para userID:', userId);
@@ -98,19 +100,20 @@ router.put('/:id', authenticateToken, (req, res) => {
     return res.status(400).json({ message: "O email do administrador principal não pode ser alterado." });
   }
 
-  const sql = `UPDATE users SET fullName = ?, username = ?, unit = ?, name = ?, lastUpdate = ? WHERE id = ?`;
+  const sql = `UPDATE users SET fullName = $1, username = $2, unit = $3, name = $4, lastUpdate = $5 WHERE id = $6`;
   const name = fullName.split(' ')[0]; // Pega o primeiro nome
   const lastUpdate = new Date().toISOString();
 
-  db.run(sql, [fullName, email, unit, name, lastUpdate, userIdToEdit], function (err) {
+  pool.query(sql, [fullName, email, unit, name, lastUpdate, userIdToEdit], (err, result) => {
     if (err) {
-      if (err.message.includes("UNIQUE constraint failed")) {
+      // Código 23505 é para unique_violation no PostgreSQL
+      if (err.code === '23505') {
         return res.status(400).json({ message: "O novo email (username) já está em uso." });
       }
       console.error('[UserRoutes] Erro ao editar usuário no DB:', err.message);
       return res.status(500).json({ error: "Erro ao atualizar usuário: " + err.message });
     }
-    if (this.changes === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para edição." });
     }
     console.log('[UserRoutes] Usuário ID:', userIdToEdit, 'editado com sucesso pelo admin ID:', req.user.id);
@@ -132,12 +135,12 @@ router.delete('/:id', authenticateToken, (req, res) => {
     return res.status(400).json({ message: "O administrador não pode se auto-excluir." });
   }
 
-  const sql = 'DELETE FROM users WHERE id = ?';
-  db.run(sql, userIdToDelete, function (err) {
+  const sql = 'DELETE FROM users WHERE id = $1';
+  pool.query(sql, [userIdToDelete], (err, result) => {
     if (err) {
       return res.status(500).json({ error: "Erro ao excluir usuário: " + err.message });
     }
-    if (this.changes === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: "Usuário não encontrado para exclusão." });
     }
     console.log('[UserRoutes] Usuário ID:', userIdToDelete, 'excluído com sucesso pelo admin ID:', req.user.id);
@@ -188,14 +191,15 @@ router.put('/:userId/skills', authenticateToken, (req, res) => {
   }
 
   params.push(targetUserId); // Adiciona o targetUserId ao final para a cláusula WHERE
-  const sql = `UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`;
+  // Placeholders for SET clauses are $1, $2, ..., and the last one for WHERE id = $N
+  const sql = `UPDATE users SET ${setClauses.map((clause, index) => clause.replace('?', `$${index + 1}`)).join(', ')} WHERE id = $${params.length}`;
 
-  db.run(sql, params, function (err) {
+  pool.query(sql, params, (err, result) => {
     if (err) {
       console.error('[Admin UserRoutes] Erro ao atualizar skills no DB para userID ' + targetUserId + ':', err.message);
       return res.status(500).json({ error: err.message });
     }
-    if (this.changes === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: "Usuário alvo não encontrado para atualização de skills." });
     }
     console.log(`[Admin UserRoutes] Skills atualizadas com sucesso para userID: ${targetUserId} pelo Admin ${req.user.username}`);

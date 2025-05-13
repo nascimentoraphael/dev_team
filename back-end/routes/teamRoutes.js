@@ -1,17 +1,18 @@
 const express = require('express');
-const db = require('../database');
+const pool = require('../postgresClient.js');
 
 const router = express.Router();
 
 // Rota para buscar todos os membros da equipe
 router.get('/', (req, res) => {
   const sql = "SELECT id, username, name, fullName, unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users";
-  db.all(sql, [], (err, rows) => {
+  pool.query(sql, [], (err, result) => {
     if (err) {
       res.status(500).json({ "error": err.message });
       return;
     }
     // As colunas de skills são armazenadas como JSON string, precisamos parseá-las
+    const rows = result.rows;
     const teamMembers = rows.map(member => ({
       ...member,
       backend: JSON.parse(member.backend || '[]'),
