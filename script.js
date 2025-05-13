@@ -16,9 +16,15 @@ document.addEventListener('DOMContentLoaded', function () {
   const editUserModal = document.getElementById('edit-user-modal');
   const closeEditUserModalBtn = document.getElementById('close-edit-user-modal');
   const editUserForm = document.getElementById('edit-user-form');
+
+  // Elementos do modal da tabela de competências
+  const competenciesTableModal = document.getElementById('competencies-table-modal');
+  const closeCompetenciesTableModalAction = document.getElementById('close-competencies-table-modal-action'); // Botão X no header do modal da tabela
+  const closeCompetenciesTableModalBtn = document.getElementById('close-competencies-table-modal-btn'); // Botão "Fechar" no footer do modal da tabela
   const editUserMessage = document.getElementById('edit-user-message');
 
   let allTeamMembersGlobal = []; // Para armazenar os dados dos usuários
+  let currentProfileInModalId = null; // Para saber qual perfil está no modal e permitir edições pelo admin
   let currentChartInstance = null; // Instância do gráfico de radar no modal
   let currentSkillsChartInstance = null; // Instância do gráfico de barras de skills no modal
 
@@ -30,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     try {
-      const response = await fetch('https://dev-team.onrender.com/api/team', {
+      const response = await fetch('http://localhost:3000/api/team', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!response.ok) {
@@ -77,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     try {
-      const response = await fetch('https://dev-team.onrender.com/api/users/me/profile', {
+      const response = await fetch('http://localhost:3000/api/users/me/profile', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -208,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
                             </div>
                         </div>
-                        ${isAdminUser() && member.username !== 'admin@example.com' ? `
+                        ${isAdminUser() && member.username !== 'admin@senai.br' ? `
                         <div class="mt-4 pt-3 border-t border-gray-200 flex justify-end space-x-2">
                             <button class="edit-user-btn text-xs px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition" data-user-id="${member.id}">
                                 <i class="fas fa-edit mr-1"></i>Editar
@@ -234,6 +240,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Open profile modal
   function openProfileModal(member) {
+    currentProfileInModalId = member.id; // Define o ID do usuário cujo perfil está no modal
+
+
     const names = (member.name || "Usuário").split(' ');
     const initials = names.length > 1
       ? `${names[0][0]}${names[names.length - 1][0]}`
@@ -241,7 +250,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const loggedInUserId = localStorage.getItem('userId');
     // Verifica se o usuário logado é o dono do perfil que está sendo visualizado
-    const isOwnerOfProfile = loggedInUserId === member.id.toString();
+    const isOwnerOfProfile = loggedInUserId === currentProfileInModalId.toString();
+    const isAdminViewingOtherProfile = isAdminUser() && !isOwnerOfProfile;
 
     document.getElementById('modal-name').textContent = member.name;
     document.getElementById('modal-fullname').textContent = member.fullName;
@@ -278,25 +288,34 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    function populateSkillsWithLevels(containerId, skillsArray, categoryKey, isOwnerViewingOwnProfile) {
+    // Modificado para aceitar flags de permissão de edição
+    function populateSkillsWithLevels(containerId, skillsArray, categoryKey, isAdminEditingOtherUser, isOwnerEditingOwnProfile) {
       const container = document.getElementById(containerId);
       container.innerHTML = '';
       const skills = skillsArray || [];
       skills.forEach(skillData => {
         const skillItemContainer = document.createElement('div');
-        // A skill é editável SE:
-        // 1. O usuário logado é o dono do perfil E
-        // 2. A skill ainda não foi avaliada (skillLevel é 0 ou undefined update)
-        const isThisSkillEditable = isOwnerViewingOwnProfile && (skillData.skillLevel === 0 || typeof skillData.skillLevel === 'undefined');
         skillItemContainer.className = 'skill-level-item mb-3 p-3 border rounded-md bg-gray-50';
+
         const skillNameLabel = document.createElement('label');
         skillNameLabel.className = 'block text-sm font-medium text-gray-800 mb-1';
         skillNameLabel.textContent = skillData.skillName;
+
         const selectLevel = document.createElement('select');
         selectLevel.className = 'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm skill-level-select';
         selectLevel.dataset.skillName = skillData.skillName;
         selectLevel.dataset.categoryKey = categoryKey;
-        selectLevel.disabled = !isThisSkillEditable; // Desabilita se não for editável
+
+        // Lógica de habilitação do select:
+        selectLevel.disabled = true; // Desabilitado por padrão
+        if (isAdminEditingOtherUser) { // Admin editando perfil de outro usuário: pode editar qualquer nível
+          selectLevel.disabled = false;
+        } else if (isOwnerEditingOwnProfile) { // Dono do perfil editando o próprio
+          if (skillData.skillLevel === 0 || typeof skillData.skillLevel === 'undefined') {
+            selectLevel.disabled = false; // Só pode editar se nível for 0
+          }
+        }
+
         proficiencyLevels.forEach(profLevel => {
           const option = document.createElement('option');
           option.value = profLevel.level;
@@ -306,16 +325,23 @@ document.addEventListener('DOMContentLoaded', function () {
           }
           selectLevel.appendChild(option);
         });
+
         const tooltipText = document.createElement('p');
-        tooltipText.className = 'text-xs text-gray-500 mt-1 italic hidden proficiency-tooltip';
-        function updateTooltip(level) {
+        tooltipText.className = 'text-xs text-gray-600 mt-2 proficiency-tooltip bg-gray-100 p-2 rounded-md border border-gray-200'; // Estilizado e sempre visível
+
+        function updateTooltip(level, skillNameForTooltip) {
           const selectedProficiency = proficiencyLevels.find(p => p.level === parseInt(level));
-          const defaultTooltipText = proficiencyLevels[0]?.text || "Descrição não disponível.";
-          tooltipText.textContent = selectedProficiency ? (selectedProficiency.text || defaultTooltipText) : defaultTooltipText;
-          tooltipText.classList.remove('hidden');
+          let baseText = "Descrição não disponível.";
+          if (selectedProficiency && selectedProficiency.text) {
+            baseText = selectedProficiency.text;
+          } else if (level === 0 && proficiencyLevels[0] && proficiencyLevels[0].text) {
+            baseText = proficiencyLevels[0].text;
+          }
+          tooltipText.textContent = baseText.replace(/\{\{skillName\}\}/g, skillNameForTooltip);
         }
-        selectLevel.addEventListener('change', (e) => updateTooltip(e.target.value));
-        updateTooltip(selectLevel.value);
+        selectLevel.addEventListener('change', (e) => updateTooltip(e.target.value, skillData.skillName));
+        updateTooltip(selectLevel.value, skillData.skillName); // Chamada inicial para exibir a descrição do nível atual
+
         skillItemContainer.appendChild(skillNameLabel);
         skillItemContainer.appendChild(selectLevel);
         skillItemContainer.appendChild(tooltipText);
@@ -363,16 +389,16 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    populateSkillsWithLevels('modal-backend', member.backend, 'backend', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-frontend', member.frontend, 'frontend', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-mobile', member.mobile, 'mobile', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-architecture', member.architecture, 'architecture', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-management', member.management, 'management', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-security', member.security, 'security', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-infra', member.infra, 'infra', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-data', member.data, 'data', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive', isOwnerOfProfile);
-    populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing', isOwnerOfProfile);
+    populateSkillsWithLevels('modal-backend', member.backend, 'backend', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-frontend', member.frontend, 'frontend', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-mobile', member.mobile, 'mobile', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-architecture', member.architecture, 'architecture', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-management', member.management, 'management', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-security', member.security, 'security', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-infra', member.infra, 'infra', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-data', member.data, 'data', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing', isAdminViewingOtherProfile, isOwnerOfProfile);
 
     const tabs = document.querySelectorAll('#competency-tabs button[role="tab"]');
     const tabContents = document.querySelectorAll('#competency-tab-content div[role="tabpanel"]');
@@ -515,17 +541,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // Remover mensagem de submissão anterior, se houver
     const existingSubmittedMessage = competencyTabsContainer.previousElementSibling;
     if (existingSubmittedMessage && existingSubmittedMessage.classList.contains('skills-submitted-info')) {
+      // Esta classe não existe mais, mas a lógica de remover um elemento anterior pode ser útil
+      // Se houver alguma mensagem específica de "salvo" ou "erro" diretamente antes das abas.
       existingSubmittedMessage.remove();
     }
 
-    // O botão de salvar aparece se o usuário logado for o dono do perfil
-    if (isOwnerOfProfile) {
+    // O botão de salvar aparece se o usuário logado for o dono do perfil OU se for admin editando outro perfil
+    const canEffectivelyEditSkills = isOwnerOfProfile || isAdminViewingOtherProfile;
+    if (canEffectivelyEditSkills) {
       if (!saveButton) {
         saveButton = document.createElement('button');
         saveButton.id = 'save-skills-btn';
         saveButton.className = 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition mr-2';
         saveButton.textContent = 'Salvar Habilidades';
-        saveButton.addEventListener('click', saveSkills);
+        saveButton.addEventListener('click', saveSkills); // saveSkills usará currentProfileInModalId
         modalFooter.insertBefore(saveButton, modalFooter.firstChild);
       }
       saveButton.style.display = 'inline-block'; // Garante que está visível
@@ -533,10 +562,99 @@ document.addEventListener('DOMContentLoaded', function () {
       if (saveButton) {
         saveButton.style.display = 'none'; // Esconde o botão se não for editável
       }
-      // A mensagem de "skills já submetidas" foi removida, pois a lógica agora é por skill individual.
     }
+
+    // Configurar botão para abrir o modal da tabela de competências
+    const openCompetenciesTableViewBtn = document.getElementById('open-competencies-table-view-btn');
+    if (openCompetenciesTableViewBtn) {
+      // Remover listener antigo para evitar duplicação, clonando o botão
+      const newBtn = openCompetenciesTableViewBtn.cloneNode(true);
+      openCompetenciesTableViewBtn.parentNode.replaceChild(newBtn, openCompetenciesTableViewBtn);
+
+      newBtn.addEventListener('click', () => {
+        openCompetenciesTableModal(member);
+      });
+    } else {
+      console.warn("Botão 'open-competencies-table-view-btn' não encontrado.");
+    }
+
     profileModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+  }
+
+
+
+  // Função para popular a tabela de competências detalhadas
+  function populateCompetenciesTable(member, containerId) {
+    const tableContainer = document.getElementById(containerId);
+    tableContainer.innerHTML = ''; // Limpa conteúdo anterior
+
+    const table = document.createElement('table');
+    table.className = 'min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg shadow-sm';
+    const thead = document.createElement('thead');
+    thead.className = 'bg-gray-100';
+    thead.innerHTML = `
+      <tr>
+        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Categoria</th>
+        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Habilidade</th>
+        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Nível</th>
+        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Descrição Detalhada</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    tbody.className = 'bg-white divide-y divide-gray-200';
+
+    let evaluatedSkillsCount = 0;
+    const areaKeys = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
+    const categoryDisplayNames = { backend: 'Backend', frontend: 'Frontend', mobile: 'Mobile', architecture: 'Arquitetura', management: 'Gestão', security: 'Segurança', infra: 'Infra', data: 'Dados/IA', immersive: 'Imersivas', marketing: 'Marketing' };
+
+    areaKeys.forEach(categoryKey => {
+      if (member[categoryKey] && Array.isArray(member[categoryKey])) {
+        member[categoryKey].forEach(skill => {
+          if (skill.skillLevel > 0) { // Apenas habilidades avaliadas
+            evaluatedSkillsCount++;
+            const proficiency = proficiencyLevels.find(p => p.level === skill.skillLevel);
+            const description = proficiency ? proficiency.text.replace(/\{\{skillName\}\}/g, skill.skillName) : 'N/A';
+            const levelLabel = proficiency ? proficiency.label : 'N/A';
+
+            const row = tbody.insertRow();
+            row.className = 'hover:bg-gray-50 transition-colors duration-150';
+            row.innerHTML = `
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${categoryDisplayNames[categoryKey] || categoryKey}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${skill.skillName}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">${levelLabel}</td>
+              <td class="px-4 py-3 text-sm text-gray-600">${description}</td>
+            `;
+          }
+        });
+      }
+    });
+
+    table.appendChild(tbody);
+    tableContainer.appendChild(table);
+
+    if (evaluatedSkillsCount === 0) {
+      tableContainer.innerHTML = '<p class="text-sm text-gray-500 italic p-4 text-center">Nenhuma competência avaliada (nível > 0) para exibir na tabela.</p>';
+    }
+  }
+
+  // Função para abrir o modal da tabela de competências
+  function openCompetenciesTableModal(member) {
+    const competenciesTableModalTitle = document.getElementById('competencies-table-modal-title');
+    if (competenciesTableModalTitle) {
+      competenciesTableModalTitle.textContent = `Resumo Detalhado das Competências - ${member.fullName || member.name}`;
+    }
+
+    populateCompetenciesTable(member, 'competencies-table-modal-content');
+
+    if (competenciesTableModal) {
+      competenciesTableModal.classList.remove('hidden');
+      // O profileModal permanece aberto por baixo, e o body.style.overflow já está 'hidden'
+    } else {
+      console.error("Elemento 'competencies-table-modal' não encontrado.");
+    }
   }
 
   let isSavingSkills = false; // Flag para debounce
@@ -549,6 +667,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     isSavingSkills = true;
     console.log("SaveSkills: Iniciando salvamento...");
+
+    const targetUserIdForSave = currentProfileInModalId; // Usa a variável de escopo mais amplo
+    if (!targetUserIdForSave) {
+      showToastNotification("ID do usuário alvo não encontrado para salvar.", 'error');
+      isSavingSkills = false;
+      return;
+    }
 
     const updatedSkills = {};
     const skillSelects = profileModal.querySelectorAll('.skill-level-select');
@@ -566,8 +691,23 @@ document.addEventListener('DOMContentLoaded', function () {
     // console.log("Enviando para o backend:", updatedSkills); // Log já extenso, pode ser comentado se o de cima for suficiente
 
     const token = localStorage.getItem('authToken');
+    const loggedInUserId = localStorage.getItem('userId');
+    const isAdminSaving = isAdminUser();
+    const isEditingOwnProfile = loggedInUserId === targetUserIdForSave.toString();
+
+    let endpoint = '';
+    if (isAdminSaving && !isEditingOwnProfile) { // Admin editando outro usuário
+      endpoint = `http://localhost:3000/api/users/${targetUserIdForSave}/skills`;
+    } else if (isEditingOwnProfile) { // Usuário (admin ou não) editando o próprio perfil
+      endpoint = 'http://localhost:3000/api/users/me/profile/skills';
+    } else {
+      showToastNotification("Não autorizado a salvar estas habilidades.", 'error');
+      isSavingSkills = false;
+      return;
+    }
+
     try {
-      const response = await fetch('https://dev-team.onrender.com/api/users/me/profile/skills', {
+      const response = await fetch(endpoint, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -596,7 +736,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const result = await response.json();
       showToastNotification(result.message || "Habilidades salvas com sucesso!", 'success');
       closeProfileModal();
-      if (isAdminUser()) {
+      if (isAdminSaving) { // Se o admin salvou (seja o seu ou de outro)
         fetchAllTeamProfiles(); // Admin recarrega a lista da equipe
       } else {
         fetchMyProfile(); // Usuário normal recarrega seu próprio perfil
@@ -624,6 +764,7 @@ document.addEventListener('DOMContentLoaded', function () {
       currentSkillsChartInstance.destroy();
       currentSkillsChartInstance = null;
     }
+    currentProfileInModalId = null; // Resetar o ID ao fechar o modal
     document.body.style.overflow = 'auto';
   }
 
@@ -778,7 +919,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const password = "password123"; // Senha padrão
 
       try {
-        const response = await fetch('https://dev-team.onrender.com/api/auth/register', {
+        const response = await fetch('http://localhost:3000/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: email, password, name, fullName, unit })
@@ -838,7 +979,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const token = localStorage.getItem('authToken');
 
       try {
-        const response = await fetch(`https://dev-team.onrender.com/api/users/${userId}`, {
+        const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -872,7 +1013,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (confirm(`Tem certeza que deseja excluir o usuário "${userName}" (ID: ${userId})? Esta ação não pode ser desfeita.`)) {
       const token = localStorage.getItem('authToken');
       try {
-        const response = await fetch(`https://dev-team.onrender.com/api/users/${userId}`, {
+        const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -895,6 +1036,20 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   if (closeModalBtn) { // closeModalBtn é o botão "Fechar" no rodapé do modal de perfil
     closeModalBtn.addEventListener('click', closeProfileModal);
+  }
+
+  // Event listeners para o novo modal da tabela de competências
+  if (closeCompetenciesTableModalAction) {
+    closeCompetenciesTableModalAction.addEventListener('click', () => {
+      if (competenciesTableModal) competenciesTableModal.classList.add('hidden');
+    });
+  } else {
+    console.warn("Elemento 'close-competencies-table-modal-action' não encontrado.");
+  }
+  if (closeCompetenciesTableModalBtn) {
+    closeCompetenciesTableModalBtn.addEventListener('click', () => {
+      if (competenciesTableModal) competenciesTableModal.classList.add('hidden');
+    });
   }
 
   // Initialize on page load
