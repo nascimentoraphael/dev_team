@@ -531,7 +531,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Defina aqui o número total de competências possíveis no sistema.
       // Ajuste este valor conforme o número real de todas as skills disponíveis para avaliação.
-      const totalPossibleSkills = 203;
+      // Exemplo: Se o total anterior era 203 e foram adicionadas 7 novas skills de Blockchain, o novo total seria 210.
+      const totalPossibleSkills = 212; // <<< ATUALIZE ESTE VALOR COM O NOVO TOTAL CORRETO DE COMPETÊNCIAS DO SISTEMA
 
       const allSkillObjectsForCard = [
         ...(member.backend || []).map(s => ({ ...s, category: 'backend' })),
