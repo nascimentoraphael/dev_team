@@ -3,14 +3,13 @@ console.log('[SCRIPT.JS] Arquivo script.js INICIANDO INTERPRETAÇÃO.');
 document.addEventListener('DOMContentLoaded', function () {
   console.log('[SCRIPT.JS] Evento DOMContentLoaded DISPARADO. Iniciando script principal.');
   // Elementos do DOM que o script principal interage
-  const searchInput = document.getElementById('searchInput'); // Para filtros (se habilitado)
-  const teamContainer = document.getElementById('team-container'); // Container principal dos cards de perfil
+  const searchInput = document.getElementById('searchInput');
+  const teamContainer = document.getElementById('team-container');
   const logoutButton = document.getElementById('logout-button');
-  const closeModalBtn = document.getElementById('close-modal-btn'); // Botão "Fechar" no rodapé do modal de perfil
-  const profileModal = document.getElementById('profile-modal'); // Referência ao modal de perfil
+  const closeModalBtn = document.getElementById('close-modal-btn');
+  const profileModal = document.getElementById('profile-modal');
   const userProfileSection = document.getElementById('user-profile-section');
   const welcomeMessage = document.getElementById('welcome-message');
-
 
   // Elementos do modal de criação de usuário
   const showCreateUserModalBtn = document.getElementById('show-create-user-modal-btn');
@@ -25,16 +24,326 @@ document.addEventListener('DOMContentLoaded', function () {
   const editUserForm = document.getElementById('edit-user-form');
   const editUserMessage = document.getElementById('edit-user-message');
 
-
   // Elementos do modal da tabela de competências
   const competenciesTableModal = document.getElementById('competencies-table-modal');
-  const closeCompetenciesTableModalAction = document.getElementById('close-competencies-table-modal-action'); // Botão X no header do modal da tabela
-  const closeCompetenciesTableModalBtn = document.getElementById('close-competencies-table-modal-btn'); // Botão "Fechar" no footer do modal da tabela
+  const closeCompetenciesTableModalAction = document.getElementById('close-competencies-table-modal-action');
+  const closeCompetenciesTableModalBtn = document.getElementById('close-competencies-table-modal-btn');
 
-  let allTeamMembersGlobal = []; // Para armazenar os dados dos usuários
-  let currentProfileInModalId = null; // Para saber qual perfil está no modal e permitir edições pelo admin
-  let currentChartInstance = null; // Instância do gráfico de radar no modal
-  let currentSkillsChartInstance = null; // Instância do gráfico de barras de skills no modal
+  let allTeamMembersGlobal = [];
+  let currentProfileInModalId = null;
+  let currentChartInstance = null;
+  let currentSkillsChartInstance = null;
+
+  // ---------------------------------------------------------------------------
+  // FUNÇÕES AUXILIARES GLOBAIS (dentro do DOMContentLoaded)
+  // ---------------------------------------------------------------------------
+
+  function formatDateTime(isoString) {
+    if (!isoString) return 'N/A';
+    try {
+      const date = new Date(isoString);
+      if (isNaN(date.getTime())) {
+        return 'Data inválida';
+      }
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+      });
+    } catch (e) {
+      console.error("Erro ao formatar data:", isoString, e);
+      return 'Erro na data';
+    }
+  }
+
+  const proficiencyLevels = [
+    { level: 0, label: '0 - Não Avaliado', text: 'Nível de proficiência ainda não avaliado para {{skillName}}.' },
+    { level: 1, label: '1 - Iniciante', text: 'Conhecimento básico de {{skillName}}, necessita de supervisão para tarefas complexas.' },
+    { level: 2, label: '2 - Elementar', text: 'Capaz de realizar tarefas simples em {{skillName}} com alguma autonomia.' },
+    { level: 3, label: '3 - Intermediário', text: 'Bom conhecimento prático de {{skillName}}, executa tarefas com independência.' },
+    { level: 4, label: '4 - Avançado', text: 'Profundo conhecimento em {{skillName}}, capaz de liderar e solucionar problemas complexos.' },
+    { level: 5, label: '5 - Especialista', text: 'Referência em {{skillName}}, contribui para a evolução da área e mentora outros.' }
+  ];
+
+  const portfolioItemsMap = [
+    {
+      name: "Análise de Vulnerabilidades",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/An%C3%A1lise%20de%20Vulnerabilidades.pptx?d=wf00cfba39cb342c8b6ddf19595f055d5&csf=1&web=1&e=AY6zt6",
+      relevantSkills: ["Pentest", "Kali Linux", "OWASP ZAP", "Segurança em Redes", "Análise de Risco", "Hardening", "Criptografia"],
+      infrastructure: ["Toolkit para Analise de Vulnerabilidade (open-source, gratuito)", "Notebook gamer de alto desempenho"]
+    },
+    {
+      name: "Assessment do CIS Controlvs V8",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Assessment%20CIS%20Controls%20v8.pptx?d=wf1a0f84445574bafa59b9ddbae3b0d14&csf=1&web=1&e=Uu4s2q",
+      relevantSkills: ["ISO 27001", "Governança", "Compliance Geral", "Análise de Risco", "Adequação LGPD"],
+      infrastructure: ["Notebook gamer de alto desempenho"]
+    },
+    {
+      name: "Assessment do CIS Controls V9",
+      link: "",
+      relevantSkills: ["ISO 27001", "ISO 27005 (Gestão de Riscos)", "Governança", "Compliance Geral", "Análise de Risco", "Adequação LGPD"],
+      infrastructure: ["Notebook gamer de alto desempenho", "Acesso digital a normas ABNT e ISO"]
+    },
+    {
+      name: "Assessoria em implantação de projetos de Infraestrutura de TI na Indústria",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Assessoria%20em%20implanta%C3%A7%C3%A3o%20de%20projetos%20de%20Infra%20TI%20na%20ind%C3%BAstria.pptx?d=w7a7e44fd00bf4574be08db0561b6a8f9&csf=1&web=1&e=klQ2wF",
+      relevantSkills: ["Amazon Web Services", "Azure", "Google Cloud Platform", "Docker", "Kubernetes", "Servidores Linux", "Servidores Windows", "Configurações de Rede", "Terraform", "DevOps", "Scrum", "Kanban", "ISA 62.443 (IEC 62443)"],
+      infrastructure: ["Notebook gamer de alto desempenho", "Raspberry PI 5+", "Servidores locais ou híbridos", "Roteadores industriais, switches gerenciáveis"]
+    },
+    {
+      name: "Assessoria em implantação de suíte de serviços em nuvem na indústria",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Assessoria%20em%20implanta%C3%A7%C3%A3o%20de%20su%C3%ADte%20de%20servi%C3%A7os%20em%20nuvem%20na%20ind%C3%BAstria.pptx?d=w94835bab29bd4d209d8584e719c2a9d2&csf=1&web=1&e=bMteeM",
+      relevantSkills: ["Amazon Web Services", "Azure", "Google Cloud Platform", "Computação em Nuvem", "Scrum", "Kanban"],
+      infrastructure: ["Notebook gamer de alto desempenho", "Assinatura Microsoft Azure", "Assinatura AWS", "Assinatura Google Cloud Platform"]
+    },
+    {
+      name: "Avaliação de Maturidade e conformidade em SI",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Avalia%C3%A7%C3%A3o%20de%20Maturidade%20e%20Conformidade%20em%20SI%20e%20Privacidade.pptx?d=w860a30ac60c0463097103461cd7fcbd9&csf=1&web=1&e=cljWMg",
+      relevantSkills: ["ISO 27001", "ISO 27005 (Gestão de Riscos)", "ISO 27701 (Privacidade/LGPD)", "Adequação LGPD", "Governança", "Compliance Geral", "Análise de Risco"],
+      infrastructure: ["Notebook gamer de alto desempenho", "Acesso digital a normas ABNT e ISO"]
+    },
+    {
+      name: "Consultoria de comunicação e marketing Digital",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Consultoria%20de%20Comunica%C3%A7%C3%A3o%20e%20Marketing%20Digital.pptx?d=w620aa68627e148cb900f33b602605a73&csf=1&web=1&e=EbC11T",
+      relevantSkills: ["SEO", "Redes Sociais", "Google ADS", "Google Analytics", "Meta ADS", "E-mail Marketing", "Mídias Digitais", "Omnichannel"],
+      infrastructure: []
+    },
+    {
+      name: "Consultoria em projetos de TI aplicado a Indústria",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Consultoria%20em%20projetos%20de%20TI%20aplicado%20a%20ind%C3%BAstria.pptx?d=wf42954bb5be147369ba035da69a5a67e&csf=1&web=1&e=fr8gq7",
+      relevantSkills: ["Scrum", "Kanban", "Clean Code", "Design Patterns", "SOLID", "DevOps", "ISA 62.443 (IEC 62443)"],
+      infrastructure: ["Notebook gamer de alto desempenho", "Servidores locais e/ou híbridos"]
+    },
+    {
+      name: "Consultoria em Sistemas ERP",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Consultoria%20em%20sistemas%20ERP.pptx?d=wa90db435c83a485dbe5046759abeef39&csf=1&web=1&e=Swe6po",
+      relevantSkills: ["Gerenciamento de Banco de Dados", "SQL Server", "Oracle", "MySQL", "PostgreSQL", "API REST", "Serviços de Mensageria PUB/SUB"],
+      infrastructure: ["Notebook gamer de alto desempenho", "SAP, Oracle ERP, Totvs Protheus", "Computação e armazenamento robustos"]
+    },
+    {
+      name: "Desenvolvimento de aplicações Mobile",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Desenvolvimento%20de%20Aplica%C3%A7%C3%B5es%20Mobile.pptx?d=w9991e5fb156e4cf1a20ff64ee3393167&csf=1&web=1&e=qVOfGg",
+      relevantSkills: ["React Native", "Flutter", "Swift", "Kotlin", "Dart", "API REST", "Firebase", "Publicação Apple Store", "Publicação Play Store"],
+      infrastructure: ["Notebook gamer de alto desempenho", "Smartphones Android", "Smartphones iOS", "Tablets Android", "Tablets iOS", "MacBooks"]
+    },
+    {
+      name: "Desenvolvimento de aplicações Web",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Desenvolvimento%20de%20Aplica%C3%A7%C3%B5es%20Web.pptx?d=w0d7fdcbede2b48fe84ad79e0565d112a&csf=1&web=1&e=Z5fM4s",
+      relevantSkills: [
+        "HTML", "CSS", "JavaScript", "TypeScript", "React", "Angular", "Next.js",
+        "Node.js", "Express", "NestJS", "Python", "Java", "Spring Boot", "PHP", "C#", ".NET",
+        "API REST", "Swagger",
+        "PostgreSQL", "MySQL", "MongoDB", "SQL Server", "SQLite", "Redis",
+        "Git", "GitHub", "Design Responsivo", "Bootstrap", "Tailwind CSS", "Materialize"
+      ],
+      infrastructure: ["Notebook gamer de alto desempenho", "Figma", "Assinatura Microsoft Azure", "Assinatura AWS", "Assinatura Google Cloud Platform", "GitHub"]
+    },
+    {
+      name: "Desenvolvimento de soluções com IA",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Desenvolvimento%20de%20Solu%C3%A7%C3%B5es%20com%20IA%E2%80%8B.pptx?d=w1b11a20fa66e4cfda746637fc19387de&csf=1&web=1&e=BrdAAO",
+      relevantSkills: [
+        "Python", "Machine Learning", "Linguagem R", "Tensorflow", "Keras", "Scikit-learn", "OpenCV",
+        "Processamento de Linguagem Natural (NLP)", "Langchain", "Large Language Modelos - LLMs", "Hugging Face",
+        "Visão Computacional - Classificação", "Visão Computacional - Detecção de Objetos", "YOLO", "Reconhecimento de Caracteres", "Visão Computacional - Segmentação Semântica",
+        "Redes Neurais Convolucionais(CNN)", "Redes Neurais Recorrentes (RNN)", "Generative adversarial network (GAN)",
+        "Algoritmos Genéticos", "K-Means", "Modelos de Classificação", "Modelos de Regressão Linear", "Jupyter Notebooks", "Google Colab", "Pandas", "Matplotlib", "Seaborn", "MLOps"
+      ],
+      infrastructure: ["Notebook gamer de alto desempenho", "Servidor para processamento massivo e dedicado", "Assinatura Microsoft Azure", "Assinatura AWS", "Assinatura Google Cloud Platform"]
+    },
+    {
+      name: "Desenvolvimento de soluções de integração de negócios",
+      link: "",
+      relevantSkills: ["API REST", "Microserviços", "Serviços de Mensageria PUB/SUB", "Apache Kafka", "RabbitMQ", "Pipelines ETL/ELT", "Node.js", "Java", "Spring Boot", "Python", "Websockets"],
+      infrastructure: []
+    },
+    {
+      name: "Softwares e soluções para análise de dados e criação de dashboards",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Desenvolvimento%20de%20Solu%C3%A7%C3%B5es%20de%20Int.%20de%20Neg%C3%B3cios%E2%80%8B.pptx?d=w2f498021b6e64de8b35d65403227f305&csf=1&web=1&e=5OS4r4",
+      relevantSkills: [
+        "Power BI", "Tableau",
+        "SQL Server", "PostgreSQL", "MySQL", "Oracle", "Gerenciamento de Banco de Dados",
+        "Python", "Pandas", "Matplotlib", "Seaborn", "Análise de Dados", "Análise exploratória",
+        "Data Warehouse", "Data Lake", "Pipelines ETL/ELT", "Amazon Redshift", "Azure Synapse Analytics", "Google Big Query"
+      ],
+      infrastructure: ["Notebook gamer de alto desempenho", "Servidor para processamento massivo e dedicado", "Assinatura Microsoft Azure", "Assinatura AWS", "Assinatura Google Cloud Platform", "Power BI", "Tableau"]
+    },
+    {
+      name: "Design de Produto Digital",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Design%20de%20Produto%20Digital%20ou%20Design%20UIUX.pptx?d=wce7215ab1f504eb48e681aafebb729ab&csf=1&web=1&e=ZrMror",
+      relevantSkills: ["Figma", "UI", "UX", "Prototipagem", "Design Thinking", "Design System"],
+      infrastructure: ["Notebook gamer de alto desempenho", "Figma", "Adobe Creative Cloud"]
+    },
+    {
+      name: "Penetration Test em aplicações Web",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Penetration%20Test%20em%20Aplica%C3%A7%C3%B5es%20WEB%E2%80%8B.pptx?d=w660462eba03644b4b0bfe98027ba1966&csf=1&web=1&e=8SYYvJ",
+      relevantSkills: ["Pentest", "OWASP ZAP", "Kali Linux", "JavaScript", "Segurança em Código (Security by Design)"],
+      infrastructure: ["Notebook gamer de alto desempenho", "Toolkit para PenTest (Open Source)"]
+    },
+    {
+      name: "Diagnóstico de comunicação e marketing digital",
+      link: "",
+      relevantSkills: ["Google Analytics", "SEO", "Redes Sociais", "Mídias Digitais"],
+      infrastructure: []
+    },
+    {
+      name: "Implementação ISO 27001",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Implementa%C3%A7%C3%A3o%20ISO%2027001.pptx?d=w5527301b3b624d46824f0f00ad4a19d0&csf=1&web=1&e=Z37nGc",
+      relevantSkills: ["ISO 27001", "Governança", "Compliance Geral", "Análise de Risco", "Adequação LGPD", "ISO 27005 (Gestão de Riscos)"],
+      infrastructure: ["Notebook gamer de alto desempenho"]
+    },
+    {
+      name: "Implementação ISO 27002",
+      link: "",
+      relevantSkills: ["ISO 27001", "Governança", "Hardening", "Segurança em Redes"],
+      infrastructure: ["Notebook gamer de alto desempenho", "Acesso digital a normas ABNT e ISO"]
+    },
+    {
+      name: "Plano de ação digital",
+      link: "",
+      relevantSkills: ["SEO", "Redes Sociais", "Google ADS", "Meta ADS", "Google Analytics", "E-mail Marketing", "Mídias Digitais", "Omnichannel", "Scrum", "Kanban"],
+      infrastructure: []
+    },
+    {
+      name: "Penetration Test - Infraestrutura e Serviços",
+      link: "https://sesisenaisp.sharepoint.com/:p:/r/sites/PPO-ComitdeTIeCybersegurana/Documentos%20Compartilhados/Comit%C3%AA%20de%20TI,%20IA%20e%20Cyberseguran%C3%A7a/Portf%C3%B3lio%20SENAI-SP/Product%20Lean%20Canvas%20-%20SGSET/Penetration%20Test%20%E2%80%93%20Infra%20e%20Servi%C3%A7os%E2%80%8B.pptx?d=wab0d6b5b8f2f4d45b0a41d76b4b67899&csf=1&web=1&e=0clvU2",
+      relevantSkills: ["Pentest", "Segurança em Redes", "Kali Linux", "Hardening", "Servidores Linux", "Servidores Windows", "Amazon Web Services", "Azure", "Docker"],
+      infrastructure: ["Notebook gamer de alto desempenho", "Toolkit para PenTest (Open Source)"]
+    }
+  ];
+
+  let toastTimeout;
+  function showToastNotification(message, type = 'info') {
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+      console.error("Toast container not found!");
+      alert(message);
+      return;
+    }
+    if (toastTimeout) clearTimeout(toastTimeout);
+    while (toastContainer.firstChild) {
+      toastContainer.removeChild(toastContainer.firstChild);
+    }
+    const toast = document.createElement('div');
+    toast.className = `fixed top-5 right-5 p-4 rounded-md shadow-lg text-white text-sm z-50 animate-toast-in`;
+    if (type === 'success') toast.classList.add('bg-green-500');
+    else if (type === 'error') toast.classList.add('bg-red-500');
+    else toast.classList.add('bg-blue-500');
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+    toastTimeout = setTimeout(() => {
+      toast.classList.remove('animate-toast-in');
+      toast.classList.add('animate-toast-out');
+      setTimeout(() => {
+        toast.remove();
+      }, 500);
+    }, 3000);
+  }
+
+  function updateStats(members) {
+    const statsSection = document.getElementById('stats-section');
+    // A função isAdminUser() será chamada aqui. Se não estiver definida, causará erro.
+    // Precisamos garantir que isAdminUser() do script.js seja usada.
+    if (!isAdminUser() || !statsSection || statsSection.style.display === 'none') {
+      if (document.getElementById('stats-total-members')) document.getElementById('stats-total-members').textContent = '0';
+      if (document.getElementById('stats-backend-experts')) document.getElementById('stats-backend-experts').textContent = '0';
+      if (document.getElementById('stats-full-stack')) document.getElementById('stats-full-stack').textContent = '0';
+      if (document.getElementById('stats-mobile-devs')) document.getElementById('stats-mobile-devs').textContent = '0';
+      return;
+    }
+
+    const totalMembers = members.length;
+    let totalSkillsEvaluated = 0;
+    const skillCounts = {};
+    const skillLevelsSum = {};
+    const categorySkillCounts = {};
+
+    members.forEach(member => {
+      const categories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
+      categories.forEach(category => {
+        if (member[category] && Array.isArray(member[category])) {
+          if (!categorySkillCounts[category]) {
+            categorySkillCounts[category] = { totalLevel: 0, skillEntries: 0 };
+          }
+          member[category].forEach(skill => {
+            if (skill.skillLevel > 0) {
+              totalSkillsEvaluated++;
+              skillCounts[skill.skillName] = (skillCounts[skill.skillName] || 0) + 1;
+              skillLevelsSum[skill.skillName] = (skillLevelsSum[skill.skillName] || 0) + skill.skillLevel;
+              categorySkillCounts[category].totalLevel += skill.skillLevel;
+              categorySkillCounts[category].skillEntries++;
+            }
+          });
+        }
+      });
+    });
+
+    const averageSkillsPerMember = totalMembers > 0 ? (totalSkillsEvaluated / totalMembers).toFixed(1) : 0;
+    const topSkillsArray = Object.entries(skillLevelsSum)
+      .map(([name, totalLevel]) => ({ name, averageLevel: totalLevel / skillCounts[name], count: skillCounts[name] }))
+      .sort((a, b) => b.averageLevel - a.averageLevel || b.count - a.count)
+      .slice(0, 3);
+    const categoryAverages = Object.entries(categorySkillCounts)
+      .map(([name, data]) => ({ name, averageLevel: data.skillEntries > 0 ? (data.totalLevel / data.skillEntries) : 0 }))
+      .sort((a, b) => b.averageLevel - a.averageLevel);
+
+    const totalMembersEl = document.getElementById('stats-total-members');
+    const avgSkillsEl = document.getElementById('stats-avg-skills'); // Este ID não existe no HTML, mas deixo a lógica
+    const topSkillsListEl = document.getElementById('stats-top-skills-list'); // Este ID não existe no HTML
+    const topCategoriesListEl = document.getElementById('stats-top-categories-list'); // Este ID não existe no HTML
+
+    // IDs corretos do HTML para stats:
+    // stats-total-members, stats-backend-experts, stats-full-stack, stats-mobile-devs
+
+    if (totalMembersEl) totalMembersEl.textContent = totalMembers;
+    // Exemplo de como preencher os outros stats (precisa da lógica correta para backend-experts, etc.)
+    if (document.getElementById('stats-backend-experts')) document.getElementById('stats-backend-experts').textContent = members.filter(m => m.backend && m.backend.some(s => s.skillLevel >= 4)).length; // Exemplo
+    if (document.getElementById('stats-full-stack')) document.getElementById('stats-full-stack').textContent = members.filter(m => (m.backend && m.backend.length > 0) && (m.frontend && m.frontend.length > 0)).length; // Exemplo
+    if (document.getElementById('stats-mobile-devs')) document.getElementById('stats-mobile-devs').textContent = members.filter(m => m.mobile && m.mobile.length > 0).length; // Exemplo
+
+
+    if (topSkillsListEl) {
+      topSkillsListEl.innerHTML = '';
+      if (topSkillsArray.length > 0) {
+        topSkillsArray.forEach(skill => {
+          const li = document.createElement('li');
+          li.className = 'text-xs text-gray-600';
+          li.innerHTML = `${skill.name} <span class="font-semibold">(Nível Médio: ${skill.averageLevel.toFixed(1)}, ${skill.count} devs)</span>`;
+          topSkillsListEl.appendChild(li);
+        });
+      } else {
+        topSkillsListEl.innerHTML = '<li class="text-xs text-gray-500 italic">Nenhuma skill avaliada.</li>';
+      }
+    }
+
+    if (topCategoriesListEl) {
+      topCategoriesListEl.innerHTML = '';
+      if (categoryAverages.length > 0) {
+        categoryAverages.slice(0, 3).forEach(cat => {
+          const li = document.createElement('li');
+          li.className = 'text-xs text-gray-600';
+          const categoryName = cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
+          li.innerHTML = `${categoryName} <span class="font-semibold">(Nível Médio: ${cat.averageLevel.toFixed(1)})</span>`;
+          topCategoriesListEl.appendChild(li);
+        });
+      } else {
+        topCategoriesListEl.innerHTML = '<li class="text-xs text-gray-500 italic">Nenhuma categoria com skills avaliadas.</li>';
+      }
+    }
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // FUNÇÃO isAdminUser - Deve ser a única definição desta função
+  // ---------------------------------------------------------------------------
+  function isAdminUser() {
+    const userEmail = localStorage.getItem('userEmail');
+    console.log('[isAdminUser] userEmail from localStorage:', userEmail);
+    const isAdmin = userEmail && userEmail.toLowerCase() === 'admin@sp.senai.br';
+    console.log('[isAdminUser] isAdmin result:', isAdmin);
+    return isAdmin;
+  }
+
+  // ---------------------------------------------------------------------------
+  // LÓGICA PRINCIPAL DA APLICAÇÃO
+  // ---------------------------------------------------------------------------
 
   // Função para buscar todos os perfis da equipe (para o Admin)
   async function fetchAllTeamProfiles() {
@@ -62,12 +371,8 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log('[fetchAllTeamProfiles] Raw team data from API:', JSON.parse(JSON.stringify(team)));
       const loggedInUserId = localStorage.getItem('userId');
       console.log('[fetchAllTeamProfiles] loggedInUserId:', loggedInUserId);
-      // Filtra o próprio admin da lista
       allTeamMembersGlobal = team.filter(member => member.id.toString() !== loggedInUserId);
-
       console.log('[fetchAllTeamProfiles] Filtered allTeamMembersGlobal (admin removed):', JSON.parse(JSON.stringify(allTeamMembersGlobal)));
-
-      // Ordenar alfabeticamente por fullName (ou name como fallback)
       allTeamMembersGlobal.sort((a, b) => {
         const nameA = (a.fullName || a.name || '').toLowerCase();
         const nameB = (b.fullName || b.name || '').toLowerCase();
@@ -75,9 +380,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (nameA > nameB) return 1;
         return 0;
       });
-
-      displayTeamMembers(allTeamMembersGlobal); // Exibe todos inicialmente
-      updateStats(allTeamMembersGlobal); // Atualiza as estatísticas
+      displayTeamMembers(allTeamMembersGlobal);
+      updateStats(allTeamMembersGlobal);
     } catch (error) {
       console.error("Failed to fetch team profiles:", error);
       if (teamContainer) {
@@ -95,12 +399,10 @@ document.addEventListener('DOMContentLoaded', function () {
       window.location.href = 'login.html';
       return;
     }
-
     try {
       const response = await fetch('https://dev-team.onrender.com/api/users/me/profile', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
           localStorage.removeItem('authToken');
@@ -112,22 +414,17 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const myProfile = await response.json();
-
-      // Garante que todas as categorias de skills existam como arrays
       const skillCategories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
       skillCategories.forEach(category => {
         myProfile[category] = myProfile[category] || [];
       });
-
-      allTeamMembersGlobal = [myProfile]; // Armazena para consistência (embora só haja um)
+      allTeamMembersGlobal = [myProfile];
       displayTeamMembers(myProfile);
-      // updateStats([myProfile]); // Stats não são mostrados para usuário normal
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
       if (teamContainer) {
         teamContainer.innerHTML = '<p class="text-red-500 text-center col-span-full">Erro ao carregar seu perfil. Tente fazer login novamente.</p>';
       }
-      // updateStats([]); // Stats não são mostrados para usuário normal
     }
   }
 
@@ -139,10 +436,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     console.log('[displayTeamMembers] Called with members:', JSON.parse(JSON.stringify(members)));
     teamContainer.innerHTML = '';
-
     const membersArray = Array.isArray(members) ? members : [members];
     console.log('[displayTeamMembers] membersArray after ensuring array:', JSON.parse(JSON.stringify(membersArray)));
-
 
     if (!membersArray || membersArray.length === 0 || !membersArray[0]) {
       console.log('[displayTeamMembers] No members to display or first member is falsy.');
@@ -151,7 +446,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    const isAdminNow = isAdminUser(); // Chama uma vez para evitar múltiplas chamadas com logs
+    const isAdminNow = isAdminUser();
     console.log('[displayTeamMembers] isAdminUser() check in displayTeamMembers:', isAdminNow);
 
     if (!isAdminNow && membersArray.length === 1) {
@@ -161,30 +456,20 @@ document.addEventListener('DOMContentLoaded', function () {
       teamContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6';
     } else {
       console.log('[displayTeamMembers] Condition for layout not met, isAdminNow:', isAdminNow, 'membersArray.length:', membersArray.length);
-      // Fallback layout or specific handling if needed
-      teamContainer.className = 'grid grid-cols-1 gap-6'; // Default to single column if logic is unclear
+      teamContainer.className = 'grid grid-cols-1 gap-6';
     }
-
 
     membersArray.forEach(member => {
       const names = (member.name || "Usuário").split(' ');
       const initials = names.length > 1
         ? `${names[0][0]}${names[names.length - 1][0]}`
         : (names[0] ? names[0][0] : 'U');
-
       const totalSkills = [
-        ...(member.backend || []),
-        ...(member.frontend || []),
-        ...(member.mobile || []),
-        ...(member.architecture || []),
-        ...(member.management || []),
-        ...(member.security || []),
-        ...(member.infra || []),
-        ...(member.data || []),
-        ...(member.immersive || []),
+        ...(member.backend || []), ...(member.frontend || []), ...(member.mobile || []),
+        ...(member.architecture || []), ...(member.management || []), ...(member.security || []),
+        ...(member.infra || []), ...(member.data || []), ...(member.immersive || []),
         ...(member.marketing || [])
       ].length;
-
       const allSkillObjectsForCard = [
         ...(member.backend || []).map(s => ({ ...s, category: 'backend' })),
         ...(member.frontend || []).map(s => ({ ...s, category: 'frontend' })),
@@ -197,88 +482,77 @@ document.addEventListener('DOMContentLoaded', function () {
         ...(member.immersive || []).map(s => ({ ...s, category: 'immersive' })),
         ...(member.marketing || []).map(s => ({ ...s, category: 'marketing' }))
       ];
-
       const card = document.createElement('div');
       let cardClasses = 'profile-card bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in';
-      if (!isAdminNow && membersArray.length === 1) { // Usa a variável isAdminNow
+      if (!isAdminNow && membersArray.length === 1) {
         cardClasses += ' max-w-2xl mx-auto';
       }
       card.className = cardClasses;
       card.innerHTML = `
-                <div class="p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg font-bold mr-3">
-                            ${initials.toUpperCase()}
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg">${member.name}</h3>
-                            <p class="text-sm text-gray-600">${member.fullName}</p>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-medium text-gray-700">Habilidades</span>
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${totalSkills} competências</span>
-                        </div>
-                        <div class="text-xs text-gray-500 mb-2">
-                            Email: ${member.username || 'N/A'} <br>
-                            Unidade: ${member.unit || 'N/A'}
-                        </div>
-                        <div class="flex justify-between items-center text-sm mb-3">
-                            <span class="text-gray-500">Última atualização: ${formatDateTime(member.lastUpdate)}</span>
-                            <button class="view-profile-btn px-3 py-1 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition">
-                                Ver Perfil Completo
-                            </button>
-                        </div>
-                        <div class="mb-4">
-                            <h6 class="text-xs font-medium text-gray-600 mb-1">Principais Habilidades:</h6>
-                            <div class="flex flex-wrap gap-2">
-                                ${allSkillObjectsForCard.sort((a, b) => (b.skillLevel || 0) - (a.skillLevel || 0)).slice(0, 3).map(skillObj => `
-                                    <span class="skill-chip text-xs bg-gray-100 text-gray-800 px-3 py-1 rounded-full">
-                                        ${skillObj.skillName} ${skillObj.skillLevel > 0 ? `(N${skillObj.skillLevel})` : ''}
-                                    </span>
-                                `).join('')}
-                                ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
-                            </div>
-                        </div>
-                        ${isAdminNow && member.id.toString() !== localStorage.getItem('userId') ? `
-                        <div class="mt-4 pt-3 border-t border-gray-200 flex justify-end space-x-2">
-                            <button class="edit-user-btn text-xs px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition" data-user-id="${member.id}">
-                                <i class="fas fa-edit mr-1"></i>Editar
-                            </button>
-                            <button class="delete-user-btn text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition" data-user-id="${member.id}" data-user-name="${member.fullName}">
-                                <i class="fas fa-trash-alt mr-1"></i>Excluir
-                            </button>
-                        </div>` : ''}
+        <div class="p-6">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg font-bold mr-3">
+                    ${initials.toUpperCase()}
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg">${member.name}</h3>
+                    <p class="text-sm text-gray-600">${member.fullName}</p>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Habilidades</span>
+                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${totalSkills} competências</span>
+                </div>
+                <div class="text-xs text-gray-500 mb-2">
+                    Email: ${member.username || 'N/A'} <br>
+                    Unidade: ${member.unit || 'N/A'}
+                </div>
+                <div class="flex justify-between items-center text-sm mb-3">
+                    <span class="text-gray-500">Última atualização: ${formatDateTime(member.lastUpdate)}</span>
+                    <button class="view-profile-btn px-3 py-1 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition">
+                        Ver Perfil Completo
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <h6 class="text-xs font-medium text-gray-600 mb-1">Principais Habilidades:</h6>
+                    <div class="flex flex-wrap gap-2">
+                        ${allSkillObjectsForCard.sort((a, b) => (b.skillLevel || 0) - (a.skillLevel || 0)).slice(0, 3).map(skillObj => `
+                            <span class="skill-chip text-xs bg-gray-100 text-gray-800 px-3 py-1 rounded-full">
+                                ${skillObj.skillName} ${skillObj.skillLevel > 0 ? `(N${skillObj.skillLevel})` : ''}
+                            </span>
+                        `).join('')}
+                        ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
                     </div>
                 </div>
-            `;
-
+                ${isAdminNow && member.id.toString() !== localStorage.getItem('userId') ? `
+                <div class="mt-4 pt-3 border-t border-gray-200 flex justify-end space-x-2">
+                    <button class="edit-user-btn text-xs px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition" data-user-id="${member.id}">
+                        <i class="fas fa-edit mr-1"></i>Editar
+                    </button>
+                    <button class="delete-user-btn text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition" data-user-id="${member.id}" data-user-name="${member.fullName}">
+                        <i class="fas fa-trash-alt mr-1"></i>Excluir
+                    </button>
+                </div>` : ''}
+            </div>
+        </div>`;
       const viewProfileBtn = card.querySelector('.view-profile-btn');
       viewProfileBtn.addEventListener('click', () => openProfileModal(member));
-
       card.querySelector('.edit-user-btn')?.addEventListener('click', () => openEditUserModal(member));
       card.querySelector('.delete-user-btn')?.addEventListener('click', () => handleDeleteUser(member.id, member.fullName));
-
       teamContainer.appendChild(card);
     });
-    if (isAdminNow) updateStats(membersArray); // Usa a variável isAdminNow
+    if (isAdminNow) updateStats(membersArray);
   }
 
   // Open profile modal
   function openProfileModal(member) {
-    currentProfileInModalId = member.id; // Define o ID do usuário cujo perfil está no modal
-
-
+    currentProfileInModalId = member.id;
     const names = (member.name || "Usuário").split(' ');
-    const initials = names.length > 1
-      ? `${names[0][0]}${names[names.length - 1][0]}`
-      : (names[0] ? names[0][0] : 'U');
-
+    const initials = names.length > 1 ? `${names[0][0]}${names[names.length - 1][0]}` : (names[0] ? names[0][0] : 'U');
     const loggedInUserId = localStorage.getItem('userId');
-    // Verifica se o usuário logado é o dono do perfil que está sendo visualizado
     const isOwnerOfProfile = loggedInUserId === currentProfileInModalId.toString();
-    const isAdminViewingOtherProfile = isAdminUser() && !isOwnerOfProfile; // Chama isAdminUser aqui
+    const isAdminViewingOtherProfile = isAdminUser() && !isOwnerOfProfile;
 
     document.getElementById('modal-name').textContent = member.name;
     document.getElementById('modal-fullname').textContent = member.fullName;
@@ -288,7 +562,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const topSkillsContainer = document.getElementById('modal-top-skills');
     topSkillsContainer.innerHTML = '';
-
     const allSkills = [
       ...(member.backend || []).map(s => ({ ...s, category: 'backend' })),
       ...(member.frontend || []).map(s => ({ ...s, category: 'frontend' })),
@@ -301,9 +574,7 @@ document.addEventListener('DOMContentLoaded', function () {
       ...(member.immersive || []).map(s => ({ ...s, category: 'immersive' })),
       ...(member.marketing || []).map(s => ({ ...s, category: 'marketing' }))
     ];
-
     const topRatedSkills = allSkills.sort((a, b) => (b.skillLevel || 0) - (a.skillLevel || 0)).slice(0, 5);
-
     if (topRatedSkills.length === 0) {
       topSkillsContainer.innerHTML = '<span class="text-xs text-gray-500 italic">Nenhuma habilidade principal avaliada.</span>';
     } else {
@@ -315,7 +586,6 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    // Modificado para aceitar flags de permissão de edição
     function populateSkillsWithLevels(containerId, skillsArray, categoryKey, isAdminEditingOtherUser, isOwnerEditingOwnProfile) {
       const container = document.getElementById(containerId);
       container.innerHTML = '';
@@ -323,26 +593,21 @@ document.addEventListener('DOMContentLoaded', function () {
       skills.forEach(skillData => {
         const skillItemContainer = document.createElement('div');
         skillItemContainer.className = 'skill-level-item mb-3 p-3 border rounded-md bg-gray-50';
-
         const skillNameLabel = document.createElement('label');
         skillNameLabel.className = 'block text-sm font-medium text-gray-800 mb-1';
         skillNameLabel.textContent = skillData.skillName;
-
         const selectLevel = document.createElement('select');
         selectLevel.className = 'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm skill-level-select';
         selectLevel.dataset.skillName = skillData.skillName;
         selectLevel.dataset.categoryKey = categoryKey;
-
-        // Lógica de habilitação do select:
-        selectLevel.disabled = true; // Desabilitado por padrão
-        if (isAdminEditingOtherUser) { // Admin editando perfil de outro usuário: pode editar qualquer nível
+        selectLevel.disabled = true;
+        if (isAdminEditingOtherUser) {
           selectLevel.disabled = false;
-        } else if (isOwnerEditingOwnProfile) { // Dono do perfil editando o próprio
+        } else if (isOwnerEditingOwnProfile) {
           if (skillData.skillLevel === 0 || typeof skillData.skillLevel === 'undefined') {
-            selectLevel.disabled = false; // Só pode editar se nível for 0
+            selectLevel.disabled = false;
           }
         }
-
         proficiencyLevels.forEach(profLevel => {
           const option = document.createElement('option');
           option.value = profLevel.level;
@@ -352,10 +617,8 @@ document.addEventListener('DOMContentLoaded', function () {
           }
           selectLevel.appendChild(option);
         });
-
         const tooltipText = document.createElement('p');
-        tooltipText.className = 'text-xs text-gray-600 mt-2 proficiency-tooltip bg-gray-100 p-2 rounded-md border border-gray-200'; // Estilizado e sempre visível
-
+        tooltipText.className = 'text-xs text-gray-600 mt-2 proficiency-tooltip bg-gray-100 p-2 rounded-md border border-gray-200';
         function updateTooltip(level, skillNameForTooltip) {
           const selectedProficiency = proficiencyLevels.find(p => p.level === parseInt(level));
           let baseText = "Descrição não disponível.";
@@ -367,8 +630,7 @@ document.addEventListener('DOMContentLoaded', function () {
           tooltipText.textContent = baseText.replace(/\{\{skillName\}\}/g, skillNameForTooltip);
         }
         selectLevel.addEventListener('change', (e) => updateTooltip(e.target.value, skillData.skillName));
-        updateTooltip(selectLevel.value, skillData.skillName); // Chamada inicial para exibir a descrição do nível atual
-
+        updateTooltip(selectLevel.value, skillData.skillName);
         skillItemContainer.appendChild(skillNameLabel);
         skillItemContainer.appendChild(selectLevel);
         skillItemContainer.appendChild(tooltipText);
@@ -389,28 +651,20 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const ctx = document.getElementById('modal-chart').getContext('2d');
-    if (currentChartInstance) {
-      currentChartInstance.destroy();
-    }
+    if (currentChartInstance) currentChartInstance.destroy();
     currentChartInstance = new Chart(ctx, {
       type: 'radar',
       data: {
         labels: areaLabels,
         datasets: [{
-          label: 'Nível Médio por Área',
-          data: skillCounts,
-          fill: true,
-          backgroundColor: 'rgba(59, 130, 246, 0.2)',
-          borderColor: 'rgb(59, 130, 246)',
-          pointBackgroundColor: 'rgb(59, 130, 246)',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: 'rgb(59, 130, 246)'
+          label: 'Nível Médio por Área', data: skillCounts, fill: true,
+          backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgb(59, 130, 246)',
+          pointBackgroundColor: 'rgb(59, 130, 246)', pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff', pointHoverBorderColor: 'rgb(59, 130, 246)'
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: true,
+        responsive: true, maintainAspectRatio: true,
         scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 5, ticks: { stepSize: 1 } } },
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.r !== null) { label += context.parsed.r.toFixed(2); } return label; } } } }
       }
@@ -440,25 +694,21 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector(targetPanelId).classList.remove('hidden');
       });
     });
-    if (tabs.length > 0) { tabs[0].click(); }
+    if (tabs.length > 0) tabs[0].click();
 
     const allIndividualSkills = [];
     areaKeys.forEach(categoryKey => {
       if (member[categoryKey] && Array.isArray(member[categoryKey])) {
         member[categoryKey].forEach(skill => {
           if (skill.skillLevel > 0) {
-            allIndividualSkills.push({
-              name: skill.skillName,
-              level: skill.skillLevel,
-              levelText: proficiencyLevels.find(p => p.level === skill.skillLevel)?.label || ''
-            });
+            allIndividualSkills.push({ name: skill.skillName, level: skill.skillLevel, levelText: proficiencyLevels.find(p => p.level === skill.skillLevel)?.label || '' });
           }
         });
       }
     });
     const topIndividualSkills = allIndividualSkills.sort((a, b) => b.level - a.level).slice(0, 10);
     const skillsChartCtx = document.getElementById('modal-skills-chart').getContext('2d');
-    if (currentSkillsChartInstance) { currentSkillsChartInstance.destroy(); }
+    if (currentSkillsChartInstance) currentSkillsChartInstance.destroy();
     if (topIndividualSkills.length > 0) {
       document.getElementById('modal-skills-chart').style.display = 'block';
       currentSkillsChartInstance = new Chart(skillsChartCtx, {
@@ -466,8 +716,7 @@ document.addEventListener('DOMContentLoaded', function () {
         data: {
           labels: topIndividualSkills.map(s => s.name),
           datasets: [{
-            label: 'Nível de Proficiência',
-            data: topIndividualSkills.map(s => s.level),
+            label: 'Nível de Proficiência', data: topIndividualSkills.map(s => s.level),
             backgroundColor: proficiencyLevels.slice(1).map((p, index) => `hsl(${index * (360 / (proficiencyLevels.length - 1))}, 70%, 60%)`),
             borderColor: proficiencyLevels.slice(1).map((p, index) => `hsl(${index * (360 / (proficiencyLevels.length - 1))}, 70%, 50%)`),
             borderWidth: 1
@@ -488,9 +737,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const memberSkillsWithLevel = [];
     areaKeys.forEach(categoryKey => {
       if (member[categoryKey] && Array.isArray(member[categoryKey])) {
-        member[categoryKey].forEach(skill => {
-          if (skill.skillLevel > 0) { memberSkillsWithLevel.push(skill.skillName); }
-        });
+        member[categoryKey].forEach(skill => { if (skill.skillLevel > 0) { memberSkillsWithLevel.push(skill.skillName); } });
       }
     });
     let portfolioMatchesFound = 0;
@@ -502,28 +749,18 @@ document.addEventListener('DOMContentLoaded', function () {
         itemDiv.className = 'p-3 border rounded-md bg-gray-50 shadow-sm';
         const itemName = document.createElement('h5');
         itemName.className = 'font-semibold text-gray-800 mb-1 text-sm flex items-center justify-between';
-
         if (item.link && item.link.trim() !== "") {
-          // Tornar o nome do item um link
           const itemNameLink = document.createElement('a');
-          itemNameLink.href = item.link;
-          itemNameLink.target = '_blank';
-          itemNameLink.rel = 'noopener noreferrer';
-          itemNameLink.textContent = item.name;
-          itemNameLink.className = 'hover:underline focus:outline-none focus:ring-2 focus:ring-blue-300 rounded'; // Adiciona underline no hover e estilo de foco
+          itemNameLink.href = item.link; itemNameLink.target = '_blank'; itemNameLink.rel = 'noopener noreferrer';
+          itemNameLink.textContent = item.name; itemNameLink.className = 'hover:underline focus:outline-none focus:ring-2 focus:ring-blue-300 rounded';
           itemName.appendChild(itemNameLink);
-
-          // Ícone de link externo (continua como um link separado para manter o ícone)
           const linkIcon = document.createElement('a');
-          linkIcon.href = item.link;
-          linkIcon.target = '_blank';
-          linkIcon.rel = 'noopener noreferrer';
-          linkIcon.innerHTML = '<i class="fas fa-external-link-alt text-blue-500 hover:text-blue-700 ml-2 text-xs" title="Abrir anexo"></i>'; // ml-2 para espaço
+          linkIcon.href = item.link; linkIcon.target = '_blank'; linkIcon.rel = 'noopener noreferrer';
+          linkIcon.innerHTML = '<i class="fas fa-external-link-alt text-blue-500 hover:text-blue-700 ml-2 text-xs" title="Abrir anexo"></i>';
           itemName.appendChild(linkIcon);
         } else {
-          itemName.textContent = item.name; // Se não houver link, apenas o texto do nome
+          itemName.textContent = item.name;
         }
-
         itemDiv.appendChild(itemName);
         const skillsList = document.createElement('div');
         skillsList.className = 'flex flex-wrap gap-1 mt-1';
@@ -564,14 +801,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalFooter = profileModal.querySelector('.border-t.p-4.flex.justify-end');
     let saveButton = modalFooter.querySelector('#save-skills-btn');
     const competencyTabsContainer = document.getElementById('competency-tabs');
-
-    // Remover mensagem de submissão anterior, se houver
     const existingSubmittedMessage = competencyTabsContainer.previousElementSibling;
     if (existingSubmittedMessage && existingSubmittedMessage.classList.contains('skills-submitted-info')) {
       existingSubmittedMessage.remove();
     }
-
-    // O botão de salvar aparece se o usuário logado for o dono do perfil OU se for admin editando outro perfil
     const canEffectivelyEditSkills = isOwnerOfProfile || isAdminViewingOtherProfile;
     if (canEffectivelyEditSkills) {
       if (!saveButton) {
@@ -579,43 +812,31 @@ document.addEventListener('DOMContentLoaded', function () {
         saveButton.id = 'save-skills-btn';
         saveButton.className = 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition mr-2';
         saveButton.textContent = 'Salvar Habilidades';
-        saveButton.addEventListener('click', saveSkills); // saveSkills usará currentProfileInModalId
+        saveButton.addEventListener('click', saveSkills);
         modalFooter.insertBefore(saveButton, modalFooter.firstChild);
       }
-      saveButton.style.display = 'inline-block'; // Garante que está visível
+      saveButton.style.display = 'inline-block';
     } else {
-      if (saveButton) {
-        saveButton.style.display = 'none'; // Esconde o botão se não for editável
-      }
-      // A mensagem de "skills já submetidas" foi removida, pois a lógica agora é por skill individual.
+      if (saveButton) saveButton.style.display = 'none';
     }
 
-    // Configurar botão para abrir o modal da tabela de competências
     const openCompetenciesTableViewBtn = document.getElementById('open-competencies-table-view-btn');
     if (openCompetenciesTableViewBtn) {
-      // Remover listener antigo para evitar duplicação, clonando o botão
       const newBtn = openCompetenciesTableViewBtn.cloneNode(true);
       openCompetenciesTableViewBtn.parentNode.replaceChild(newBtn, openCompetenciesTableViewBtn);
-
-      newBtn.addEventListener('click', () => {
-        openCompetenciesTableModal(member);
-      });
+      newBtn.addEventListener('click', () => openCompetenciesTableModal(member));
     } else {
       console.warn("Botão 'open-competencies-table-view-btn' não encontrado.");
     }
-
-
-    profileModal.classList.remove('hidden');
+    if (profileModal) profileModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
-
-
 
   // Função para popular a tabela de competências detalhadas
   function populateCompetenciesTable(member, containerId) {
     const tableContainer = document.getElementById(containerId);
-    tableContainer.innerHTML = ''; // Limpa conteúdo anterior
-
+    if (!tableContainer) return;
+    tableContainer.innerHTML = '';
     const table = document.createElement('table');
     table.className = 'min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg shadow-sm';
     const thead = document.createElement('thead');
@@ -626,42 +847,34 @@ document.addEventListener('DOMContentLoaded', function () {
         <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Habilidade</th>
         <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Nível</th>
         <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Descrição Detalhada</th>
-      </tr>
-    `;
+      </tr>`;
     table.appendChild(thead);
-
     const tbody = document.createElement('tbody');
     tbody.className = 'bg-white divide-y divide-gray-200';
-
     let evaluatedSkillsCount = 0;
     const areaKeys = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
     const categoryDisplayNames = { backend: 'Backend', frontend: 'Frontend', mobile: 'Mobile', architecture: 'Arquitetura', management: 'Gestão', security: 'Segurança', infra: 'Infra', data: 'Dados/IA', immersive: 'Imersivas', marketing: 'Marketing' };
-
     areaKeys.forEach(categoryKey => {
       if (member[categoryKey] && Array.isArray(member[categoryKey])) {
         member[categoryKey].forEach(skill => {
-          if (skill.skillLevel > 0) { // Apenas habilidades avaliadas
+          if (skill.skillLevel > 0) {
             evaluatedSkillsCount++;
             const proficiency = proficiencyLevels.find(p => p.level === skill.skillLevel);
             const description = proficiency ? proficiency.text.replace(/\{\{skillName\}\}/g, skill.skillName) : 'N/A';
             const levelLabel = proficiency ? proficiency.label : 'N/A';
-
             const row = tbody.insertRow();
             row.className = 'hover:bg-gray-50 transition-colors duration-150';
             row.innerHTML = `
               <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${categoryDisplayNames[categoryKey] || categoryKey}</td>
               <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${skill.skillName}</td>
               <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">${levelLabel}</td>
-              <td class="px-4 py-3 text-sm text-gray-600">${description}</td>
-            `;
+              <td class="px-4 py-3 text-sm text-gray-600">${description}</td>`;
           }
         });
       }
     });
-
     table.appendChild(tbody);
     tableContainer.appendChild(table);
-
     if (evaluatedSkillsCount === 0) {
       tableContainer.innerHTML = '<p class="text-sm text-gray-500 italic p-4 text-center">Nenhuma competência avaliada (nível > 0) para exibir na tabela.</p>';
     }
@@ -673,20 +886,15 @@ document.addEventListener('DOMContentLoaded', function () {
     if (competenciesTableModalTitle) {
       competenciesTableModalTitle.textContent = `Resumo Detalhado das Competências - ${member.fullName || member.name}`;
     }
-
     populateCompetenciesTable(member, 'competencies-table-modal-content');
-
     if (competenciesTableModal) {
       competenciesTableModal.classList.remove('hidden');
-      // O profileModal permanece aberto por baixo, e o body.style.overflow já está 'hidden'
     } else {
       console.error("Elemento 'competencies-table-modal' não encontrado.");
     }
   }
 
-  let isSavingSkills = false; // Flag para debounce
-
-  // Função para salvar as habilidades
+  let isSavingSkills = false;
   async function saveSkills() {
     if (isSavingSkills) {
       console.log("SaveSkills: Já está salvando, ignorando chamada duplicada.");
@@ -694,132 +902,93 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     isSavingSkills = true;
     console.log("SaveSkills: Iniciando salvamento...");
-
-    const targetUserIdForSave = currentProfileInModalId; // Usa a variável de escopo mais amplo
+    const targetUserIdForSave = currentProfileInModalId;
     if (!targetUserIdForSave) {
       showToastNotification("ID do usuário alvo não encontrado para salvar.", 'error');
       isSavingSkills = false;
       return;
     }
-
     const updatedSkills = {};
     const skillSelects = profileModal.querySelectorAll('.skill-level-select');
     skillSelects.forEach(select => {
       const category = select.dataset.categoryKey;
       const skillName = select.dataset.skillName;
       const skillLevel = parseInt(select.value);
-
-      if (!updatedSkills[category]) {
-        updatedSkills[category] = [];
-      }
+      if (!updatedSkills[category]) updatedSkills[category] = [];
       updatedSkills[category].push({ skillName, skillLevel });
     });
-
-    // console.log("Enviando para o backend:", updatedSkills); // Log já extenso, pode ser comentado se o de cima for suficiente
-
     const token = localStorage.getItem('authToken');
     const loggedInUserId = localStorage.getItem('userId');
-    const isAdminSaving = isAdminUser(); // Chama isAdminUser aqui
+    const isAdminSaving = isAdminUser();
     const isEditingOwnProfile = loggedInUserId === targetUserIdForSave.toString();
-
     let endpoint = '';
-    if (isAdminSaving && !isEditingOwnProfile) { // Admin editando outro usuário
+    if (isAdminSaving && !isEditingOwnProfile) {
       endpoint = `https://dev-team.onrender.com/api/users/${targetUserIdForSave}/skills`;
-    } else if (isEditingOwnProfile) { // Usuário (admin ou não) editando o próprio perfil
+    } else if (isEditingOwnProfile) {
       endpoint = 'https://dev-team.onrender.com/api/users/me/profile/skills';
     } else {
       showToastNotification("Não autorizado a salvar estas habilidades.", 'error');
       isSavingSkills = false;
       return;
     }
-
     try {
       const response = await fetch(endpoint, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ skills: updatedSkills })
       });
-
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`;
         try {
-          // Tenta parsear a resposta como JSON, comum para erros de API bem formatados
           const errorData = await response.json();
           errorMessage = errorData.message || errorMessage;
         } catch (e) {
-          // Se response.json() falhar, o corpo da resposta pode não ser JSON (ex: erro 401/403 simples)
-          // Tenta ler como texto para obter mais informações.
           const errorText = await response.text();
-          if (errorText) {
-            errorMessage += ` - ${errorText}`;
-          }
+          if (errorText) errorMessage += ` - ${errorText}`;
         }
         throw new Error(errorMessage);
       }
-
       const result = await response.json();
       showToastNotification(result.message || "Habilidades salvas com sucesso!", 'success');
       closeProfileModal();
-      if (isAdminUser()) { // Chama isAdminUser aqui
-        fetchAllTeamProfiles(); // Admin recarrega a lista da equipe
+      if (isAdminUser()) {
+        fetchAllTeamProfiles();
       } else {
-        fetchMyProfile(); // Usuário normal recarrega seu próprio perfil
+        fetchMyProfile();
       }
     } catch (error) {
       console.error("Erro detalhado ao salvar habilidades:", error);
-      console.error("Mensagem do erro:", error.message);
-      console.error("Stack do erro:", error.stack);
       showToastNotification(`Erro ao salvar habilidades: ${error.message}`, 'error');
     } finally {
-      isSavingSkills = false; // Reseta a flag
+      isSavingSkills = false;
     }
   }
 
-
   // Close profile modal
   function closeProfileModal() {
-    if (profileModal) profileModal.classList.add('hidden'); // Verifica se profileModal existe
-    // Destruir o gráfico ao fechar o modal
-    if (currentChartInstance) {
-      currentChartInstance.destroy();
-      currentChartInstance = null;
-    }
-    if (currentSkillsChartInstance) { // Destruir o segundo gráfico também
-      currentSkillsChartInstance.destroy();
-      currentSkillsChartInstance = null;
-    }
-    currentProfileInModalId = null; // Resetar o ID ao fechar o modal
+    if (profileModal) profileModal.classList.add('hidden');
+    if (currentChartInstance) { currentChartInstance.destroy(); currentChartInstance = null; }
+    if (currentSkillsChartInstance) { currentSkillsChartInstance.destroy(); currentSkillsChartInstance = null; }
+    currentProfileInModalId = null;
     document.body.style.overflow = 'auto';
   }
 
   // Filter team members (for Admin view)
   function filterTeamMembers() {
-    if (!isAdminUser()) { // Chama isAdminUser aqui
-      // Para usuários normais, apenas exibe seu perfil (allTeamMembersGlobal terá 1 item)
+    if (!isAdminUser()) {
       displayTeamMembers(allTeamMembersGlobal);
       return;
     }
-
-    const searchTerm = searchInput ? searchInput.value.toLowerCase() : ""; // Verifica se searchInput existe
-    // const selectedAreaDropdown = document.getElementById('filter-area').value; // Comentado, pois o filtro de área não está ativo
-    const activeCategoryTab = document.querySelector('.category-tab.active');
-    // const selectedCategoryTab = activeCategoryTab ? activeCategoryTab.dataset.category : 'all'; // Comentado, pois o filtro de categoria não está ativo para a busca por nome
-
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
     let filtered = [...allTeamMembersGlobal];
-
-    // Filtrar por nome
     if (searchTerm) {
       filtered = filtered.filter(member =>
         member.name.toLowerCase().includes(searchTerm) ||
         member.fullName.toLowerCase().includes(searchTerm)
       );
     }
-
     displayTeamMembers(filtered);
-    updateStats(filtered); // Atualiza as estatísticas com base nos membros filtrados
+    updateStats(filtered);
   }
 
   if (logoutButton) {
@@ -828,7 +997,7 @@ document.addEventListener('DOMContentLoaded', function () {
       localStorage.removeItem('userName');
       localStorage.removeItem('userEmail');
       localStorage.removeItem('userId');
-      window.location.href = 'login.html'; // Redireciona para a página de login
+      window.location.href = 'login.html';
     });
   } else {
     console.warn("Botão de logout não encontrado.");
@@ -843,9 +1012,9 @@ document.addEventListener('DOMContentLoaded', function () {
       if (userProfileSection) userProfileSection.classList.remove('hidden');
       if (welcomeMessage) welcomeMessage.textContent = `Bem-vindo(a), ${userName}!`;
 
-
-      const isAdmin = isAdminUser(); // Chama isAdminUser aqui e armazena o resultado
+      const isAdmin = isAdminUser(); // ESTA LINHA CAUSA O ERRO SE isAdminUser NÃO ESTIVER DEFINIDA CORRETAMENTE
       console.log('[checkLoginStatus] isAdminUser() returned:', isAdmin);
+
       if (isAdmin) {
         console.log('[checkLoginStatus] Admin path taken.');
         if (showCreateUserModalBtn) {
@@ -853,27 +1022,19 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
           console.warn('[checkLoginStatus] Admin user, but showCreateUserModalBtn not found.');
         }
-
-        // showCreateUserModalBtn pode ser null se não estiver na página, então verificamos antes de usar
-        if (showCreateUserModalBtn) showCreateUserModalBtn.classList.remove('hidden');
-
         const filtersSection = document.getElementById('filters-section');
         const categoriesSection = document.getElementById('categories-section');
         const statsSection = document.getElementById('stats-section');
-
         if (filtersSection) filtersSection.style.display = 'block';
         if (categoriesSection) categoriesSection.style.display = 'block';
-        if (statsSection) statsSection.style.display = 'grid'; // 'grid' para manter o layout
-
+        if (statsSection) statsSection.style.display = 'grid';
         initializeFiltersAndCategories();
         fetchAllTeamProfiles();
-
-      } else { // Não é admin
+      } else {
         console.log('[checkLoginStatus] Non-admin path taken.');
         const filtersSection = document.getElementById('filters-section');
         const categoriesSection = document.getElementById('categories-section');
         const statsSection = document.getElementById('stats-section');
-
         if (filtersSection) filtersSection.style.display = 'none';
         if (showCreateUserModalBtn) showCreateUserModalBtn.classList.add('hidden');
         if (categoriesSection) categoriesSection.style.display = 'none';
@@ -882,17 +1043,15 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } else {
       console.log('[checkLoginStatus] No token or userName, redirecting to login.');
-      window.location.href = 'login.html'; // Redireciona para login se não houver token
+      window.location.href = 'login.html';
     }
   }
 
   function initializeFiltersAndCategories() {
     const categoryTabs = document.querySelectorAll('.category-tab');
-
     if (searchInput) {
       searchInput.addEventListener('input', filterTeamMembers);
     }
-
     categoryTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         categoryTabs.forEach(t => t.classList.remove('active'));
@@ -913,29 +1072,22 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
-
   if (closeCreateUserModalBtn) {
     closeCreateUserModalBtn.addEventListener('click', () => {
       if (createUserModal) createUserModal.classList.add('hidden');
     });
   }
-
   if (createUserForm) {
     createUserForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (createUserMessage) createUserMessage.textContent = '';
       const submitButton = document.getElementById('create-user-submit-btn');
-      if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.textContent = 'Criando...';
-      }
-
+      if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Criando...'; }
       const fullName = document.getElementById('new-user-fullname').value;
       const email = document.getElementById('new-user-email').value;
       const unit = document.getElementById('new-user-unit').value;
-      const name = fullName.split(' ')[0]; // Pega o primeiro nome
-      const password = "password123"; // Senha padrão
-
+      const name = fullName.split(' ')[0];
+      const password = "password123";
       try {
         const response = await fetch('https://dev-team.onrender.com/api/auth/register', {
           method: 'POST',
@@ -943,13 +1095,10 @@ document.addEventListener('DOMContentLoaded', function () {
           body: JSON.stringify({ username: email, password, name, fullName, unit })
         });
         const data = await response.json();
-
         if (response.ok) {
           showToastNotification(data.message || "Usuário criado com sucesso!", 'success');
-          fetchAllTeamProfiles(); // Atualiza a lista de usuários no dashboard do admin
-          setTimeout(() => {
-            if (createUserModal) createUserModal.classList.add('hidden');
-          }, 2000); // Fecha o modal após 2 segundos
+          fetchAllTeamProfiles();
+          setTimeout(() => { if (createUserModal) createUserModal.classList.add('hidden'); }, 2000);
         } else {
           showToastNotification(data.message || 'Falha ao criar usuário.', 'error');
         }
@@ -957,10 +1106,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Create user error:', error);
         showToastNotification('Erro ao tentar criar usuário. Verifique a conexão.', 'error');
       } finally {
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = 'Criar Usuário';
-        }
+        if (submitButton) { submitButton.disabled = false; submitButton.textContent = 'Criar Usuário'; }
       }
     });
   }
@@ -969,56 +1115,37 @@ document.addEventListener('DOMContentLoaded', function () {
   function openEditUserModal(member) {
     if (editUserModal) editUserModal.classList.remove('hidden');
     if (editUserForm) editUserForm.reset();
-    if (editUserMessage) {
-      editUserMessage.textContent = '';
-      editUserMessage.className = 'mt-3 text-sm text-center';
-    }
-
+    if (editUserMessage) { editUserMessage.textContent = ''; editUserMessage.className = 'mt-3 text-sm text-center'; }
     document.getElementById('edit-user-id').value = member.id;
     document.getElementById('edit-user-fullname').value = member.fullName;
-    document.getElementById('edit-user-email').value = member.username; // username é o email
+    document.getElementById('edit-user-email').value = member.username;
     document.getElementById('edit-user-unit').value = member.unit || '';
   }
-
   if (closeEditUserModalBtn) {
-    closeEditUserModalBtn.addEventListener('click', () => {
-      if (editUserModal) editUserModal.classList.add('hidden');
-    });
+    closeEditUserModalBtn.addEventListener('click', () => { if (editUserModal) editUserModal.classList.add('hidden'); });
   }
-
   if (editUserForm) {
     editUserForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (editUserMessage) editUserMessage.textContent = '';
       const submitButton = document.getElementById('edit-user-submit-btn');
-      if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.textContent = 'Salvando...';
-      }
-
+      if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Salvando...'; }
       const userId = document.getElementById('edit-user-id').value;
       const fullName = document.getElementById('edit-user-fullname').value;
       const email = document.getElementById('edit-user-email').value;
       const unit = document.getElementById('edit-user-unit').value;
       const token = localStorage.getItem('authToken');
-
       try {
         const response = await fetch(`https://dev-team.onrender.com/api/users/${userId}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ fullName, email, unit })
         });
         const data = await response.json();
-
         if (response.ok) {
           showToastNotification(data.message || "Usuário atualizado com sucesso!", 'success');
-          fetchAllTeamProfiles(); // Atualiza a lista
-          setTimeout(() => {
-            if (editUserModal) editUserModal.classList.add('hidden');
-          }, 2000);
+          fetchAllTeamProfiles();
+          setTimeout(() => { if (editUserModal) editUserModal.classList.add('hidden'); }, 2000);
         } else {
           showToastNotification(data.message || 'Falha ao atualizar usuário.', 'error');
         }
@@ -1026,10 +1153,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Edit user error:', error);
         showToastNotification('Erro ao tentar atualizar usuário.', 'error');
       } finally {
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = 'Salvar Alterações';
-        }
+        if (submitButton) { submitButton.disabled = false; submitButton.textContent = 'Salvar Alterações'; }
       }
     });
   }
@@ -1045,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         const data = await response.json();
         showToastNotification(data.message || (response.ok ? "Usuário excluído com sucesso." : "Falha ao excluir usuário."), response.ok ? 'success' : 'error');
-        if (response.ok) fetchAllTeamProfiles(); // Atualiza a lista
+        if (response.ok) fetchAllTeamProfiles();
       } catch (error) {
         console.error('Delete user error:', error);
         showToastNotification('Erro ao tentar excluir usuário.', 'error');
@@ -1054,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Event listeners
-  const closeModalButton = document.getElementById('close-modal'); // Renomeado para evitar conflito com closeModalBtn
+  const closeModalButton = document.getElementById('close-modal');
   if (closeModalButton) {
     closeModalButton.addEventListener('click', closeProfileModal);
   } else {
@@ -1064,8 +1188,6 @@ document.addEventListener('DOMContentLoaded', function () {
     closeModalBtn.addEventListener('click', closeProfileModal);
   }
 
-
-  // Event listeners para o novo modal da tabela de competências
   if (closeCompetenciesTableModalAction) {
     closeCompetenciesTableModalAction.addEventListener('click', () => {
       if (competenciesTableModal) competenciesTableModal.classList.add('hidden');
@@ -1078,153 +1200,6 @@ document.addEventListener('DOMContentLoaded', function () {
       if (competenciesTableModal) competenciesTableModal.classList.add('hidden');
     });
   }
-
-  // Funções auxiliares que podem estar faltando no escopo do DOMContentLoaded
-  // (Estas podem estar no script inline do index.html, mas é melhor tê-las aqui se forem usadas pelas funções acima)
-
-  function formatDateTime(isoString) {
-    if (!isoString) return 'N/A';
-    try {
-      const date = new Date(isoString);
-      // Verifica se a data é válida
-      if (isNaN(date.getTime())) {
-        return 'Data inválida';
-      }
-      return date.toLocaleDateString('pt-BR', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        // hour: '2-digit', minute: '2-digit' // Removido para apenas data
-      });
-    } catch (e) {
-      console.error("Erro ao formatar data:", isoString, e);
-      return 'Erro na data';
-    }
-  }
-
-  const proficiencyLevels = [
-    { level: 0, label: '0 - Não Avaliado', text: 'Nível de proficiência ainda não avaliado para {{skillName}}.' },
-    { level: 1, label: '1 - Iniciante', text: 'Conhecimento básico de {{skillName}}, necessita de supervisão para tarefas complexas.' },
-    { level: 2, label: '2 - Elementar', text: 'Capaz de realizar tarefas simples em {{skillName}} com alguma autonomia.' },
-    { level: 3, label: '3 - Intermediário', text: 'Bom conhecimento prático de {{skillName}}, executa tarefas com independência.' },
-    { level: 4, label: '4 - Avançado', text: 'Profundo conhecimento em {{skillName}}, capaz de liderar e solucionar problemas complexos.' },
-    { level: 5, label: '5 - Especialista', text: 'Referência em {{skillName}}, contribui para a evolução da área e mentora outros.' }
-  ];
-
-  const portfolioItemsMap = [
-    // ... (seu mapa de portfólio, se existir)
-    // Exemplo:
-    // { name: "Sistema de Gestão de Clientes", relevantSkills: ["Java", "Spring Boot", "React", "PostgreSQL"], infrastructure: ["Servidor de Aplicação", "Banco de Dados SQL"], link: "http://example.com/projeto1" },
-    // { name: "Aplicativo Mobile de Vendas", relevantSkills: ["React Native", "Node.js", "MongoDB", "Firebase"], infrastructure: ["Servidor Node.js", "Banco NoSQL", "Serviço de Autenticação"], link: "" }
-  ];
-
-  function showToastNotification(message, type = 'info') {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-      console.error("Toast container not found!");
-      alert(message); // Fallback para alert
-      return;
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `fixed top-5 right-5 p-4 rounded-md shadow-lg text-white text-sm z-50 animate-toast-in`;
-
-    if (type === 'success') {
-      toast.classList.add('bg-green-500');
-    } else if (type === 'error') {
-      toast.classList.add('bg-red-500');
-    } else { // info or default
-      toast.classList.add('bg-blue-500');
-    }
-
-    toast.textContent = message;
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-      toast.classList.remove('animate-toast-in');
-      toast.classList.add('animate-toast-out');
-      setTimeout(() => {
-        toast.remove();
-      }, 500); // Tempo para a animação de saída
-    }, 3000); // Duração do toast
-  }
-
-  function updateStats(members) {
-    const totalMembers = members.length;
-    let totalSkillsEvaluated = 0;
-    const skillCounts = {}; // Para contar quantas vezes cada skill aparece
-    const skillLevelsSum = {}; // Para somar os níveis de cada skill
-    const categorySkillCounts = {}; // { backend: { total: X, count: Y }, ... }
-
-    members.forEach(member => {
-      const categories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
-      categories.forEach(category => {
-        if (member[category] && Array.isArray(member[category])) {
-          if (!categorySkillCounts[category]) {
-            categorySkillCounts[category] = { totalLevel: 0, skillEntries: 0 };
-          }
-          member[category].forEach(skill => {
-            if (skill.skillLevel > 0) { // Considera apenas skills avaliadas
-              totalSkillsEvaluated++;
-              skillCounts[skill.skillName] = (skillCounts[skill.skillName] || 0) + 1;
-              skillLevelsSum[skill.skillName] = (skillLevelsSum[skill.skillName] || 0) + skill.skillLevel;
-
-              categorySkillCounts[category].totalLevel += skill.skillLevel;
-              categorySkillCounts[category].skillEntries++;
-            }
-          });
-        }
-      });
-    });
-
-    const averageSkillsPerMember = totalMembers > 0 ? (totalSkillsEvaluated / totalMembers).toFixed(1) : 0;
-
-    const topSkillsArray = Object.entries(skillLevelsSum)
-      .map(([name, totalLevel]) => ({ name, averageLevel: totalLevel / skillCounts[name], count: skillCounts[name] }))
-      .sort((a, b) => b.averageLevel - a.averageLevel || b.count - a.count) // Prioriza maior nível médio, depois maior contagem
-      .slice(0, 3);
-
-    const categoryAverages = Object.entries(categorySkillCounts)
-      .map(([name, data]) => ({ name, averageLevel: data.skillEntries > 0 ? (data.totalLevel / data.skillEntries) : 0 }))
-      .sort((a, b) => b.averageLevel - a.averageLevel);
-
-    // Atualiza os elementos do DOM
-    const totalMembersEl = document.getElementById('stats-total-members');
-    const avgSkillsEl = document.getElementById('stats-avg-skills');
-    const topSkillsListEl = document.getElementById('stats-top-skills-list');
-    const topCategoriesListEl = document.getElementById('stats-top-categories-list');
-
-    if (totalMembersEl) totalMembersEl.textContent = totalMembers;
-    if (avgSkillsEl) avgSkillsEl.textContent = averageSkillsPerMember;
-
-    if (topSkillsListEl) {
-      topSkillsListEl.innerHTML = ''; // Limpa
-      if (topSkillsArray.length > 0) {
-        topSkillsArray.forEach(skill => {
-          const li = document.createElement('li');
-          li.className = 'text-xs text-gray-600';
-          li.innerHTML = `${skill.name} <span class="font-semibold">(Nível Médio: ${skill.averageLevel.toFixed(1)}, ${skill.count} devs)</span>`;
-          topSkillsListEl.appendChild(li);
-        });
-      } else {
-        topSkillsListEl.innerHTML = '<li class="text-xs text-gray-500 italic">Nenhuma skill avaliada.</li>';
-      }
-    }
-
-    if (topCategoriesListEl) {
-      topCategoriesListEl.innerHTML = ''; // Limpa
-      if (categoryAverages.length > 0) {
-        categoryAverages.slice(0, 3).forEach(cat => { // Mostra top 3 categorias
-          const li = document.createElement('li');
-          li.className = 'text-xs text-gray-600';
-          const categoryName = cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
-          li.innerHTML = `${categoryName} <span class="font-semibold">(Nível Médio: ${cat.averageLevel.toFixed(1)})</span>`;
-          topCategoriesListEl.appendChild(li);
-        });
-      } else {
-        topCategoriesListEl.innerHTML = '<li class="text-xs text-gray-500 italic">Nenhuma categoria com skills avaliadas.</li>';
-      }
-    }
-  }
-
 
   // Initialize on page load
   checkLoginStatus();
