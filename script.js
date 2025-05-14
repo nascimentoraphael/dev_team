@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const teamContainer = document.getElementById('team-container'); // Container principal dos cards de perfil
   const logoutButton = document.getElementById('logout-button');
   const closeModalBtn = document.getElementById('close-modal-btn'); // Botão "Fechar" no rodapé do modal de perfil
+  const profileModal = document.getElementById('profile-modal'); // Referência ao modal de perfil
+  const userProfileSection = document.getElementById('user-profile-section');
+  const welcomeMessage = document.getElementById('welcome-message');
+
 
   // Elementos do modal de criação de usuário
   const showCreateUserModalBtn = document.getElementById('show-create-user-modal-btn');
@@ -20,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const closeEditUserModalBtn = document.getElementById('close-edit-user-modal');
   const editUserForm = document.getElementById('edit-user-form');
   const editUserMessage = document.getElementById('edit-user-message');
+
 
   // Elementos do modal da tabela de competências
   const competenciesTableModal = document.getElementById('competencies-table-modal');
@@ -136,19 +141,30 @@ document.addEventListener('DOMContentLoaded', function () {
     teamContainer.innerHTML = '';
 
     const membersArray = Array.isArray(members) ? members : [members];
+    console.log('[displayTeamMembers] membersArray after ensuring array:', JSON.parse(JSON.stringify(membersArray)));
+
 
     if (!membersArray || membersArray.length === 0 || !membersArray[0]) {
+      console.log('[displayTeamMembers] No members to display or first member is falsy.');
       teamContainer.innerHTML = '<p class="text-gray-600 col-span-full text-center">Nenhum membro encontrado.</p>';
       if (isAdminUser()) updateStats([]);
       return;
     }
 
-    console.log('[displayTeamMembers] isAdminUser() check in displayTeamMembers:', isAdminUser());
-    if (!isAdminUser() && membersArray.length === 1) {
+    const isAdminNow = isAdminUser(); // Chama uma vez para evitar múltiplas chamadas com logs
+    console.log('[displayTeamMembers] isAdminUser() check in displayTeamMembers:', isAdminNow);
+
+    if (!isAdminNow && membersArray.length === 1) {
       teamContainer.className = 'grid grid-cols-1 gap-6';
-    } else if (isAdminUser()) {
+    } else if (isAdminNow) {
+      console.log('[displayTeamMembers] Applying multi-card admin layout.');
       teamContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6';
+    } else {
+      console.log('[displayTeamMembers] Condition for layout not met, isAdminNow:', isAdminNow, 'membersArray.length:', membersArray.length);
+      // Fallback layout or specific handling if needed
+      teamContainer.className = 'grid grid-cols-1 gap-6'; // Default to single column if logic is unclear
     }
+
 
     membersArray.forEach(member => {
       const names = (member.name || "Usuário").split(' ');
@@ -184,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const card = document.createElement('div');
       let cardClasses = 'profile-card bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in';
-      if (!isAdminUser() && membersArray.length === 1) {
+      if (!isAdminNow && membersArray.length === 1) { // Usa a variável isAdminNow
         cardClasses += ' max-w-2xl mx-auto';
       }
       card.className = cardClasses;
@@ -225,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
                             </div>
                         </div>
-                        ${isAdminUser() && member.id.toString() !== localStorage.getItem('userId') ? `
+                        ${isAdminNow && member.id.toString() !== localStorage.getItem('userId') ? `
                         <div class="mt-4 pt-3 border-t border-gray-200 flex justify-end space-x-2">
                             <button class="edit-user-btn text-xs px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition" data-user-id="${member.id}">
                                 <i class="fas fa-edit mr-1"></i>Editar
@@ -246,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       teamContainer.appendChild(card);
     });
-    if (isAdminUser()) updateStats(membersArray);
+    if (isAdminNow) updateStats(membersArray); // Usa a variável isAdminNow
   }
 
   // Open profile modal
@@ -262,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const loggedInUserId = localStorage.getItem('userId');
     // Verifica se o usuário logado é o dono do perfil que está sendo visualizado
     const isOwnerOfProfile = loggedInUserId === currentProfileInModalId.toString();
-    const isAdminViewingOtherProfile = isAdminUser() && !isOwnerOfProfile;
+    const isAdminViewingOtherProfile = isAdminUser() && !isOwnerOfProfile; // Chama isAdminUser aqui
 
     document.getElementById('modal-name').textContent = member.name;
     document.getElementById('modal-fullname').textContent = member.fullName;
@@ -703,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const token = localStorage.getItem('authToken');
     const loggedInUserId = localStorage.getItem('userId');
-    const isAdminSaving = isAdminUser();
+    const isAdminSaving = isAdminUser(); // Chama isAdminUser aqui
     const isEditingOwnProfile = loggedInUserId === targetUserIdForSave.toString();
 
     let endpoint = '';
@@ -747,7 +763,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const result = await response.json();
       showToastNotification(result.message || "Habilidades salvas com sucesso!", 'success');
       closeProfileModal();
-      if (isAdminUser()) {
+      if (isAdminUser()) { // Chama isAdminUser aqui
         fetchAllTeamProfiles(); // Admin recarrega a lista da equipe
       } else {
         fetchMyProfile(); // Usuário normal recarrega seu próprio perfil
@@ -765,7 +781,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Close profile modal
   function closeProfileModal() {
-    profileModal.classList.add('hidden');
+    if (profileModal) profileModal.classList.add('hidden'); // Verifica se profileModal existe
     // Destruir o gráfico ao fechar o modal
     if (currentChartInstance) {
       currentChartInstance.destroy();
@@ -781,7 +797,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Filter team members (for Admin view)
   function filterTeamMembers() {
-    if (!isAdminUser()) {
+    if (!isAdminUser()) { // Chama isAdminUser aqui
       // Para usuários normais, apenas exibe seu perfil (allTeamMembersGlobal terá 1 item)
       displayTeamMembers(allTeamMembersGlobal);
       return;
@@ -801,23 +817,6 @@ document.addEventListener('DOMContentLoaded', function () {
         member.fullName.toLowerCase().includes(searchTerm)
       );
     }
-
-    // Determinar a área/categoria final para filtrar (COMENTADO - FOCO NA BUSCA POR NOME)
-    // let areaToFilterBy = 'all';
-    // if (selectedAreaDropdown && selectedAreaDropdown.value !== 'all') { // Verifica se o elemento existe
-    //     areaToFilterBy = selectedAreaDropdown.value;
-    // } else if (activeCategoryTab && activeCategoryTab.dataset.category !== 'all') { // Verifica se o elemento existe
-    //     areaToFilterBy = activeCategoryTab.dataset.category;
-    // }
-
-    // Filtrar por área/categoria se uma específica for selecionada (COMENTADO - FOCO NA BUSCA POR NOME)
-    // if (areaToFilterBy !== 'all') {
-    //     filtered = filtered.filter(member => {
-    //         const skillsInCategory = member[areaToFilterBy]; // e.g., member.backend
-    //         // Verifica se a categoria existe no membro e se tem skills nela
-    //         return skillsInCategory && Array.isArray(skillsInCategory) && skillsInCategory.length > 0;
-    //     });
-    // }
 
     displayTeamMembers(filtered);
     updateStats(filtered); // Atualiza as estatísticas com base nos membros filtrados
@@ -841,11 +840,11 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('[checkLoginStatus] Token:', token, 'UserName:', userName);
 
     if (token && userName) {
-      userProfileSection.classList.remove('hidden');
-      welcomeMessage.textContent = `Bem-vindo(a), ${userName}!`;
+      if (userProfileSection) userProfileSection.classList.remove('hidden');
+      if (welcomeMessage) welcomeMessage.textContent = `Bem-vindo(a), ${userName}!`;
 
 
-      const isAdmin = isAdminUser();
+      const isAdmin = isAdminUser(); // Chama isAdminUser aqui e armazena o resultado
       console.log('[checkLoginStatus] isAdminUser() returned:', isAdmin);
       if (isAdmin) {
         console.log('[checkLoginStatus] Admin path taken.');
@@ -855,20 +854,30 @@ document.addEventListener('DOMContentLoaded', function () {
           console.warn('[checkLoginStatus] Admin user, but showCreateUserModalBtn not found.');
         }
 
-        showCreateUserModalBtn.classList.remove('hidden');
-        document.getElementById('filters-section').style.display = 'block';
-        document.getElementById('categories-section').style.display = 'block';
-        document.getElementById('stats-section').style.display = 'grid'; // 'grid' para manter o layout
+        // showCreateUserModalBtn pode ser null se não estiver na página, então verificamos antes de usar
+        if (showCreateUserModalBtn) showCreateUserModalBtn.classList.remove('hidden');
+
+        const filtersSection = document.getElementById('filters-section');
+        const categoriesSection = document.getElementById('categories-section');
+        const statsSection = document.getElementById('stats-section');
+
+        if (filtersSection) filtersSection.style.display = 'block';
+        if (categoriesSection) categoriesSection.style.display = 'block';
+        if (statsSection) statsSection.style.display = 'grid'; // 'grid' para manter o layout
+
         initializeFiltersAndCategories();
         fetchAllTeamProfiles();
 
       } else { // Não é admin
         console.log('[checkLoginStatus] Non-admin path taken.');
-        document.getElementById('filters-section').style.display = 'none';
+        const filtersSection = document.getElementById('filters-section');
+        const categoriesSection = document.getElementById('categories-section');
+        const statsSection = document.getElementById('stats-section');
 
+        if (filtersSection) filtersSection.style.display = 'none';
         if (showCreateUserModalBtn) showCreateUserModalBtn.classList.add('hidden');
-        document.getElementById('categories-section').style.display = 'none';
-        document.getElementById('stats-section').style.display = 'none';
+        if (categoriesSection) categoriesSection.style.display = 'none';
+        if (statsSection) statsSection.style.display = 'none';
         fetchMyProfile();
       }
     } else {
@@ -878,38 +887,17 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function initializeFiltersAndCategories() {
-    // searchInput já é uma variável global no escopo do script
-    // const filterArea = document.getElementById('filter-area'); // Comentado
-    // const resetFiltersBtn = document.getElementById('reset-filters'); // Comentado
     const categoryTabs = document.querySelectorAll('.category-tab');
 
-    if (searchInput) { // Verifica se searchInput existe
+    if (searchInput) {
       searchInput.addEventListener('input', filterTeamMembers);
     }
-    // if (filterArea) filterArea.addEventListener('change', filterTeamMembers); // Comentado
-
-    // Lógica do botão de reset comentada, pois o foco é na busca por nome
-    // if (resetFiltersBtn) {
-    //   resetFiltersBtn.addEventListener('click', () => {
-    //     if (searchInput) searchInput.value = '';
-    //     if (filterArea) filterArea.value = 'all';
-    //     categoryTabs.forEach(tab => {
-    //         tab.classList.remove('active');
-    //         if (tab.dataset.category === 'all') {
-    //           tab.classList.add('active');
-    //         }
-    //     });
-    //     // Re-display all (filtered by admin's self-exclusion) members
-    //     // allTeamMembersGlobal já está filtrado, então apenas chamamos filterTeamMembers para resetar
-    //     filterTeamMembers();
-    //   });
-    // }
 
     categoryTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         categoryTabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        filterTeamMembers(); // filterTeamMembers considerará a categoria ativa
+        filterTeamMembers();
       });
     });
   }
@@ -917,26 +905,30 @@ document.addEventListener('DOMContentLoaded', function () {
   // --- Create User Modal Logic ---
   if (showCreateUserModalBtn) {
     showCreateUserModalBtn.addEventListener('click', () => {
-      createUserModal.classList.remove('hidden');
-      createUserForm.reset();
-      createUserMessage.textContent = '';
-      createUserMessage.className = 'mt-3 text-sm text-center';
+      if (createUserModal) createUserModal.classList.remove('hidden');
+      if (createUserForm) createUserForm.reset();
+      if (createUserMessage) {
+        createUserMessage.textContent = '';
+        createUserMessage.className = 'mt-3 text-sm text-center';
+      }
     });
   }
 
   if (closeCreateUserModalBtn) {
     closeCreateUserModalBtn.addEventListener('click', () => {
-      createUserModal.classList.add('hidden');
+      if (createUserModal) createUserModal.classList.add('hidden');
     });
   }
 
   if (createUserForm) {
     createUserForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      createUserMessage.textContent = '';
+      if (createUserMessage) createUserMessage.textContent = '';
       const submitButton = document.getElementById('create-user-submit-btn');
-      submitButton.disabled = true;
-      submitButton.textContent = 'Criando...';
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Criando...';
+      }
 
       const fullName = document.getElementById('new-user-fullname').value;
       const email = document.getElementById('new-user-email').value;
@@ -956,7 +948,7 @@ document.addEventListener('DOMContentLoaded', function () {
           showToastNotification(data.message || "Usuário criado com sucesso!", 'success');
           fetchAllTeamProfiles(); // Atualiza a lista de usuários no dashboard do admin
           setTimeout(() => {
-            createUserModal.classList.add('hidden');
+            if (createUserModal) createUserModal.classList.add('hidden');
           }, 2000); // Fecha o modal após 2 segundos
         } else {
           showToastNotification(data.message || 'Falha ao criar usuário.', 'error');
@@ -965,18 +957,22 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Create user error:', error);
         showToastNotification('Erro ao tentar criar usuário. Verifique a conexão.', 'error');
       } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = 'Criar Usuário';
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Criar Usuário';
+        }
       }
     });
   }
 
   // --- Edit User Modal Logic ---
   function openEditUserModal(member) {
-    editUserModal.classList.remove('hidden');
-    editUserForm.reset();
-    editUserMessage.textContent = '';
-    editUserMessage.className = 'mt-3 text-sm text-center';
+    if (editUserModal) editUserModal.classList.remove('hidden');
+    if (editUserForm) editUserForm.reset();
+    if (editUserMessage) {
+      editUserMessage.textContent = '';
+      editUserMessage.className = 'mt-3 text-sm text-center';
+    }
 
     document.getElementById('edit-user-id').value = member.id;
     document.getElementById('edit-user-fullname').value = member.fullName;
@@ -986,17 +982,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (closeEditUserModalBtn) {
     closeEditUserModalBtn.addEventListener('click', () => {
-      editUserModal.classList.add('hidden');
+      if (editUserModal) editUserModal.classList.add('hidden');
     });
   }
 
   if (editUserForm) {
     editUserForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      editUserMessage.textContent = '';
+      if (editUserMessage) editUserMessage.textContent = '';
       const submitButton = document.getElementById('edit-user-submit-btn');
-      submitButton.disabled = true;
-      submitButton.textContent = 'Salvando...';
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Salvando...';
+      }
 
       const userId = document.getElementById('edit-user-id').value;
       const fullName = document.getElementById('edit-user-fullname').value;
@@ -1019,7 +1017,7 @@ document.addEventListener('DOMContentLoaded', function () {
           showToastNotification(data.message || "Usuário atualizado com sucesso!", 'success');
           fetchAllTeamProfiles(); // Atualiza a lista
           setTimeout(() => {
-            editUserModal.classList.add('hidden');
+            if (editUserModal) editUserModal.classList.add('hidden');
           }, 2000);
         } else {
           showToastNotification(data.message || 'Falha ao atualizar usuário.', 'error');
@@ -1028,8 +1026,10 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Edit user error:', error);
         showToastNotification('Erro ao tentar atualizar usuário.', 'error');
       } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = 'Salvar Alterações';
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Salvar Alterações';
+        }
       }
     });
   }
@@ -1054,15 +1054,16 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Event listeners
-  // closeModal é uma variável global definida no index.html (botão X no topo do modal de perfil)
-  if (closeModal) { // closeModal é o ID do botão X no modal de perfil
-    closeModal.addEventListener('click', closeProfileModal);
+  const closeModalButton = document.getElementById('close-modal'); // Renomeado para evitar conflito com closeModalBtn
+  if (closeModalButton) {
+    closeModalButton.addEventListener('click', closeProfileModal);
   } else {
     console.warn("Elemento 'close-modal' (botão X do modal de perfil) não encontrado.");
   }
-  if (closeModalBtn) { // closeModalBtn é o botão "Fechar" no rodapé do modal de perfil
+  if (closeModalBtn) {
     closeModalBtn.addEventListener('click', closeProfileModal);
   }
+
 
   // Event listeners para o novo modal da tabela de competências
   if (closeCompetenciesTableModalAction) {
@@ -1078,6 +1079,153 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Funções auxiliares que podem estar faltando no escopo do DOMContentLoaded
+  // (Estas podem estar no script inline do index.html, mas é melhor tê-las aqui se forem usadas pelas funções acima)
+
+  function formatDateTime(isoString) {
+    if (!isoString) return 'N/A';
+    try {
+      const date = new Date(isoString);
+      // Verifica se a data é válida
+      if (isNaN(date.getTime())) {
+        return 'Data inválida';
+      }
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        // hour: '2-digit', minute: '2-digit' // Removido para apenas data
+      });
+    } catch (e) {
+      console.error("Erro ao formatar data:", isoString, e);
+      return 'Erro na data';
+    }
+  }
+
+  const proficiencyLevels = [
+    { level: 0, label: '0 - Não Avaliado', text: 'Nível de proficiência ainda não avaliado para {{skillName}}.' },
+    { level: 1, label: '1 - Iniciante', text: 'Conhecimento básico de {{skillName}}, necessita de supervisão para tarefas complexas.' },
+    { level: 2, label: '2 - Elementar', text: 'Capaz de realizar tarefas simples em {{skillName}} com alguma autonomia.' },
+    { level: 3, label: '3 - Intermediário', text: 'Bom conhecimento prático de {{skillName}}, executa tarefas com independência.' },
+    { level: 4, label: '4 - Avançado', text: 'Profundo conhecimento em {{skillName}}, capaz de liderar e solucionar problemas complexos.' },
+    { level: 5, label: '5 - Especialista', text: 'Referência em {{skillName}}, contribui para a evolução da área e mentora outros.' }
+  ];
+
+  const portfolioItemsMap = [
+    // ... (seu mapa de portfólio, se existir)
+    // Exemplo:
+    // { name: "Sistema de Gestão de Clientes", relevantSkills: ["Java", "Spring Boot", "React", "PostgreSQL"], infrastructure: ["Servidor de Aplicação", "Banco de Dados SQL"], link: "http://example.com/projeto1" },
+    // { name: "Aplicativo Mobile de Vendas", relevantSkills: ["React Native", "Node.js", "MongoDB", "Firebase"], infrastructure: ["Servidor Node.js", "Banco NoSQL", "Serviço de Autenticação"], link: "" }
+  ];
+
+  function showToastNotification(message, type = 'info') {
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+      console.error("Toast container not found!");
+      alert(message); // Fallback para alert
+      return;
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `fixed top-5 right-5 p-4 rounded-md shadow-lg text-white text-sm z-50 animate-toast-in`;
+
+    if (type === 'success') {
+      toast.classList.add('bg-green-500');
+    } else if (type === 'error') {
+      toast.classList.add('bg-red-500');
+    } else { // info or default
+      toast.classList.add('bg-blue-500');
+    }
+
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.remove('animate-toast-in');
+      toast.classList.add('animate-toast-out');
+      setTimeout(() => {
+        toast.remove();
+      }, 500); // Tempo para a animação de saída
+    }, 3000); // Duração do toast
+  }
+
+  function updateStats(members) {
+    const totalMembers = members.length;
+    let totalSkillsEvaluated = 0;
+    const skillCounts = {}; // Para contar quantas vezes cada skill aparece
+    const skillLevelsSum = {}; // Para somar os níveis de cada skill
+    const categorySkillCounts = {}; // { backend: { total: X, count: Y }, ... }
+
+    members.forEach(member => {
+      const categories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
+      categories.forEach(category => {
+        if (member[category] && Array.isArray(member[category])) {
+          if (!categorySkillCounts[category]) {
+            categorySkillCounts[category] = { totalLevel: 0, skillEntries: 0 };
+          }
+          member[category].forEach(skill => {
+            if (skill.skillLevel > 0) { // Considera apenas skills avaliadas
+              totalSkillsEvaluated++;
+              skillCounts[skill.skillName] = (skillCounts[skill.skillName] || 0) + 1;
+              skillLevelsSum[skill.skillName] = (skillLevelsSum[skill.skillName] || 0) + skill.skillLevel;
+
+              categorySkillCounts[category].totalLevel += skill.skillLevel;
+              categorySkillCounts[category].skillEntries++;
+            }
+          });
+        }
+      });
+    });
+
+    const averageSkillsPerMember = totalMembers > 0 ? (totalSkillsEvaluated / totalMembers).toFixed(1) : 0;
+
+    const topSkillsArray = Object.entries(skillLevelsSum)
+      .map(([name, totalLevel]) => ({ name, averageLevel: totalLevel / skillCounts[name], count: skillCounts[name] }))
+      .sort((a, b) => b.averageLevel - a.averageLevel || b.count - a.count) // Prioriza maior nível médio, depois maior contagem
+      .slice(0, 3);
+
+    const categoryAverages = Object.entries(categorySkillCounts)
+      .map(([name, data]) => ({ name, averageLevel: data.skillEntries > 0 ? (data.totalLevel / data.skillEntries) : 0 }))
+      .sort((a, b) => b.averageLevel - a.averageLevel);
+
+    // Atualiza os elementos do DOM
+    const totalMembersEl = document.getElementById('stats-total-members');
+    const avgSkillsEl = document.getElementById('stats-avg-skills');
+    const topSkillsListEl = document.getElementById('stats-top-skills-list');
+    const topCategoriesListEl = document.getElementById('stats-top-categories-list');
+
+    if (totalMembersEl) totalMembersEl.textContent = totalMembers;
+    if (avgSkillsEl) avgSkillsEl.textContent = averageSkillsPerMember;
+
+    if (topSkillsListEl) {
+      topSkillsListEl.innerHTML = ''; // Limpa
+      if (topSkillsArray.length > 0) {
+        topSkillsArray.forEach(skill => {
+          const li = document.createElement('li');
+          li.className = 'text-xs text-gray-600';
+          li.innerHTML = `${skill.name} <span class="font-semibold">(Nível Médio: ${skill.averageLevel.toFixed(1)}, ${skill.count} devs)</span>`;
+          topSkillsListEl.appendChild(li);
+        });
+      } else {
+        topSkillsListEl.innerHTML = '<li class="text-xs text-gray-500 italic">Nenhuma skill avaliada.</li>';
+      }
+    }
+
+    if (topCategoriesListEl) {
+      topCategoriesListEl.innerHTML = ''; // Limpa
+      if (categoryAverages.length > 0) {
+        categoryAverages.slice(0, 3).forEach(cat => { // Mostra top 3 categorias
+          const li = document.createElement('li');
+          li.className = 'text-xs text-gray-600';
+          const categoryName = cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
+          li.innerHTML = `${categoryName} <span class="font-semibold">(Nível Médio: ${cat.averageLevel.toFixed(1)})</span>`;
+          topCategoriesListEl.appendChild(li);
+        });
+      } else {
+        topCategoriesListEl.innerHTML = '<li class="text-xs text-gray-500 italic">Nenhuma categoria com skills avaliadas.</li>';
+      }
+    }
+  }
+
+
   // Initialize on page load
   checkLoginStatus();
-})
+});
