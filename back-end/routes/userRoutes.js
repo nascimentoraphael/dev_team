@@ -212,4 +212,43 @@ router.put('/:userId/skills', authenticateToken, async (req, res) => {
   }
 });
 
+// Rota para o usuário alterar sua própria senha
+router.put('/me/password', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({ message: "Senha antiga e nova senha são obrigatórias." });
+  }
+
+  try {
+    // 1. Verificar a senha antiga
+    const queryText = `SELECT password_hash FROM users WHERE id = $1`;
+    const result = await db.query(queryText, [userId]);
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Senha antiga incorreta." });
+    }
+
+    // 2. Fazer o hash da nova senha
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+    // 3. Atualizar a senha no banco de dados
+    const updateQueryText = `UPDATE users SET password_hash = $1, lastUpdate = $2 WHERE id = $3`;
+    await db.query(updateQueryText, [newPasswordHash, new Date().toISOString(), userId]);
+
+    res.json({ message: "Senha alterada com sucesso!" });
+  } catch (err) {
+    console.error("Erro ao alterar senha:", err);
+    return res.status(500).json({ error: "Erro ao alterar senha: " + err.message });
+  }
+});
+
+const bcrypt = require('bcryptjs'); // Importar bcrypt
 module.exports = router;
