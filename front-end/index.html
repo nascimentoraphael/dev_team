@@ -642,6 +642,8 @@
     function isAdminUser() {
       const userEmail = localStorage.getItem('userEmail');
 
+      return userEmail && userEmail.toLowerCase() === 'admin@sp.senai.br';
+
     }
 
     // Function to update stats display
