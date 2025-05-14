@@ -1,5 +1,5 @@
 {
-  "backend": [
+  "DESENVOLVIMENTO BACKEND (27)": [
     {
       "skillName": ".NET",
       "skillLevel": 0
@@ -13,7 +13,7 @@
       "skillLevel": 0
     },
     {
-      "skillName": "Banco de Dados de Grafos",
+      "skillName": "Banco de dados de Grafos",
       "skillLevel": 0
     },
     {
@@ -21,7 +21,7 @@
       "skillLevel": 0
     },
     {
-      "skillName": "Dbeaver",
+      "skillName": "DBeaver",
       "skillLevel": 0
     },
     {
@@ -54,6 +54,10 @@
     },
     {
       "skillName": "Node.js",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "NestJS",
       "skillLevel": 0
     },
     {
@@ -103,17 +107,9 @@
     {
       "skillName": "Xunit",
       "skillLevel": 0
-    },
-    {
-      "skillName": "NestJS",
-      "skillLevel": 0
-    },
-    {
-      "skillName": "Quarckus",
-      "skillLevel": 0
     }
   ],
-  "frontend": [
+  "DESENVOLVIMENTO FRONTEND (23)": [
     {
       "skillName": "Angular",
       "skillLevel": 0
@@ -167,7 +163,15 @@
       "skillLevel": 0
     },
     {
+      "skillName": "React",
+      "skillLevel": 0
+    },
+    {
       "skillName": "React Hook Form",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "React Query",
       "skillLevel": 0
     },
     {
@@ -175,7 +179,7 @@
       "skillLevel": 0
     },
     {
-      "skillName": "React",
+      "skillName": "Styled-components",
       "skillLevel": 0
     },
     {
@@ -187,19 +191,19 @@
       "skillLevel": 0
     },
     {
-      "skillName": "StoryBook",
+      "skillName": "Vitest",
       "skillLevel": 0
     },
     {
-      "skillName": "UI",
+      "skillName": "VueJS",
       "skillLevel": 0
     },
     {
-      "skillName": "UX",
+      "skillName": "Wordpress",
       "skillLevel": 0
     }
   ],
-  "mobile": [
+  "DESENVOLVIMENTO FRONTEND APLICATIVOS (10)": [
     {
       "skillName": "Dart",
       "skillLevel": 0
@@ -225,11 +229,11 @@
       "skillLevel": 0
     },
     {
-      "skillName": "Publicação Apple Store",
+      "skillName": "Publicação em Apple Store",
       "skillLevel": 0
     },
     {
-      "skillName": "Publicação Play Store",
+      "skillName": "Publicação em Play Store",
       "skillLevel": 0
     },
     {
@@ -241,7 +245,7 @@
       "skillLevel": 0
     }
   ],
-  "architecture": [
+  "ARQUITETURA DE SOFTWARE (19)": [
     {
       "skillName": "Aplicações Monolíticas",
       "skillLevel": 0
@@ -299,25 +303,49 @@
       "skillLevel": 0
     },
     {
-      "skillName": "Serverless",
+      "skillName": "SOLID",
       "skillLevel": 0
     },
     {
-      "skillName": "SOLID",
+      "skillName": "Servless",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "StoryBook",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "UI",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "UX",
       "skillLevel": 0
     }
   ],
-  "management": [
+  "GESTÃO E OPERAÇÃO (05)": [
     {
-      "skillName": "Scrum",
+      "skillName": "Escrita de Projetos",
       "skillLevel": 0
     },
     {
       "skillName": "Kanban",
       "skillLevel": 0
+    },
+    {
+      "skillName": "Levantamento de Requisitos",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "Metodologia OKR",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "Scrum",
+      "skillLevel": 0
     }
   ],
-  "security": [
+  "SEGURANÇA DA INFORMAÇÃO E CONFORMIDADE (18)": [
     {
       "skillName": "Adequação LGPD",
       "skillLevel": 0
@@ -343,23 +371,23 @@
       "skillLevel": 0
     },
     {
-      "skillName": "ISA 62.443 (IEC 62443)",
+      "skillName": "ISA 62.443",
       "skillLevel": 0
     },
     {
-      "skillName": "ISO 22301 (Continuidade de Negócios)",
+      "skillName": "ISO 22.301",
       "skillLevel": 0
     },
     {
-      "skillName": "ISO 27001",
+      "skillName": "ISO 27.001",
       "skillLevel": 0
     },
     {
-      "skillName": "ISO 27005 (Gestão de Riscos)",
+      "skillName": "ISO 27.005",
       "skillLevel": 0
     },
     {
-      "skillName": "ISO 27701 (Privacidade/LGPD)",
+      "skillName": "ISO 27.701",
       "skillLevel": 0
     },
     {
@@ -375,11 +403,11 @@
       "skillLevel": 0
     },
     {
-      "skillName": "Segurança da Informação em Automação Industrial",
+      "skillName": "SI Automação Industrial",
       "skillLevel": 0
     },
     {
-      "skillName": "Segurança em Código (Security by Design)",
+      "skillName": "Segurança em Código",
       "skillLevel": 0
     },
     {
@@ -387,11 +415,11 @@
       "skillLevel": 0
     },
     {
-      "skillName": "TISAX (Automotivo)",
+      "skillName": "Tissax",
       "skillLevel": 0
     }
   ],
-  "infra": [
+  "TECNOLOGIA E INFRAESTRUTURA DE TI (31)": [
     {
       "skillName": "Amazon Web Services",
       "skillLevel": 0
@@ -421,15 +449,11 @@
       "skillLevel": 0
     },
     {
-      "skillName": "Computação em Nuvem",
+      "skillName": "Computação em Nuvem (cloud computing)",
       "skillLevel": 0
     },
     {
       "skillName": "Configurações de Rede",
-      "skillLevel": 0
-    },
-    {
-      "skillName": "Databricks",
       "skillLevel": 0
     },
     {
@@ -489,7 +513,7 @@
       "skillLevel": 0
     },
     {
-      "skillName": "Serviços de Mensageria PUB/SUB",
+      "skillName": "Serviços de Mensageria - PUB/SUB",
       "skillLevel": 0
     },
     {
@@ -511,15 +535,19 @@
     {
       "skillName": "Zabbix",
       "skillLevel": 0
-    }
-  ],
-  "data": [
+    },
     {
-      "skillName": "Algoritmos Genéticos",
+      "skillName": "Databricks",
       "skillLevel": 0
     },
     {
-      "skillName": "Amazon Redshift",
+      "skillName": "Quarckus",
+      "skillLevel": 0
+    }
+  ],
+  "DADOS E INTELIGÊNCIA ARTIFICIAL (49)": [
+    {
+      "skillName": "Algoritmos Genéticos",
       "skillLevel": 0
     },
     {
@@ -571,10 +599,6 @@
       "skillLevel": 0
     },
     {
-      "skillName": "Keras",
-      "skillLevel": 0
-    },
-    {
       "skillName": "K-Means",
       "skillLevel": 0
     },
@@ -611,7 +635,15 @@
       "skillLevel": 0
     },
     {
-      "skillName": "OpenCV",
+      "skillName": "Amazon Redshift",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "Keras",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "Opencv",
       "skillLevel": 0
     },
     {
@@ -691,47 +723,23 @@
       "skillLevel": 0
     },
     {
-      "skillName": "Visão Computacional - Detecção de Objetos",
+      "skillName": "VC - Detecção de Objetos",
       "skillLevel": 0
     },
     {
-      "skillName": "Reconhecimento de Caracteres",
+      "skillName": "VC - Reconhecimento de Caracteres (OCR)",
       "skillLevel": 0
     },
     {
-      "skillName": "Visão Computacional - Segmentação Semântica",
+      "skillName": "VC - Segmentação Semântica",
       "skillLevel": 0
     },
     {
-      "skillName": "YOLO",
+      "skillName": "Yolo",
       "skillLevel": 0
     }
   ],
-  "immersive": [
-    {
-      "skillName": "DApps (aplicações descentralizadas)",
-      "skillLevel": 0
-    },
-    {
-      "skillName": "Hyperledger Fabric",
-      "skillLevel": 0
-    },
-    {
-      "skillName": "Proof of Work (PoW), Proof of Stake (PoS), Delegated",
-      "skillLevel": 0
-    },
-    {
-      "skillName": "Rastreabilidade",
-      "skillLevel": 0
-    },
-    {
-      "skillName": "Solidity (Ethereum)",
-      "skillLevel": 0
-    },
-    {
-      "skillName": "Tokenização (NFTs, DeFi, etc.)",
-      "skillLevel": 0
-    },
+  "TECNOLOGIAS IMERSIVAS (16)": [
     {
       "skillName": "Animação",
       "skillLevel": 0
@@ -797,7 +805,7 @@
       "skillLevel": 0
     }
   ],
-  "marketing": [
+  "MARKETING DIGITAL E MÍDIAS SOCIAIS (08)": [
     {
       "skillName": "E-mail Marketing",
       "skillLevel": 0
@@ -828,6 +836,36 @@
     },
     {
       "skillName": "SEO",
+      "skillLevel": 0
+    }
+  ],
+  "BLOCKCHAIN (07)": [
+    {
+      "skillName": "Algoritmos de Criptografia",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "Protocolos de consenso: PoW, PoS, DPoS",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "Rastreabilidade",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "Solidity(Ethereum)",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "Tokenização (NFTs, DeFi, etc.)",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "DApps (aplicações descentralizadas)",
+      "skillLevel": 0
+    },
+    {
+      "skillName": "Hyperledger Fabric",
       "skillLevel": 0
     }
   ]
