@@ -55,12 +55,37 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   const proficiencyLevels = [
-    { level: 0, label: '0 - Não Avaliado', text: 'Nível de proficiência ainda não avaliado para {{skillName}}.' },
-    { level: 1, label: '1 - Iniciante', text: 'Conhecimento básico de {{skillName}}, necessita de supervisão para tarefas complexas.' },
-    { level: 2, label: '2 - Elementar', text: 'Capaz de realizar tarefas simples em {{skillName}} com alguma autonomia.' },
-    { level: 3, label: '3 - Intermediário', text: 'Bom conhecimento prático de {{skillName}}, executa tarefas com independência.' },
-    { level: 4, label: '4 - Avançado', text: 'Profundo conhecimento em {{skillName}}, capaz de liderar e solucionar problemas complexos.' },
-    { level: 5, label: '5 - Especialista', text: 'Referência em {{skillName}}, contribui para a evolução da área e mentora outros.' }
+
+    {
+      level: 0,
+      label: "0 - Não Avaliado / Sem Experiência",
+      text: "Nenhuma avaliação ou experiência prática registrada para {{skillName}}."
+    },
+    {
+      level: 1,
+      label: "1 - Familiar (Conceitos Básicos)",
+      text: "Familiarizado com os conceitos básicos de {{skillName}}, como seus princípios fundamentais e aplicações comuns, mas ainda não aplicou esses conhecimentos em projetos reais."
+    },
+    {
+      level: 2,
+      label: "2 - Iniciante (Entende Terminologia)",
+      text: "Entende e consegue discutir a terminologia e os conceitos fundamentais de {{skillName}}, como seus componentes chave e casos de uso. Pode participar de discussões sobre projetos e contribuir com ideias básicas relacionadas a {{skillName}}."
+    },
+    {
+      level: 3,
+      label: "3 - Intermediário (Aplica com Orientação)",
+      text: "Capaz de aplicar as habilidades de {{skillName}} de forma independente em situações familiares, como a implementação de funcionalidades padrão ou a resolução de problemas comuns. Pode preparar o ambiente, desenvolver soluções e avaliar resultados com orientação ocasional para {{skillName}}."
+    },
+    {
+      level: 4,
+      label: "4 - Avançado (Orienta Outros)",
+      text: "Pode orientar ou guiar outros na aplicação de {{skillName}}, incluindo a explicação de nuances complexas, melhores práticas e otimizações. Tem experiência em liderar aspectos técnicos de projetos envolvendo {{skillName}} e garantir que os objetivos sejam alcançados dentro do prazo e do orçamento."
+    },
+    {
+      level: 5,
+      label: "5 - Especialista (Gerencia Projetos Complexos)",
+      text: "Demonstrou resultados consistentes na aplicação de {{skillName}} em diversos contextos e desafios. Capaz de gerenciar projetos complexos e de grande escala, implementar metodologias avançadas com {{skillName}} e inovar na abordagem para resolver problemas. Seus resultados são mensuráveis e alinhados com as necessidades e objetivos departamentais."
+    }
   ];
 
   const portfolioItemsMap = [
