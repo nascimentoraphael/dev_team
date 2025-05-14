@@ -570,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     Unidade: ${member.unit || 'N/A'}
                 </div>
                 <div class="flex justify-between items-center text-sm mb-3">
-                    <span class="text-gray-500">Última atualização: ${formatDateTime(member.lastUpdate)}</span>
+                    <span class="text-gray-500">Última atualização: ${formatDateTime(member.lastUpdate || '')}</span>
                     <button class="view-profile-btn px-3 py-1 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition">
                         Ver Perfil Completo
                     </button>
@@ -608,6 +608,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Open profile modal
   function openProfileModal(member) {
+    console.log('Dados do membro no modal:', JSON.parse(JSON.stringify(member))); // Adicionado para depuração
     currentProfileInModalId = member.id;
     const names = (member.name || "Usuário").split(' ');
     const initials = names.length > 1 ? `${names[0][0]}${names[names.length - 1][0]}` : (names[0] ? names[0][0] : 'U');
@@ -619,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('modal-fullname').textContent = member.fullName;
     document.getElementById('modal-initials').textContent = initials.toUpperCase();
     document.getElementById('modal-unit').textContent = member.unit || 'N/A';
-    document.getElementById('modal-update').textContent = formatDateTime(member.lastUpdate);
+    document.getElementById('modal-update').textContent = formatDateTime(member.lastupdate); // Corrigido para 'lastupdate' (minúsculo)
 
     const topSkillsContainer = document.getElementById('modal-top-skills');
     topSkillsContainer.innerHTML = '';
