@@ -489,12 +489,23 @@ document.addEventListener('DOMContentLoaded', function () {
       const initials = names.length > 1
         ? `${names[0][0]}${names[names.length - 1][0]}`
         : (names[0] ? names[0][0] : 'U');
-      const totalSkills = [
+
+      // Calcula todas as skills listadas para o membro (para a lógica de "+X" das top skills)
+      const allListedSkillsObjects = [
         ...(member.backend || []), ...(member.frontend || []), ...(member.mobile || []),
         ...(member.architecture || []), ...(member.management || []), ...(member.security || []),
         ...(member.infra || []), ...(member.data || []), ...(member.immersive || []),
         ...(member.marketing || [])
-      ].length;
+      ];
+      const totalListedSkills = allListedSkillsObjects.length;
+
+      // Calcula o número de skills efetivamente preenchidas (nível > 0)
+      const filledSkillsCount = allListedSkillsObjects.filter(skill => skill.skillLevel > 0).length;
+
+      // Defina aqui o número total de competências possíveis no sistema.
+      // Ajuste este valor conforme o número real de todas as skills disponíveis para avaliação.
+      const totalPossibleSkills = 203;
+
       const allSkillObjectsForCard = [
         ...(member.backend || []).map(s => ({ ...s, category: 'backend' })),
         ...(member.frontend || []).map(s => ({ ...s, category: 'frontend' })),
@@ -527,7 +538,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="mb-2">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-sm font-medium text-gray-700">Habilidades</span>
-                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${totalSkills} competências</span>
+                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${filledSkillsCount} de ${totalPossibleSkills} competências</span>
                 </div>
                 <div class="text-xs text-gray-500 mb-2">
                     Email: ${member.username || 'N/A'} <br>
@@ -547,7 +558,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 ${skillObj.skillName} ${skillObj.skillLevel > 0 ? `(N${skillObj.skillLevel})` : ''}
                             </span>
                         `).join('')}
-                        ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
+                        ${totalListedSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalListedSkills - 3}</span>` : ''}
                     </div>
                 </div>
                 ${isAdminNow && member.id.toString() !== localStorage.getItem('userId') ? `
