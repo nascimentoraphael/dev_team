@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
                             </div>
                         </div>
-                        ${isAdminUser() && member.username !== 'admin@example.com' ? `
+                        ${isAdminUser() && member.username !== 'admin@sp.senai.br' ? `
                         <div class="mt-4 pt-3 border-t border-gray-200 flex justify-end space-x-2">
                             <button class="edit-user-btn text-xs px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition" data-user-id="${member.id}">
                                 <i class="fas fa-edit mr-1"></i>Editar

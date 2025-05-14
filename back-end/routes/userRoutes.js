@@ -89,14 +89,14 @@ router.put('/me/profile/skills', authenticateToken, async (req, res) => {
 // Rota para o admin editar um usuário (fullName, username/email, unit)
 router.put('/:id', authenticateToken, async (req, res) => {
   // Verifica se o requisitante é o admin
-  if (req.user.username !== 'admin@senai.br') {
+  if (req.user.username !== 'admin@sp.senai.br') {
     return res.status(403).json({ message: "Acesso negado. Apenas administradores podem editar usuários." });
   }
 
   const userIdToEdit = req.params.id;
   const { fullName, email, unit } = req.body; // username no frontend é o email
 
-  if (!fullName || !email || !unit) {
+  if (!fullName || !email || unit === undefined || unit === null) { // unit pode ser string vazia, mas deve existir
     return res.status(400).json({ message: "Nome completo, email e unidade são obrigatórios." });
   }
 
@@ -130,7 +130,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 // Rota para o admin excluir um usuário
 router.delete('/:id', authenticateToken, async (req, res) => {
   // Verifica se o requisitante é o admin
-  if (req.user.username !== 'admin@senai.br') {
+  if (req.user.username !== 'admin@sp.senai.br') {
     return res.status(403).json({ message: "Acesso negado. Apenas administradores podem excluir usuários." });
   }
 
@@ -157,7 +157,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 // Rota para o ADMIN atualizar as habilidades de um usuário específico
 router.put('/:userId/skills', authenticateToken, async (req, res) => {
   // 1. Verificar se o requisitante é admin
-  if (req.user.username !== 'admin@senai.br') {
+  if (req.user.username !== 'admin@sp.senai.br') {
     return res.status(403).json({ message: "Acesso negado. Apenas administradores podem realizar esta ação." });
   }
 
