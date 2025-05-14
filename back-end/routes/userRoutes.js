@@ -4,13 +4,15 @@ const authenticateToken = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
+const DB_SKILL_COLUMNS = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing', 'blockchain'];
+
 // Rota para buscar o perfil do usuário autenticado
 router.get('/me/profile', authenticateToken, async (req, res) => {
   // req.user foi adicionado pelo middleware authenticateToken e contém o id do usuário
   const userId = req.user.id;
 
   try {
-    const queryText = `SELECT id, username, name, "fullName", unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE id = $1`;
+    const queryText = `SELECT id, username, name, "fullName", unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing, blockchain FROM users WHERE id = $1`;
     const result = await db.query(queryText, [userId]);
     const row = result.rows[0];
 
@@ -23,7 +25,7 @@ router.get('/me/profile', authenticateToken, async (req, res) => {
     const userProfile = {
       ...row,
       ...Object.fromEntries(Object.entries(row).map(([key, value]) => {
-        if (['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'].includes(key)) {
+        if (DB_SKILL_COLUMNS.includes(key)) {
           return [key, typeof value === 'string' ? JSON.parse(value || '[]') : (value || [])];
         }
         return [key, value];
@@ -48,12 +50,11 @@ router.put('/me/profile/skills', authenticateToken, async (req, res) => {
   }
 
   // Validar e preparar os campos de skills para o update
-  const skillCategories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
   let setClauses = [];
   let queryParams = [];
   let paramIndex = 1;
 
-  skillCategories.forEach(category => {
+  DB_SKILL_COLUMNS.forEach(category => {
     if (skills[category] !== undefined) { // Verifica se a categoria de skill foi enviada
       setClauses.push(`${category} = $${paramIndex++}`);
       queryParams.push(JSON.stringify(skills[category] || []));
@@ -177,12 +178,11 @@ router.put('/:userId/skills', authenticateToken, async (req, res) => {
     return res.status(400).json({ message: "Formato de habilidades inválido." });
   }
 
-  const skillCategories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
   let setClauses = [];
   let queryParams = [];
   let paramIndex = 1;
 
-  skillCategories.forEach(category => {
+  DB_SKILL_COLUMNS.forEach(category => {
     if (skills[category] !== undefined) { // Verifica se a categoria de skill foi enviada
       setClauses.push(`${category} = $${paramIndex++}`);
       queryParams.push(JSON.stringify(skills[category] || []));

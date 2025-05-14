@@ -4,6 +4,19 @@ const jwt = require('jsonwebtoken');
 const db = require('../postgresClient.js');// Importa a conexão com o banco de dados
 const defaultSkillCategories = require('../skillCategories.json'); // Carrega as skills padrão
 
+const SKILL_CATEGORIES_JSON_KEYS = {
+  backend: "DESENVOLVIMENTO BACKEND (27)",
+  frontend: "DESENVOLVIMENTO FRONTEND (23)",
+  mobile: "DESENVOLVIMENTO FRONTEND APLICATIVOS (10)",
+  architecture: "ARQUITETURA DE SOFTWARE (19)",
+  management: "GESTÃO E OPERAÇÃO (05)",
+  security: "SEGURANÇA DA INFORMAÇÃO E CONFORMIDADE (18)",
+  infra: "TECNOLOGIA E INFRAESTRUTURA DE TI (31)",
+  data: "DADOS E INTELIGÊNCIA ARTIFICIAL (49)",
+  immersive: "TECNOLOGIAS IMERSIVAS (16)",
+  marketing: "MARKETING DIGITAL E MÍDIAS SOCIAIS (08)",
+  blockchain: "BLOCKCHAIN (07)"
+};
 const router = express.Router();
 
 // Rota de Registro (opcional, mas útil para adicionar novos usuários)
@@ -19,28 +32,30 @@ router.post('/register', async (req, res) => {
 
     // Usar skills do request se fornecidas e completas, senão usar as defaultSkillCategories
     const finalSkills = {
-      backend: (skills && skills.backend && skills.backend.length > 0) ? skills.backend : defaultSkillCategories.backend,
-      frontend: (skills && skills.frontend && skills.frontend.length > 0) ? skills.frontend : defaultSkillCategories.frontend,
-      mobile: (skills && skills.mobile && skills.mobile.length > 0) ? skills.mobile : defaultSkillCategories.mobile,
-      architecture: (skills && skills.architecture && skills.architecture.length > 0) ? skills.architecture : defaultSkillCategories.architecture,
-      management: (skills && skills.management && skills.management.length > 0) ? skills.management : defaultSkillCategories.management,
-      security: (skills && skills.security && skills.security.length > 0) ? skills.security : defaultSkillCategories.security,
-      infra: (skills && skills.infra && skills.infra.length > 0) ? skills.infra : defaultSkillCategories.infra,
-      data: (skills && skills.data && skills.data.length > 0) ? skills.data : defaultSkillCategories.data,
-      immersive: (skills && skills.immersive && skills.immersive.length > 0) ? skills.immersive : defaultSkillCategories.immersive,
-      marketing: (skills && skills.marketing && skills.marketing.length > 0) ? skills.marketing : defaultSkillCategories.marketing,
+      backend: (skills && skills.backend && skills.backend.length > 0) ? skills.backend : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.backend],
+      frontend: (skills && skills.frontend && skills.frontend.length > 0) ? skills.frontend : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.frontend],
+      mobile: (skills && skills.mobile && skills.mobile.length > 0) ? skills.mobile : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.mobile],
+      architecture: (skills && skills.architecture && skills.architecture.length > 0) ? skills.architecture : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.architecture],
+      management: (skills && skills.management && skills.management.length > 0) ? skills.management : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.management],
+      security: (skills && skills.security && skills.security.length > 0) ? skills.security : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.security],
+      infra: (skills && skills.infra && skills.infra.length > 0) ? skills.infra : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.infra],
+      data: (skills && skills.data && skills.data.length > 0) ? skills.data : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.data],
+      immersive: (skills && skills.immersive && skills.immersive.length > 0) ? skills.immersive : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.immersive],
+      marketing: (skills && skills.marketing && skills.marketing.length > 0) ? skills.marketing : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.marketing],
+      blockchain: (skills && skills.blockchain && skills.blockchain.length > 0) ? skills.blockchain : defaultSkillCategories[SKILL_CATEGORIES_JSON_KEYS.blockchain],
     };
 
     // Adicionada a coluna 'unit' e placeholders ajustados para PostgreSQL, e RETURNING id
-    const queryText = `INSERT INTO users (username, password_hash, name, "fullName", unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing)
-                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id`;
+    const queryText = `INSERT INTO users (username, password_hash, name, "fullName", unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing, blockchain)
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING id`;
     const values = [
       username, hash, name, fullName, unit, lastUpdate,
       JSON.stringify(finalSkills.backend || []), JSON.stringify(finalSkills.frontend || []),
       JSON.stringify(finalSkills.mobile || []), JSON.stringify(finalSkills.architecture || []),
       JSON.stringify(finalSkills.management || []), JSON.stringify(finalSkills.security || []),
       JSON.stringify(finalSkills.infra || []), JSON.stringify(finalSkills.data || []),
-      JSON.stringify(finalSkills.immersive || []), JSON.stringify(finalSkills.marketing || [])
+      JSON.stringify(finalSkills.immersive || []), JSON.stringify(finalSkills.marketing || []),
+      JSON.stringify(finalSkills.blockchain || [])
     ];
     const result = await db.query(queryText, values);
     res.status(201).json({ message: "Usuário registrado com sucesso!", userId: result.rows[0].id });
@@ -65,7 +80,7 @@ router.post('/login', async (req, res) => {
 
   try {
     // Selecionar explicitamente com aspas garante o case, ou confiar que SELECT * com coluna citada na criação funcione.
-    const queryText = `SELECT id, username, password_hash, name, "fullName", unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing FROM users WHERE username = $1`;
+    const queryText = `SELECT id, username, password_hash, name, "fullName", unit, lastUpdate, backend, frontend, mobile, architecture, management, security, infra, data, immersive, marketing, blockchain FROM users WHERE username = $1`;
     const result = await db.query(queryText, [username]);
     const user = result.rows[0];
 
