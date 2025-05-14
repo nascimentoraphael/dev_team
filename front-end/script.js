@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Função para buscar todos os perfis da equipe (para o Admin)
   async function fetchAllTeamProfiles() {
     const token = localStorage.getItem('authToken');
+    console.log('[fetchAllTeamProfiles] Called. Token:', token);
     if (!token) {
       window.location.href = 'login.html';
       return;
@@ -44,9 +45,13 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const team = await response.json();
+      console.log('[fetchAllTeamProfiles] Raw team data from API:', JSON.parse(JSON.stringify(team)));
       const loggedInUserId = localStorage.getItem('userId');
+      console.log('[fetchAllTeamProfiles] loggedInUserId:', loggedInUserId);
       // Filtra o próprio admin da lista
       allTeamMembersGlobal = team.filter(member => member.id.toString() !== loggedInUserId);
+
+      console.log('[fetchAllTeamProfiles] Filtered allTeamMembersGlobal (admin removed):', JSON.parse(JSON.stringify(allTeamMembersGlobal)));
 
       // Ordenar alfabeticamente por fullName (ou name como fallback)
       allTeamMembersGlobal.sort((a, b) => {
@@ -71,6 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Função para buscar o perfil do usuário logado (não admin)
   async function fetchMyProfile() {
     const token = localStorage.getItem('authToken');
+    console.log('[fetchMyProfile] Called. Token:', token);
     if (!token) {
       window.location.href = 'login.html';
       return;
@@ -117,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error("Elemento 'team-container' não encontrado no DOM.");
       return;
     }
+    console.log('[displayTeamMembers] Called with members:', JSON.parse(JSON.stringify(members)));
     teamContainer.innerHTML = '';
 
     const membersArray = Array.isArray(members) ? members : [members];
@@ -127,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
+    console.log('[displayTeamMembers] isAdminUser() check in displayTeamMembers:', isAdminUser());
     if (!isAdminUser() && membersArray.length === 1) {
       teamContainer.className = 'grid grid-cols-1 gap-6';
     } else if (isAdminUser()) {
@@ -686,26 +694,41 @@ document.addEventListener('DOMContentLoaded', function () {
   function checkLoginStatus() {
     const token = localStorage.getItem('authToken');
     const userName = localStorage.getItem('userName');
+    console.log('[checkLoginStatus] Token:', token, 'UserName:', userName);
 
     if (token && userName) {
       userProfileSection.classList.remove('hidden');
       welcomeMessage.textContent = `Bem-vindo(a), ${userName}!`;
 
-      if (isAdminUser() && showCreateUserModalBtn) { // Adicionada verificação para showCreateUserModalBtn
+
+      const isAdmin = isAdminUser();
+      console.log('[checkLoginStatus] isAdminUser() returned:', isAdmin);
+      if (isAdmin) {
+        console.log('[checkLoginStatus] Admin path taken.');
+        if (showCreateUserModalBtn) {
+          showCreateUserModalBtn.classList.remove('hidden');
+        } else {
+          console.warn('[checkLoginStatus] Admin user, but showCreateUserModalBtn not found.');
+        }
+
         showCreateUserModalBtn.classList.remove('hidden');
         document.getElementById('filters-section').style.display = 'block';
         document.getElementById('categories-section').style.display = 'block';
         document.getElementById('stats-section').style.display = 'grid'; // 'grid' para manter o layout
         initializeFiltersAndCategories();
         fetchAllTeamProfiles();
-      } else if (!isAdminUser()) { // Garante que o botão de criar usuário seja escondido se não for admin
+
+      } else { // Não é admin
+        console.log('[checkLoginStatus] Non-admin path taken.');
         document.getElementById('filters-section').style.display = 'none';
-        showCreateUserModalBtn.classList.add('hidden');
+
+        if (showCreateUserModalBtn) showCreateUserModalBtn.classList.add('hidden');
         document.getElementById('categories-section').style.display = 'none';
         document.getElementById('stats-section').style.display = 'none';
         fetchMyProfile();
       }
     } else {
+      console.log('[checkLoginStatus] No token or userName, redirecting to login.');
       window.location.href = 'login.html'; // Redireciona para login se não houver token
     }
   }

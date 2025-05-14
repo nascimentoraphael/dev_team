@@ -644,6 +644,12 @@
 
       return userEmail && userEmail.toLowerCase() === 'admin@sp.senai.br';
 
+      console.log('[isAdminUser] userEmail from localStorage:', userEmail);
+      // Normaliza para minúsculas antes de comparar, para garantir robustez
+      const isAdmin = userEmail && userEmail.toLowerCase() === 'admin@sp.senai.br';
+      console.log('[isAdminUser] isAdmin result:', isAdmin);
+      return isAdmin;
+
     }
 
     // Function to update stats display
