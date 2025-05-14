@@ -703,11 +703,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const areaKeys = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
     const areaLabels = ['Backend', 'Frontend', 'Mobile', 'Arquitetura', 'Gestão', 'Segurança', 'Infra', 'Dados/IA', 'Imersivas', 'Marketing'];
-    const skillCounts = areaKeys.map(key => {
-      const skillsInCategory = member[key];
-      if (!skillsInCategory || skillsInCategory.length === 0) return 0;
-      const totalLevel = skillsInCategory.reduce((sum, s) => sum + (s.skillLevel || 0), 0);
-      return skillsInCategory.length > 0 ? (totalLevel / skillsInCategory.length) : 0;
+
+    // Calcula a porcentagem de skills preenchidas por área
+    const areaCompletionPercentages = areaKeys.map(key => {
+      const skillsInCategory = member[key] || []; // Garante que é um array
+      const totalPossibleSkillsInArea = skillsInCategory.length;
+
+      if (totalPossibleSkillsInArea === 0) {
+        return 0; // Se não há skills definidas para esta área no perfil, a completude é 0%
+      }
+
+      const filledSkillsInArea = skillsInCategory.filter(skill => skill.skillLevel && skill.skillLevel > 0).length;
+      const percentage = (filledSkillsInArea / totalPossibleSkillsInArea) * 100;
+      return parseFloat(percentage.toFixed(2)); // Retorna com até 2 casas decimais
     });
 
     const ctx = document.getElementById('modal-chart').getContext('2d');
@@ -717,7 +725,7 @@ document.addEventListener('DOMContentLoaded', function () {
       data: {
         labels: areaLabels,
         datasets: [{
-          label: 'Nível Médio por Área', data: skillCounts, fill: true,
+          label: 'Preenchimento da Área (%)', data: areaCompletionPercentages, fill: true,
           backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgb(59, 130, 246)',
           pointBackgroundColor: 'rgb(59, 130, 246)', pointBorderColor: '#fff',
           pointHoverBackgroundColor: '#fff', pointHoverBorderColor: 'rgb(59, 130, 246)'
@@ -725,8 +733,32 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       options: {
         responsive: true, maintainAspectRatio: true,
-        scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 5, ticks: { stepSize: 1 } } },
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.r !== null) { label += context.parsed.r.toFixed(2); } return label; } } } }
+        scales: {
+          r: {
+            angleLines: { display: true },
+            suggestedMin: 0,
+            suggestedMax: 100, // Escala de 0 a 100 para porcentagem
+            ticks: {
+              stepSize: 20,
+              callback: function (value) { return value + "%" } // Adiciona % aos ticks
+            }
+          }
+        },
+        plugins: {
+          legend: { display: true, position: 'top' }, // Mostrar legenda para clareza
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                let label = context.dataset.label || '';
+                if (label) { label += ': '; }
+                if (context.parsed.r !== null) {
+                  label += context.parsed.r.toFixed(2) + '%'; // Adiciona % ao valor do tooltip
+                }
+                return label;
+              }
+            }
+          }
+        }
       }
     });
 
