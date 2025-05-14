@@ -371,6 +371,10 @@
         </div>
       </div>
       <div class="border-t p-4 flex justify-end sticky bottom-0 bg-white">
+        <button id="open-competencies-table-view-btn"
+          class="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition mr-2">
+          Ver Tabela de Competências
+        </button>
         <button id="close-modal-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
           Fechar
         </button>
@@ -378,8 +382,29 @@
     </div>
   </div>
 
-  <script>
+  <!-- Competencies Table Modal -->
+  <div id="competencies-table-modal"
+    class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-5xl w-full max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center border-b p-4 sticky top-0 bg-white z-10">
+        <h3 id="competencies-table-modal-title" class="text-xl font-bold">Resumo Detalhado das Competências</h3>
+        <button id="close-competencies-table-modal-action" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div id="competencies-table-modal-content" class="p-6 overflow-y-auto flex-grow">
+        <!-- Table will be inserted here by JavaScript -->
+      </div>
+      <div class="border-t p-4 flex justify-end sticky bottom-0 bg-white">
+        <button id="close-competencies-table-modal-btn"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
 
+  <script>
     function updateStats(members) {
       const statsSection = document.getElementById('stats-section');
       if (!isAdminUser() || !statsSection || statsSection.style.display === 'none') {
