@@ -706,9 +706,32 @@ document.addEventListener('DOMContentLoaded', function () {
     populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive', isAdminViewingOtherProfile, isOwnerOfProfile);
     populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing', isAdminViewingOtherProfile, isOwnerOfProfile);
 
-    const tabs = document.querySelectorAll('#competency-tabs button[role="tab"]');
+    // Regenerar as abas para incluir a contagem de skills
+    const competencyTabsContainer = document.getElementById('competency-tabs');
+    competencyTabsContainer.innerHTML = ''; // Limpa as abas existentes
+
+    areaKeys.forEach((key, index) => {
+      const skillsInCategory = member[key] || [];
+      const skillCount = skillsInCategory.length;
+      const tabButton = document.createElement('li');
+      tabButton.className = `mr-2 ${index === areaKeys.length - 1 ? '' : ''}`; // Adiciona mr-2 exceto para o último
+      tabButton.setAttribute('role', 'presentation');
+      tabButton.innerHTML = `
+            <button class="inline-block p-3 border-b-2 rounded-t-lg ${index === 0 ? 'text-blue-600 border-blue-600' : 'hover:text-gray-600 hover:border-gray-300 border-transparent'}"
+                    id="${key}-tab"
+                    data-tabs-target="#${key}-content"
+                    type="button"
+                    role="tab"
+                    aria-controls="${key}"
+                    aria-selected="${index === 0 ? 'true' : 'false'}">
+                ${areaLabels[index]} (${skillCount})
+            </button>`;
+      competencyTabsContainer.appendChild(tabButton);
+    });
+
+    const tabs = document.querySelectorAll('#competency-tabs button[role="tab"]'); // Seleciona as novas abas
     const tabContents = document.querySelectorAll('#competency-tab-content div[role="tabpanel"]');
-    tabs.forEach(tab => {
+    tabs.forEach(tab => { // Adiciona listeners às novas abas
       tab.addEventListener('click', () => {
         tabs.forEach(t => { t.setAttribute('aria-selected', 'false'); t.classList.remove('text-blue-600', 'border-blue-600'); t.classList.add('hover:text-gray-600', 'hover:border-gray-300', 'border-transparent'); });
         tabContents.forEach(content => { content.classList.add('hidden'); });
@@ -719,7 +742,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector(targetPanelId).classList.remove('hidden');
       });
     });
-    if (tabs.length > 0) tabs[0].click();
+    if (tabs.length > 0) tabs[0].click(); // Ativa a primeira aba por padrão
 
     const allIndividualSkills = [];
     areaKeys.forEach(categoryKey => {
@@ -824,14 +847,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const modalFooter = profileModal.querySelector('.border-t.p-4.flex.justify-end');
-    let saveButton = modalFooter.querySelector('#save-skills-btn');
-    const competencyTabsContainer = document.getElementById('competency-tabs');
-    const existingSubmittedMessage = competencyTabsContainer.previousElementSibling;
+    const existingSubmittedMessage = competencyTabsContainer.previousElementSibling; // competencyTabsContainer já foi definido acima
     if (existingSubmittedMessage && existingSubmittedMessage.classList.contains('skills-submitted-info')) {
       existingSubmittedMessage.remove();
     }
     const canEffectivelyEditSkills = isOwnerOfProfile || isAdminViewingOtherProfile;
     if (canEffectivelyEditSkills) {
+      let saveButton = modalFooter.querySelector('#save-skills-btn');
       if (!saveButton) {
         saveButton = document.createElement('button');
         saveButton.id = 'save-skills-btn';
