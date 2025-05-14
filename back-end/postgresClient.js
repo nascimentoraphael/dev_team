@@ -21,7 +21,7 @@ const pool = new Pool({
 async function insertInitialData(pool) {
   const initialUsers = [
     {
-      username: "italo@senai.br", password: "password123", name: "Italo Ignacio", fullName: "Italo Felipe Ignacio", unit: "Sede", lastUpdate: new Date().toISOString(),
+      username: "italo@sp.senai.br", password: "password123", name: "Italo Ignacio", fullName: "Italo Felipe Ignacio", unit: "1.27", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -127,7 +127,7 @@ async function insertInitialData(pool) {
       ])
     },
     {
-      username: "janaina@senai.br", password: "password123", name: "Janaina Falco", fullName: "Janaina Ferreira Falco", unit: "Filial A", lastUpdate: new Date().toISOString(),
+      username: "janaina@sp.senai.br", password: "password123", name: "Janaina Falco", fullName: "Janaina Ferreira Falco", unit: "1.27", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -233,7 +233,7 @@ async function insertInitialData(pool) {
       ])
     },
     {
-      username: "admin@senai.br", password: "adminpassword", name: "Admin", fullName: "System Administrator", unit: "Sede", lastUpdate: new Date().toISOString(),
+      username: "admin@sp.senai.br", password: "adminpassword", name: "Admin", fullName: "System Administrator", unit: "1.27", lastUpdate: new Date().toISOString(),
       backend: JSON.stringify([
         { skillName: ".NET", skillLevel: 0 }, { skillName: "API REST", skillLevel: 0 }, { skillName: "AssertJ", skillLevel: 0 },
         { skillName: "Banco de Dados de Grafos", skillLevel: 0 }, { skillName: "C#", skillLevel: 0 }, { skillName: "Dbeaver", skillLevel: 0 },
@@ -357,29 +357,29 @@ async function insertInitialData(pool) {
   };
 
   const newUsersList = [
-    { username: "bruno.fernandes@senai.br", name: "Bruno", fullName: "Bruno Henrique Fernandes" },
-    { username: "christian.alonso@senai.br", name: "Christian", fullName: "Christian Albuquerque Alonso" },
-    { username: "daniel.santos@senai.br", name: "Daniel", fullName: "Daniel Wilson Alves dos Santos" },
-    { username: "erick.barbosa@senai.br", name: "Erick", fullName: "Erick Araujo Barbosa" },
-    { username: "flavio.dias@senai.br", name: "Flávio", fullName: "Flávio Camilo Dias" },
-    { username: "joao.meyer@senai.br", name: "João", fullName: "João Henrique Parizoti Meyer" },
-    { username: "lucas.silva@senai.br", name: "Lucas", fullName: "Lucas Araujo Oliveira Silva" },
-    { username: "lukas.venancio@senai.br", name: "Lukas", fullName: "Lukas Santos Venâncio" },
-    { username: "pedro.santos@senai.br", name: "Pedro", fullName: "Pedro Henrique Silva Santos" },
-    { username: "raphael.nascimento@senai.br", name: "Raphael", fullName: "Raphael Lima Marques do Nascimento" },
-    { username: "rodrigo.silva@senai.br", name: "Rodrigo", fullName: "Rodrigo Areias da Silva" },
-    { username: "rogger.silveira@senai.br", name: "Rogger", fullName: "Rogger da Silva Silveira" },
-    { username: "wesley.meneghini@senai.br", name: "Wesley", fullName: "Wesley Meneghini" },
-    { username: "wilson.carneiro@senai.br", name: "Wilson", fullName: "Wilson Rogerio Carneiro" }
+    { usernameBase: "bruno.fernandes", name: "Bruno", fullName: "Bruno Henrique Fernandes" },
+    { usernameBase: "christian.alonso", name: "Christian", fullName: "Christian Albuquerque Alonso" },
+    { usernameBase: "daniel.santos", name: "Daniel", fullName: "Daniel Wilson Alves dos Santos" },
+    { usernameBase: "erick.barbosa", name: "Erick", fullName: "Erick Araujo Barbosa" },
+    { usernameBase: "flavio.dias", name: "Flávio", fullName: "Flávio Camilo Dias" },
+    { usernameBase: "joao.meyer", name: "João", fullName: "João Henrique Parizoti Meyer" },
+    { usernameBase: "lucas.silva", name: "Lucas", fullName: "Lucas Araujo Oliveira Silva" },
+    { usernameBase: "lukas.venancio", name: "Lukas", fullName: "Lukas Santos Venâncio" },
+    { usernameBase: "pedro.santos", name: "Pedro", fullName: "Pedro Henrique Silva Santos" },
+    { usernameBase: "raphael.nascimento", name: "Raphael", fullName: "Raphael Lima Marques do Nascimento" },
+    { usernameBase: "rodrigo.silva", name: "Rodrigo", fullName: "Rodrigo Areias da Silva" },
+    { usernameBase: "rogger.silveira", name: "Rogger", fullName: "Rogger da Silva Silveira" },
+    { usernameBase: "wesley.meneghini", name: "Wesley", fullName: "Wesley Meneghini" },
+    { usernameBase: "wilson.carneiro", name: "Wilson", fullName: "Wilson Rogerio Carneiro" }
   ];
 
   newUsersList.forEach(u => {
     initialUsers.push({
-      username: u.username,
+      username: `${u.usernameBase}@sp.senai.br`,
       password: "password123",
       name: u.name,
       fullName: u.fullName,
-      unit: u.unit || "Não Definida",
+      unit: "1.27", // Definindo a unidade para 1.27 para todos os novos usuários
       lastUpdate: new Date().toISOString(),
       backend: JSON.stringify(allSkillCategories.backend),
       frontend: JSON.stringify(allSkillCategories.frontend),
