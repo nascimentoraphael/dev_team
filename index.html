@@ -105,6 +105,9 @@
         <button data-category="immersive" class="category-tab px-6 py-2 font-medium rounded-t-lg">
           <i class="fas fa-vr-cardboard mr-2"></i>Imersivas
         </button>
+        <button data-category="blockchain" class="category-tab px-6 py-2 font-medium rounded-t-lg">
+          <i class="fas fa-cube mr-2"></i>Blockchain
+        </button>
         <button data-category="marketing" class="category-tab px-6 py-2 font-medium rounded-t-lg">
           <i class="fas fa-hashtag mr-2"></i>Marketing
         </button>
@@ -331,7 +334,11 @@
                       class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
                       id="immersive-tab" data-tabs-target="#immersive-content" type="button" role="tab"
                       aria-controls="immersive" aria-selected="false">Imersivas</button></li>
-                  <li role="presentation"><button
+                  <li class="mr-2" role="presentation"><button
+                      class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                      id="blockchain-tab" data-tabs-target="#blockchain-content" type="button" role="tab"
+                      aria-controls="blockchain" aria-selected="false">Blockchain</button></li>
+                  <li role="presentation"><button <!-- Last item, no mr-2 -->
                       class="inline-block p-3 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300"
                       id="marketing-tab" data-tabs-target="#marketing-content" type="button" role="tab"
                       aria-controls="marketing" aria-selected="false">Marketing</button></li>
@@ -383,6 +390,11 @@
                   aria-labelledby="immersive-tab">
                   <h5 class="font-medium text-blue-700 mb-2 text-base">Tecnologias Imersivas</h5>
                   <div id="modal-immersive" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                </div>
+                <div class="hidden p-1 rounded-lg bg-gray-50" id="blockchain-content" role="tabpanel"
+                  aria-labelledby="blockchain-tab">
+                  <h5 class="font-medium text-blue-700 mb-2 text-base">Desenvolvimento Blockchain</h5>
+                  <div id="modal-blockchain" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
                 <div class="hidden p-1 rounded-lg bg-gray-50" id="marketing-content" role="tabpanel"
                   aria-labelledby="marketing-tab">

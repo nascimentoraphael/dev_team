@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const categorySkillCounts = {};
 
     members.forEach(member => {
-      const categories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
+      const categories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'blockchain', 'marketing'];
       categories.forEach(category => {
         if (member[category] && Array.isArray(member[category])) {
           if (!categorySkillCounts[category]) {
@@ -465,7 +465,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       const myProfile = await response.json();
       const skillCategories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
-      skillCategories.forEach(category => {
+      skillCategories.push('blockchain'); // Add blockchain here
+      skillCategories.forEach(category => { // Ensure all categories including blockchain are initialized
         myProfile[category] = myProfile[category] || [];
       });
       allTeamMembersGlobal = [myProfile];
@@ -520,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const allListedSkillsObjects = [
         ...(member.backend || []), ...(member.frontend || []), ...(member.mobile || []),
         ...(member.architecture || []), ...(member.management || []), ...(member.security || []),
-        ...(member.infra || []), ...(member.data || []), ...(member.immersive || []),
+        ...(member.infra || []), ...(member.data || []), ...(member.immersive || []), ...(member.blockchain || []),
         ...(member.marketing || [])
       ];
       const totalListedSkills = allListedSkillsObjects.length;
@@ -542,6 +543,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ...(member.infra || []).map(s => ({ ...s, category: 'infra' })),
         ...(member.data || []).map(s => ({ ...s, category: 'data' })),
         ...(member.immersive || []).map(s => ({ ...s, category: 'immersive' })),
+        ...(member.blockchain || []).map(s => ({ ...s, category: 'blockchain' })),
         ...(member.marketing || []).map(s => ({ ...s, category: 'marketing' }))
       ];
       const card = document.createElement('div');
@@ -635,6 +637,7 @@ document.addEventListener('DOMContentLoaded', function () {
       ...(member.infra || []).map(s => ({ ...s, category: 'infra' })),
       ...(member.data || []).map(s => ({ ...s, category: 'data' })),
       ...(member.immersive || []).map(s => ({ ...s, category: 'immersive' })),
+      ...(member.blockchain || []).map(s => ({ ...s, category: 'blockchain' })),
       ...(member.marketing || []).map(s => ({ ...s, category: 'marketing' }))
     ];
 
@@ -710,8 +713,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
-    const areaKeys = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
-    const areaLabels = ['Backend', 'Frontend', 'Mobile', 'Arquitetura', 'Gestão', 'Segurança', 'Infra', 'Dados/IA', 'Imersivas', 'Marketing'];
+    const areaKeys = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'blockchain', 'marketing'];
+    const areaLabels = ['Backend', 'Frontend', 'Mobile', 'Arquitetura', 'Gestão', 'Segurança', 'Infra', 'Dados/IA', 'Imersivas', 'Blockchain', 'Marketing'];
 
     // Calcula a porcentagem de skills preenchidas por área
     const areaCompletionPercentages = areaKeys.map(key => {
@@ -780,6 +783,7 @@ document.addEventListener('DOMContentLoaded', function () {
     populateSkillsWithLevels('modal-infra', member.infra, 'infra', isAdminViewingOtherProfile, isOwnerOfProfile);
     populateSkillsWithLevels('modal-data', member.data, 'data', isAdminViewingOtherProfile, isOwnerOfProfile);
     populateSkillsWithLevels('modal-immersive', member.immersive, 'immersive', isAdminViewingOtherProfile, isOwnerOfProfile);
+    populateSkillsWithLevels('modal-blockchain', member.blockchain, 'blockchain', isAdminViewingOtherProfile, isOwnerOfProfile);
     populateSkillsWithLevels('modal-marketing', member.marketing, 'marketing', isAdminViewingOtherProfile, isOwnerOfProfile);
 
     // Regenerar as abas para incluir a contagem de skills
@@ -976,8 +980,19 @@ document.addEventListener('DOMContentLoaded', function () {
     tbody.className = 'bg-white divide-y divide-gray-200';
     let evaluatedSkillsCount = 0;
     const areaKeys = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
-    const categoryDisplayNames = { backend: 'Backend', frontend: 'Frontend', mobile: 'Mobile', architecture: 'Arquitetura', management: 'Gestão', security: 'Segurança', infra: 'Infra', data: 'Dados/IA', immersive: 'Imersivas', marketing: 'Marketing' };
+    areaKeys.push('blockchain'); // Add blockchain to the list for the table
+
+    const categoryDisplayNames = {
+      backend: 'Backend', frontend: 'Frontend', mobile: 'Mobile',
+      architecture: 'Arquitetura', management: 'Gestão', security: 'Segurança',
+      infra: 'Infra', data: 'Dados/IA', immersive: 'Imersivas',
+      blockchain: 'Blockchain', marketing: 'Marketing'
+    };
+
     areaKeys.forEach(categoryKey => {
+      // Ensure the category exists in display names, if not, use the key itself (fallback)
+      const displayName = categoryDisplayNames[categoryKey] || categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1);
+
       if (member[categoryKey] && Array.isArray(member[categoryKey])) {
         member[categoryKey].forEach(skill => {
           if (skill.skillLevel > 0) {
@@ -988,7 +1003,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const row = tbody.insertRow();
             row.className = 'hover:bg-gray-50 transition-colors duration-150';
             row.innerHTML = `
-              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${categoryDisplayNames[categoryKey] || categoryKey}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${displayName}</td>
               <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${skill.skillName}</td>
               <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">${levelLabel}</td>
               <td class="px-4 py-3 text-sm text-gray-600">${description}</td>`;
