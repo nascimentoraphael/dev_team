@@ -1,4 +1,7 @@
+console.log('[SCRIPT.JS] Arquivo script.js INICIANDO INTERPRETAÇÃO.');
+
 document.addEventListener('DOMContentLoaded', function () {
+  console.log('[SCRIPT.JS] Evento DOMContentLoaded DISPARADO. Iniciando script principal.');
   // Elementos do DOM que o script principal interage
   const searchInput = document.getElementById('searchInput'); // Para filtros (se habilitado)
   const teamContainer = document.getElementById('team-container'); // Container principal dos cards de perfil
@@ -16,12 +19,12 @@ document.addEventListener('DOMContentLoaded', function () {
   const editUserModal = document.getElementById('edit-user-modal');
   const closeEditUserModalBtn = document.getElementById('close-edit-user-modal');
   const editUserForm = document.getElementById('edit-user-form');
+  const editUserMessage = document.getElementById('edit-user-message');
 
   // Elementos do modal da tabela de competências
   const competenciesTableModal = document.getElementById('competencies-table-modal');
   const closeCompetenciesTableModalAction = document.getElementById('close-competencies-table-modal-action'); // Botão X no header do modal da tabela
   const closeCompetenciesTableModalBtn = document.getElementById('close-competencies-table-modal-btn'); // Botão "Fechar" no footer do modal da tabela
-  const editUserMessage = document.getElementById('edit-user-message');
 
   let allTeamMembersGlobal = []; // Para armazenar os dados dos usuários
   let currentProfileInModalId = null; // Para saber qual perfil está no modal e permitir edições pelo admin
@@ -31,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Função para buscar todos os perfis da equipe (para o Admin)
   async function fetchAllTeamProfiles() {
     const token = localStorage.getItem('authToken');
+    console.log('[fetchAllTeamProfiles] Called. Token:', token);
     if (!token) {
       window.location.href = 'login.html';
       return;
@@ -50,9 +54,13 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const team = await response.json();
+      console.log('[fetchAllTeamProfiles] Raw team data from API:', JSON.parse(JSON.stringify(team)));
       const loggedInUserId = localStorage.getItem('userId');
+      console.log('[fetchAllTeamProfiles] loggedInUserId:', loggedInUserId);
       // Filtra o próprio admin da lista
       allTeamMembersGlobal = team.filter(member => member.id.toString() !== loggedInUserId);
+
+      console.log('[fetchAllTeamProfiles] Filtered allTeamMembersGlobal (admin removed):', JSON.parse(JSON.stringify(allTeamMembersGlobal)));
 
       // Ordenar alfabeticamente por fullName (ou name como fallback)
       allTeamMembersGlobal.sort((a, b) => {
@@ -77,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Função para buscar o perfil do usuário logado (não admin)
   async function fetchMyProfile() {
     const token = localStorage.getItem('authToken');
+    console.log('[fetchMyProfile] Called. Token:', token);
     if (!token) {
       window.location.href = 'login.html';
       return;
@@ -123,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error("Elemento 'team-container' não encontrado no DOM.");
       return;
     }
+    console.log('[displayTeamMembers] Called with members:', JSON.parse(JSON.stringify(members)));
     teamContainer.innerHTML = '';
 
     const membersArray = Array.isArray(members) ? members : [members];
@@ -133,6 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
+    console.log('[displayTeamMembers] isAdminUser() check in displayTeamMembers:', isAdminUser());
     if (!isAdminUser() && membersArray.length === 1) {
       teamContainer.className = 'grid grid-cols-1 gap-6';
     } else if (isAdminUser()) {
@@ -214,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 ${totalSkills > 3 ? `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">+${totalSkills - 3}</span>` : ''}
                             </div>
                         </div>
-                        ${isAdminUser() && member.username !== 'admin@senai.br' ? `
+                        ${isAdminUser() && member.id.toString() !== localStorage.getItem('userId') ? `
                         <div class="mt-4 pt-3 border-t border-gray-200 flex justify-end space-x-2">
                             <button class="edit-user-btn text-xs px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition" data-user-id="${member.id}">
                                 <i class="fas fa-edit mr-1"></i>Editar
@@ -541,8 +552,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Remover mensagem de submissão anterior, se houver
     const existingSubmittedMessage = competencyTabsContainer.previousElementSibling;
     if (existingSubmittedMessage && existingSubmittedMessage.classList.contains('skills-submitted-info')) {
-      // Esta classe não existe mais, mas a lógica de remover um elemento anterior pode ser útil
-      // Se houver alguma mensagem específica de "salvo" ou "erro" diretamente antes das abas.
       existingSubmittedMessage.remove();
     }
 
@@ -562,6 +571,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (saveButton) {
         saveButton.style.display = 'none'; // Esconde o botão se não for editável
       }
+      // A mensagem de "skills já submetidas" foi removida, pois a lógica agora é por skill individual.
     }
 
     // Configurar botão para abrir o modal da tabela de competências
@@ -577,6 +587,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       console.warn("Botão 'open-competencies-table-view-btn' não encontrado.");
     }
+
 
     profileModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -736,7 +747,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const result = await response.json();
       showToastNotification(result.message || "Habilidades salvas com sucesso!", 'success');
       closeProfileModal();
-      if (isAdminSaving) { // Se o admin salvou (seja o seu ou de outro)
+      if (isAdminUser()) {
         fetchAllTeamProfiles(); // Admin recarrega a lista da equipe
       } else {
         fetchMyProfile(); // Usuário normal recarrega seu próprio perfil
@@ -827,26 +838,41 @@ document.addEventListener('DOMContentLoaded', function () {
   function checkLoginStatus() {
     const token = localStorage.getItem('authToken');
     const userName = localStorage.getItem('userName');
+    console.log('[checkLoginStatus] Token:', token, 'UserName:', userName);
 
     if (token && userName) {
       userProfileSection.classList.remove('hidden');
       welcomeMessage.textContent = `Bem-vindo(a), ${userName}!`;
 
-      if (isAdminUser() && showCreateUserModalBtn) { // Adicionada verificação para showCreateUserModalBtn
+
+      const isAdmin = isAdminUser();
+      console.log('[checkLoginStatus] isAdminUser() returned:', isAdmin);
+      if (isAdmin) {
+        console.log('[checkLoginStatus] Admin path taken.');
+        if (showCreateUserModalBtn) {
+          showCreateUserModalBtn.classList.remove('hidden');
+        } else {
+          console.warn('[checkLoginStatus] Admin user, but showCreateUserModalBtn not found.');
+        }
+
         showCreateUserModalBtn.classList.remove('hidden');
         document.getElementById('filters-section').style.display = 'block';
         document.getElementById('categories-section').style.display = 'block';
         document.getElementById('stats-section').style.display = 'grid'; // 'grid' para manter o layout
         initializeFiltersAndCategories();
         fetchAllTeamProfiles();
-      } else if (!isAdminUser()) { // Garante que o botão de criar usuário seja escondido se não for admin
+
+      } else { // Não é admin
+        console.log('[checkLoginStatus] Non-admin path taken.');
         document.getElementById('filters-section').style.display = 'none';
-        showCreateUserModalBtn.classList.add('hidden');
+
+        if (showCreateUserModalBtn) showCreateUserModalBtn.classList.add('hidden');
         document.getElementById('categories-section').style.display = 'none';
         document.getElementById('stats-section').style.display = 'none';
         fetchMyProfile();
       }
     } else {
+      console.log('[checkLoginStatus] No token or userName, redirecting to login.');
       window.location.href = 'login.html'; // Redireciona para login se não houver token
     }
   }
