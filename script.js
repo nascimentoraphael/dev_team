@@ -481,12 +481,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // Função para exibir os membros da equipe (cards)
   function displayTeamMembers(members) {
     if (!teamContainer) {
-      console.error("Elemento 'team-container' não encontrado no DOM.");
+      console.error("[displayTeamMembers] Elemento 'team-container' não encontrado no DOM.");
       return;
     }
     console.log('[displayTeamMembers] Called with members:', JSON.parse(JSON.stringify(members)));
-    teamContainer.innerHTML = '';
+    // Ensure members is an array, even if a single profile is passed (non-admin case)
     const membersArray = Array.isArray(members) ? members : [members];
+    teamContainer.innerHTML = '';
     console.log('[displayTeamMembers] membersArray after ensuring array:', JSON.parse(JSON.stringify(membersArray)));
 
     if (!membersArray || membersArray.length === 0 || !membersArray[0]) {
@@ -496,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    const isAdminNow = isAdminUser();
+    const isAdminNow = isAdminUser(); // Recalcula para garantir
     console.log('[displayTeamMembers] isAdminUser() check in displayTeamMembers:', isAdminNow);
 
     if (!isAdminNow && membersArray.length === 1) {
@@ -1101,14 +1102,38 @@ document.addEventListener('DOMContentLoaded', function () {
       displayTeamMembers(allTeamMembersGlobal);
       return;
     }
-    const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
+
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : ""; // Trim whitespace
+    const activeCategoryTab = document.querySelector('.category-tab.active');
+    // Get the data-category attribute, default to 'all' if no active tab or 'all' is active
+    const selectedCategory = activeCategoryTab ? activeCategoryTab.dataset.category : 'all';
+
+    console.log(`[filterTeamMembers] Filtering with searchTerm: "${searchTerm}", selectedCategory: "${selectedCategory}"`);
+
     let filtered = [...allTeamMembersGlobal];
+
+    // 1. Apply Text Search Filter
     if (searchTerm) {
       filtered = filtered.filter(member =>
+        // Search in name, fullName, username, and unit
         member.name.toLowerCase().includes(searchTerm) ||
-        member.fullName.toLowerCase().includes(searchTerm)
+        (member.fullName || '').toLowerCase().includes(searchTerm) ||
+        (member.username || '').toLowerCase().includes(searchTerm) ||
+        (member.unit || '').toLowerCase().includes(searchTerm)
       );
     }
+
+    // 2. Apply Category Filter (if not 'all')
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(member => {
+        const categorySkills = member[selectedCategory]; // Access the array for the selected category (e.g., member.backend)
+        // Check if the category property exists, is an array, and has at least one skill with level > 0
+        return categorySkills && Array.isArray(categorySkills) && categorySkills.some(skill => skill.skillLevel > 0);
+      });
+    }
+
+    console.log(`[filterTeamMembers] Filtered down to ${filtered.length} members.`);
+
     displayTeamMembers(filtered);
     updateStats(filtered);
   }
