@@ -610,14 +610,20 @@ document.addEventListener('DOMContentLoaded', function () {
       ...(member.immersive || []).map(s => ({ ...s, category: 'immersive' })),
       ...(member.marketing || []).map(s => ({ ...s, category: 'marketing' }))
     ];
-    const topRatedSkills = allSkills.sort((a, b) => (b.skillLevel || 0) - (a.skillLevel || 0)).slice(0, 5);
+
+    // Filtra para incluir apenas skills com nível > 0, depois ordena e pega as top 5
+    const topRatedSkills = allSkills
+      .filter(skill => skill.skillLevel && skill.skillLevel > 0)
+      .sort((a, b) => b.skillLevel - a.skillLevel) // Agora skillLevel é garantido ser um número > 0
+      .slice(0, 5);
+
     if (topRatedSkills.length === 0) {
       topSkillsContainer.innerHTML = '<span class="text-xs text-gray-500 italic">Nenhuma habilidade principal avaliada.</span>';
     } else {
       topRatedSkills.forEach(skillObj => {
         const chip = document.createElement('span');
         chip.className = 'skill-chip text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full mb-1';
-        chip.textContent = `${skillObj.skillName} (Nível ${skillObj.skillLevel || 'N/A'})`;
+        chip.textContent = `${skillObj.skillName} (Nível ${skillObj.skillLevel})`; // skillLevel é garantido aqui
         topSkillsContainer.appendChild(chip);
       });
     }
