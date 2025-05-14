@@ -340,17 +340,20 @@ async function insertInitialData(pool) {
     }
   ];
 
-  const allSkillCategories = { // Este objeto define a estrutura padrão de skills para os novos usuários
-    backend: JSON.parse(initialUsers[0].backend), // Pega a estrutura do primeiro usuário como base
-    frontend: JSON.parse(initialUsers[0].frontend),
-    mobile: JSON.parse(initialUsers[0].mobile),
-    architecture: JSON.parse(initialUsers[0].architecture),
-    management: JSON.parse(initialUsers[0].management),
-    security: JSON.parse(initialUsers[0].security),
-    infra: JSON.parse(initialUsers[0].infra),
-    data: JSON.parse(initialUsers[0].data),
-    immersive: JSON.parse(initialUsers[0].immersive),
-    marketing: JSON.parse(initialUsers[0].marketing)
+  let allSkillCategories;
+  try {
+    allSkillCategories = require('./skillCategories.json');
+    console.log("[PostgresClient] skillCategories.json carregado para popular novos usuários.");
+  } catch (e) {
+    console.error("[PostgresClient] ERRO: Não foi possível carregar './skillCategories.json' para popular novos usuários. Usando arrays vazios como fallback.", e.message);
+    // Fallback para arrays vazios se o JSON não puder ser carregado, para evitar que a inicialização quebre.
+    // No entanto, isso significaria que os novos usuários não teriam a estrutura de skills.
+    // O ideal é garantir que skillCategories.json sempre exista e seja válido.
+    const categories = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing'];
+    allSkillCategories = {};
+    categories.forEach(cat => {
+      allSkillCategories[cat] = [];
+    });
   };
 
   const newUsersList = [
