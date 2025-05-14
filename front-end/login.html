@@ -75,7 +75,7 @@
         if (response.ok) {
           localStorage.setItem('authToken', data.token);
           localStorage.setItem('userName', data.user.name || username);
-          localStorage.setItem('userEmail', username); // Salvar o email/username
+          localStorage.setItem('userEmail', username.toLowerCase()); // Salvar o email/username em minúsculas
           localStorage.setItem('userId', data.user.id); // Salvar o ID do usuário
           window.location.href = 'index.html'; // Redireciona para a página principal
         } else {
