@@ -270,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (document.getElementById('stats-total-members')) document.getElementById('stats-total-members').textContent = '0';
       if (document.getElementById('stats-backend-experts')) document.getElementById('stats-backend-experts').textContent = '0';
       if (document.getElementById('stats-full-stack')) document.getElementById('stats-full-stack').textContent = '0';
+      if (document.getElementById('stats-frontend-devs')) document.getElementById('stats-frontend-devs').textContent = '0';
       if (document.getElementById('stats-mobile-devs')) document.getElementById('stats-mobile-devs').textContent = '0';
       return;
     }
@@ -314,15 +315,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const topSkillsListEl = document.getElementById('stats-top-skills-list'); // Este ID não existe no HTML
     const topCategoriesListEl = document.getElementById('stats-top-categories-list'); // Este ID não existe no HTML
 
-    // IDs corretos do HTML para stats:
-    // stats-total-members, stats-backend-experts, stats-full-stack, stats-mobile-devs
-
     if (totalMembersEl) totalMembersEl.textContent = totalMembers;
-    // Exemplo de como preencher os outros stats (precisa da lógica correta para backend-experts, etc.)
-    if (document.getElementById('stats-backend-experts')) document.getElementById('stats-backend-experts').textContent = members.filter(m => m.backend && m.backend.some(s => s.skillLevel >= 4)).length; // Exemplo
-    if (document.getElementById('stats-full-stack')) document.getElementById('stats-full-stack').textContent = members.filter(m => (m.backend && m.backend.length > 0) && (m.frontend && m.frontend.length > 0)).length; // Exemplo
-    if (document.getElementById('stats-mobile-devs')) document.getElementById('stats-mobile-devs').textContent = members.filter(m => m.mobile && m.mobile.length > 0).length; // Exemplo
 
+    // Backend Experts: Pelo menos uma skill backend com nível >= 4
+    const backendExpertsCount = members.filter(m =>
+      m.backend && m.backend.some(s => s.skillLevel >= 4)
+    ).length;
+    if (document.getElementById('stats-backend-experts')) document.getElementById('stats-backend-experts').textContent = backendExpertsCount;
+
+    // Frontend Devs: Pelo menos uma skill frontend com nível > 0
+    const frontendDevsCount = members.filter(m =>
+      m.frontend && m.frontend.some(s => s.skillLevel > 0)
+    ).length;
+    if (document.getElementById('stats-frontend-devs')) document.getElementById('stats-frontend-devs').textContent = frontendDevsCount;
+
+    // Full Stack: Pelo menos uma skill backend com nível > 0 E pelo menos uma skill frontend com nível > 0
+    const fullStackCount = members.filter(m =>
+      (m.backend && m.backend.some(s => s.skillLevel > 0)) &&
+      (m.frontend && m.frontend.some(s => s.skillLevel > 0))
+    ).length;
+    if (document.getElementById('stats-full-stack')) document.getElementById('stats-full-stack').textContent = fullStackCount;
+
+    // Mobile Devs: Pelo menos uma skill mobile com nível > 0
+    const mobileDevsCount = members.filter(m =>
+      m.mobile && m.mobile.some(s => s.skillLevel > 0)
+    ).length;
+    if (document.getElementById('stats-mobile-devs')) document.getElementById('stats-mobile-devs').textContent = mobileDevsCount;
 
     if (topSkillsListEl) {
       topSkillsListEl.innerHTML = '';
