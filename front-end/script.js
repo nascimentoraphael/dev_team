@@ -1,4 +1,7 @@
+console.log('[SCRIPT.JS] Arquivo script.js INICIANDO INTERPRETAÇÃO.');
+
 document.addEventListener('DOMContentLoaded', function () {
+  console.log('[SCRIPT.JS] Evento DOMContentLoaded DISPARADO. Iniciando script principal.');
   // Elementos do DOM que o script principal interage
   const searchInput = document.getElementById('searchInput'); // Para filtros (se habilitado)
   const teamContainer = document.getElementById('team-container'); // Container principal dos cards de perfil

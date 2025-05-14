@@ -640,16 +640,8 @@
 
     // Helper function to check if the logged-in user is admin
     function isAdminUser() {
-      const userEmail = localStorage.getItem('userEmail');
-
-      return userEmail && userEmail.toLowerCase() === 'admin@sp.senai.br';
-
-      console.log('[isAdminUser] userEmail from localStorage:', userEmail);
-      // Normaliza para minúsculas antes de comparar, para garantir robustez
-      const isAdmin = userEmail && userEmail.toLowerCase() === 'admin@sp.senai.br';
-      console.log('[isAdminUser] isAdmin result:', isAdmin);
-      return isAdmin;
-
+      // Esta função será definida e usada a partir do script.js externo.
+      // A definição anterior aqui estava incompleta e causava problemas.
     }
 
     // Function to update stats display
