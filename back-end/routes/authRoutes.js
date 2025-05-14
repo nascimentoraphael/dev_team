@@ -17,6 +17,9 @@ const SKILL_CATEGORIES_JSON_KEYS = {
   marketing: "MARKETING DIGITAL E MÍDIAS SOCIAIS (08)",
   blockchain: "BLOCKCHAIN (07)"
 };
+// Adicionar DB_SKILL_COLUMNS para consistência com outras rotas e para parsear skills no login
+const DB_SKILL_COLUMNS = ['backend', 'frontend', 'mobile', 'architecture', 'management', 'security', 'infra', 'data', 'immersive', 'marketing', 'blockchain'];
+
 const router = express.Router();
 
 // Rota de Registro (opcional, mas útil para adicionar novos usuários)
@@ -91,8 +94,33 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password_hash);
 
     if (isMatch) {
+      // O 'user' obtido do banco (result.rows[0]) já contém todas as colunas, incluindo as de skills.
       const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      res.json({ message: "Login bem-sucedido!", token, user: { id: user.id, name: user.name, fullName: user.fullName } });
+
+      // Construir o objeto de usuário para a resposta, incluindo todas as skills parseadas
+      const userProfileForResponse = {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        fullName: user.fullName,
+        unit: user.unit,
+        lastUpdate: user.lastUpdate,
+        ...DB_SKILL_COLUMNS.reduce((acc, key) => {
+          const skillData = user[key];
+          if (typeof skillData === 'string') {
+            try {
+              acc[key] = JSON.parse(skillData || '[]');
+            } catch (e) {
+              console.warn(`[AuthRoutes Login] Falha ao parsear skill ${key} para usuário ${user.id}. Usando array vazio. Data: ${skillData}`);
+              acc[key] = [];
+            }
+          } else {
+            acc[key] = skillData || [];
+          }
+          return acc;
+        }, {})
+      };
+      res.json({ message: "Login bem-sucedido!", token, user: userProfileForResponse });
     } else {
       res.status(401).json({ message: "Senha incorreta." });
     }
