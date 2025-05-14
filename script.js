@@ -29,6 +29,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const closeCompetenciesTableModalAction = document.getElementById('close-competencies-table-modal-action');
   const closeCompetenciesTableModalBtn = document.getElementById('close-competencies-table-modal-btn');
 
+  // Elementos do modal de alteração de senha
+  const showChangePasswordModalBtn = document.getElementById('show-change-password-modal-btn');
+  const changePasswordModal = document.getElementById('change-password-modal');
+  const closeChangePasswordModalBtn = document.getElementById('close-change-password-modal');
+  const changePasswordForm = document.getElementById('change-password-form');
+  const changePasswordMessage = document.getElementById('change-password-message');
+
   let allTeamMembersGlobal = [];
   let currentProfileInModalId = null;
   let currentChartInstance = null;
@@ -1063,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error(errorMessage);
       }
       const result = await response.json();
-      showToastNotification("salvo com sucesso", 'success'); // Mensagem fixa de sucesso
+      showToastNotification("Salvo com sucesso", 'success'); // Mensagem fixa de sucesso
       closeProfileModal();
       if (isAdminUser()) {
         fetchAllTeamProfiles();
@@ -1289,6 +1296,77 @@ document.addEventListener('DOMContentLoaded', function () {
         showToastNotification('Erro ao tentar excluir usuário.', 'error');
       }
     }
+  }
+
+  // --- Change Password Modal Logic ---
+  if (showChangePasswordModalBtn) {
+    showChangePasswordModalBtn.addEventListener('click', () => {
+      if (changePasswordModal) changePasswordModal.classList.remove('hidden');
+      if (changePasswordForm) changePasswordForm.reset();
+      if (changePasswordMessage) {
+        changePasswordMessage.textContent = '';
+        changePasswordMessage.className = 'mt-3 text-sm text-center';
+      }
+    });
+  }
+
+  if (closeChangePasswordModalBtn) {
+    closeChangePasswordModalBtn.addEventListener('click', () => {
+      if (changePasswordModal) changePasswordModal.classList.add('hidden');
+    });
+  }
+
+  async function handleChangePassword(event) {
+    event.preventDefault();
+    if (changePasswordMessage) changePasswordMessage.textContent = '';
+
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+    if (newPassword !== confirmNewPassword) {
+      if (changePasswordMessage) {
+        changePasswordMessage.textContent = 'A nova senha e a confirmação não correspondem.';
+        changePasswordMessage.className = 'mt-3 text-sm text-center text-red-600';
+      }
+      return;
+    }
+    if (!newPassword) {
+      if (changePasswordMessage) {
+        changePasswordMessage.textContent = 'A nova senha não pode estar em branco.';
+        changePasswordMessage.className = 'mt-3 text-sm text-center text-red-600';
+      }
+      return;
+    }
+
+    const submitButton = document.getElementById('change-password-submit-btn');
+    if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Salvando...'; }
+
+    const token = localStorage.getItem('authToken');
+    try {
+      // Use a rota /me/password para alterar a senha
+      const response = await fetch('https://dev-team.onrender.com/api/users/me/password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ oldPassword: currentPassword, newPassword })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        showToastNotification(data.message || "Senha alterada com sucesso!", 'success');
+        if (changePasswordModal) changePasswordModal.classList.add('hidden');
+        if (changePasswordForm) changePasswordForm.reset();
+      } else {
+        showToastNotification(data.message || 'Falha ao alterar a senha.', 'error', changePasswordMessage);
+      }
+    } catch (error) {
+      console.error('Change password error:', error);
+      showToastNotification('Erro ao tentar alterar a senha. Verifique a conexão.', 'error', changePasswordMessage);
+    } finally {
+      if (submitButton) { submitButton.disabled = false; submitButton.textContent = 'Salvar Nova Senha'; }
+    }
+  }
+  if (changePasswordForm) {
+    changePasswordForm.addEventListener('submit', handleChangePassword);
   }
 
   // Event listeners

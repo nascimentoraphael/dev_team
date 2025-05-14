@@ -27,6 +27,8 @@
       <p id="welcome-message" class="text-lg mb-4"></p>
       <button id="logout-button"
         class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition mr-2">Sair</button>
+      <button id="show-change-password-modal-btn"
+        class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition mr-2">Alterar Senha</button>
       <!-- Botão para Adicionar Usuário (apenas admin) -->
       <button id="show-create-user-modal-btn"
         class="hidden px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
@@ -211,6 +213,43 @@
             class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Criar
             Usuário</button>
           <p id="create-user-message" class="mt-3 text-sm text-center"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div id="change-password-modal"
+    class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full">
+      <div class="flex justify-between items-center border-b p-4">
+        <h3 class="text-xl font-bold">Alterar Senha</h3>
+        <button id="close-change-password-modal" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <form id="change-password-form">
+          <div class="mb-4">
+            <label for="current-password" class="block text-sm font-medium text-gray-700">Senha Atual:</label>
+            <input type="password" id="current-password" name="currentPassword" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
+          <div class="mb-4">
+            <label for="new-password" class="block text-sm font-medium text-gray-700">Nova Senha:</label>
+            <input type="password" id="new-password" name="newPassword" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
+          <div class="mb-6">
+            <label for="confirm-new-password" class="block text-sm font-medium text-gray-700">Confirmar Nova
+              Senha:</label>
+            <input type="password" id="confirm-new-password" name="confirmNewPassword" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
+          <button type="submit" id="change-password-submit-btn"
+            class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">Salvar
+            Nova Senha</button>
+          <p id="change-password-message" class="mt-3 text-sm text-center"></p>
         </form>
       </div>
     </div>
