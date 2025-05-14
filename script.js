@@ -1063,7 +1063,7 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error(errorMessage);
       }
       const result = await response.json();
-      showToastNotification(result.message || "Habilidades salvas com sucesso!", 'success');
+      showToastNotification("salvo com sucesso", 'success'); // Mensagem fixa de sucesso
       closeProfileModal();
       if (isAdminUser()) {
         fetchAllTeamProfiles();
