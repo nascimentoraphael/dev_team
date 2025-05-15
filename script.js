@@ -1,7 +1,5 @@
-console.log('[SCRIPT.JS] Arquivo script.js INICIANDO INTERPRETAÇÃO.');
-
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('[SCRIPT.JS] Evento DOMContentLoaded DISPARADO. Iniciando script principal.');
+
   // Elementos do DOM que o script principal interage
   const searchInput = document.getElementById('searchInput');
   const teamContainer = document.getElementById('team-container');
@@ -385,9 +383,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // ---------------------------------------------------------------------------
   function isAdminUser() {
     const userEmail = localStorage.getItem('userEmail');
-    console.log('[isAdminUser] userEmail from localStorage:', userEmail);
+
     const isAdmin = userEmail && userEmail.toLowerCase() === 'admin@sp.senai.br';
-    console.log('[isAdminUser] isAdmin result:', isAdmin);
+
     return isAdmin;
   }
 
@@ -398,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Função para buscar todos os perfis da equipe (para o Admin)
   async function fetchAllTeamProfiles() {
     const token = localStorage.getItem('authToken');
-    console.log('[fetchAllTeamProfiles] Called. Token:', token);
+
     if (!token) {
       window.location.href = 'login.html';
       return;
@@ -418,11 +416,11 @@ document.addEventListener('DOMContentLoaded', function () {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const team = await response.json();
-      console.log('[fetchAllTeamProfiles] Raw team data from API:', JSON.parse(JSON.stringify(team)));
+
       const loggedInUserId = localStorage.getItem('userId');
-      console.log('[fetchAllTeamProfiles] loggedInUserId:', loggedInUserId);
+
       allTeamMembersGlobal = team.filter(member => member.id.toString() !== loggedInUserId);
-      console.log('[fetchAllTeamProfiles] Filtered allTeamMembersGlobal (admin removed):', JSON.parse(JSON.stringify(allTeamMembersGlobal)));
+
       allTeamMembersGlobal.sort((a, b) => {
         const nameA = (a.fullName || a.name || '').toLowerCase();
         const nameB = (b.fullName || b.name || '').toLowerCase();
@@ -444,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Função para buscar o perfil do usuário logado (não admin)
   async function fetchMyProfile() {
     const token = localStorage.getItem('authToken');
-    console.log('[fetchMyProfile] Called. Token:', token);
+
     if (!token) {
       window.location.href = 'login.html';
       return;
@@ -485,29 +483,29 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error("[displayTeamMembers] Elemento 'team-container' não encontrado no DOM.");
       return;
     }
-    console.log('[displayTeamMembers] Called with members:', JSON.parse(JSON.stringify(members)));
+
     // Ensure members is an array, even if a single profile is passed (non-admin case)
     const membersArray = Array.isArray(members) ? members : [members];
     teamContainer.innerHTML = '';
-    console.log('[displayTeamMembers] membersArray after ensuring array:', JSON.parse(JSON.stringify(membersArray)));
+
 
     if (!membersArray || membersArray.length === 0 || !membersArray[0]) {
-      console.log('[displayTeamMembers] No members to display or first member is falsy.');
+
       teamContainer.innerHTML = '<p class="text-gray-600 col-span-full text-center">Nenhum membro encontrado.</p>';
       if (isAdminUser()) updateStats([]);
       return;
     }
 
     const isAdminNow = isAdminUser(); // Recalcula para garantir
-    console.log('[displayTeamMembers] isAdminUser() check in displayTeamMembers:', isAdminNow);
+
 
     if (!isAdminNow && membersArray.length === 1) {
       teamContainer.className = 'grid grid-cols-1 gap-6';
     } else if (isAdminNow) {
-      console.log('[displayTeamMembers] Applying multi-card admin layout.');
+
       teamContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6';
     } else {
-      console.log('[displayTeamMembers] Condition for layout not met, isAdminNow:', isAdminNow, 'membersArray.length:', membersArray.length);
+
       teamContainer.className = 'grid grid-cols-1 gap-6';
     }
 
@@ -612,7 +610,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Open profile modal
   function openProfileModal(member) {
-    console.log('Dados do membro no modal:', JSON.parse(JSON.stringify(member))); // Adicionado para depuração
+
     currentProfileInModalId = member.id;
     const names = (member.name || "Usuário").split(' ');
     const initials = names.length > 1 ? `${names[0][0]}${names[names.length - 1][0]}` : (names[0] ? names[0][0] : 'U');
@@ -1036,11 +1034,11 @@ document.addEventListener('DOMContentLoaded', function () {
   let isSavingSkills = false;
   async function saveSkills() {
     if (isSavingSkills) {
-      console.log("SaveSkills: Já está salvando, ignorando chamada duplicada.");
+
       return;
     }
     isSavingSkills = true;
-    console.log("SaveSkills: Iniciando salvamento...");
+
     const targetUserIdForSave = currentProfileInModalId;
     if (!targetUserIdForSave) {
       showToastNotification("ID do usuário alvo não encontrado para salvar.", 'error');
@@ -1124,7 +1122,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Get the data-category attribute, default to 'all' if no active tab or 'all' is active
     const selectedCategory = activeCategoryTab ? activeCategoryTab.dataset.category : 'all';
 
-    console.log(`[filterTeamMembers] Filtering with searchTerm: "${searchTerm}", selectedCategory: "${selectedCategory}"`);
+
 
     let filtered = [...allTeamMembersGlobal];
 
@@ -1148,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    console.log(`[filterTeamMembers] Filtered down to ${filtered.length} members.`);
+
 
     displayTeamMembers(filtered);
     updateStats(filtered);
@@ -1169,17 +1167,17 @@ document.addEventListener('DOMContentLoaded', function () {
   function checkLoginStatus() {
     const token = localStorage.getItem('authToken');
     const userName = localStorage.getItem('userName');
-    console.log('[checkLoginStatus] Token:', token, 'UserName:', userName);
+
 
     if (token && userName) {
       if (userProfileSection) userProfileSection.classList.remove('hidden');
       if (welcomeMessage) welcomeMessage.textContent = `Bem-vindo(a), ${userName}!`;
 
       const isAdmin = isAdminUser(); // ESTA LINHA CAUSA O ERRO SE isAdminUser NÃO ESTIVER DEFINIDA CORRETAMENTE
-      console.log('[checkLoginStatus] isAdminUser() returned:', isAdmin);
+
 
       if (isAdmin) {
-        console.log('[checkLoginStatus] Admin path taken.');
+
         if (showCreateUserModalBtn) {
           showCreateUserModalBtn.classList.remove('hidden');
         } else {
@@ -1194,7 +1192,7 @@ document.addEventListener('DOMContentLoaded', function () {
         initializeFiltersAndCategories();
         fetchAllTeamProfiles();
       } else {
-        console.log('[checkLoginStatus] Non-admin path taken.');
+
         const filtersSection = document.getElementById('filters-section');
         const categoriesSection = document.getElementById('categories-section');
         const statsSection = document.getElementById('stats-section');
@@ -1205,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchMyProfile();
       }
     } else {
-      console.log('[checkLoginStatus] No token or userName, redirecting to login.');
+
       window.location.href = 'login.html';
     }
   }
